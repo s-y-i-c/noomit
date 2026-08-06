@@ -1,0 +1,53 @@
+# CD: ci.yml 이 main 에서 성공하면 이어서 오라클 인스턴스에 실제로 배포한다.
+# 필요한 저장소 Secrets (Settings > Secrets and variables > Actions):
+#   SSH_HOST         인스턴스 접속 주소
+#   SSH_USER         ubuntu
+#   SSH_PRIVATE_KEY  인스턴스 생성 시 받은 private key 파일 전체 내용
+name: Deploy to Oracle Instance
+
+on:
+  workflow_run:
+    workflows: ["Build and Push Images"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      # deploy/.env.prod 는 인스턴스에 이미 있는 걸 그대로 쓴다 — 리포에는 없으니(gitignore)
+      # 여기서 옮기는 deploy/ 에는 포함되지 않고, 서버 쪽 파일이 덮어써지지도 않는다.
+      - name: docker-compose/nginx 설정을 인스턴스로 동기화
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "deploy"
+          target: "~/noomit"
+
+      - name: 이미지 pull 후 컨테이너 재기동
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: GHCR_TOKEN,GHCR_ACTOR
+          script: |
+            set -e
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_ACTOR" --password-stdin
+            cd ~/noomit/deploy
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            docker image prune -f
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_ACTOR: ${{ github.actor }}
