@@ -1,0 +1,70 @@
+# 프로덕션 배포용 compose 파일. 인스턴스가 1GB RAM(OCI Always Free E2.1.Micro)이라
+# 서비스별 mem_limit 을 명시적으로 잡아 한 컨테이너가 메모리를 독점해 나머지가
+# OOM 나는 상황을 막는다. 합계는 스왑 2GB를 감안해도 호스트 여유분을 남기도록 잡았다.
+#
+# 이미지는 CI에서 미리 빌드해 GHCR 로 push 한 것을 pull 해서 쓴다 — 1GB 인스턴스에서
+# 직접 gradle test/build 나 next build 를 돌리면 메모리 부족으로 죽는다.
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    env_file: .env.prod
+    environment:
+      POSTGRES_DB: noomit
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    # 기본 shared_buffers(128MB)는 1GB 인스턴스엔 과하다.
+    command: >
+      postgres
+      -c shared_buffers=32MB
+      -c max_connections=20
+    volumes:
+      - noomit-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d noomit"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    mem_limit: 128m
+
+  backend:
+    image: ghcr.io/s-y-i-c/noomit-backend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    env_file: .env.prod
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      # 컨테이너 안에서 spring.config.import 의 ../.env 는 존재하지 않으므로(optional),
+      # 필요한 값은 전부 env_file(.env.prod)로 주입한다.
+      JAVA_TOOL_OPTIONS: >-
+        -Xmx256m -Xss256k -XX:MaxMetaspaceSize=128m -XX:+UseSerialGC
+    depends_on:
+      db:
+        condition: service_healthy
+    mem_limit: 384m
+
+  frontend:
+    # NEXT_PUBLIC_API_URL 은 빌드 시점에 이미 이미지에 박혀 있다(frontend/Dockerfile 참고).
+    image: ghcr.io/s-y-i-c/noomit-frontend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      - backend
+    mem_limit: 200m
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/certbot/conf:/etc/letsencrypt:ro
+      - ./nginx/certbot/www:/var/www/certbot:ro
+    depends_on:
+      - backend
+      - frontend
+    mem_limit: 32m
+
+volumes:
+  noomit-db-data:
