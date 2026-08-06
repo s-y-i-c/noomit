@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogOut, PanelLeftClose, PanelLeftOpen, Users } from "lucide-react";
+import { BarChart3, LogOut, PanelLeftClose, PanelLeftOpen, Users } from "lucide-react";
 import styles from "./AdminSidebar.module.css";
 
 interface AdminSidebarProps {
@@ -46,6 +46,10 @@ export function AdminSidebar({
             <Link href="/admin/members" className={styles.navItem} data-active="true" onClick={onClose}>
               <Users className={styles.icon} />
               <span className={styles.collapsible}>회원 관리</span>
+            </Link>
+            <Link href="/admin/statistics" className={styles.navItem} onClick={onClose}>
+              <BarChart3 className={styles.icon} />
+              <span className={styles.collapsible}>통계</span>
             </Link>
           </nav>
         </div>
