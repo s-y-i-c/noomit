@@ -9,11 +9,12 @@ services:
   db:
     image: postgres:17-alpine
     restart: unless-stopped
+    # POSTGRES_USER/POSTGRES_PASSWORD 는 .env.prod 에서 직접 그 이름으로 내려온다.
+    # environment: 블록의 ${...} 는 compose 파일 자체를 파싱할 때 셸/`.env` 파일에서만
+    # 치환되는 값이라 env_file 로 넘긴 값을 여기서 ${DB_USERNAME} 처럼 참조할 수 없다.
     env_file: .env.prod
     environment:
       POSTGRES_DB: noomit
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
     # 기본 shared_buffers(128MB)는 1GB 인스턴스엔 과하다.
     command: >
       postgres
@@ -22,7 +23,9 @@ services:
     volumes:
       - noomit-db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d noomit"]
+      # $$ 는 컨테이너 안에서 셸이 런타임에 풀어주는 환경변수 참조 — 위와 같은 이유로
+      # compose 파싱 시점 치환(${...})이 아니라 컨테이너 실행 시점 치환을 써야 한다.
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d noomit"]
       interval: 5s
       timeout: 5s
       retries: 10
