@@ -5,9 +5,7 @@ name: Build and Push Images
 
 on:
   push:
-    # TODO: 이 브랜치에서 CI 최초 검증 끝나면 main만 남기고 지울 것 — main에 한 번
-    # 올라가야 workflow_dispatch로 다른 브랜치를 수동 실행시킬 수 있게 됨.
-    branches: [main, chore/abcganada/deploy-setup]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
