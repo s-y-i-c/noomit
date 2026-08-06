@@ -1,0 +1,19 @@
+# backend/, frontend/ 는 각자 .gitignore 를 갖고 있다. 이건 두 프로젝트에 걸치는
+# 루트 레벨 파일만 잡는다.
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 로컬 환경 설정 (backend 가 여기서 .env 를 읽는다)
+.env
+.env.*
+!.env.example
+
+# Claude Code — 레포에 올리지 않는다.
+.claude/

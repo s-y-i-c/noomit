@@ -1,0 +1,43 @@
+server:
+  port: ${SERVER_PORT}
+
+spring:
+  # 배포 환경이 진짜 OS 환경변수로 SPRING_PROFILES_ACTIVE 를 주면 그게 우선한다.
+  # .env 로 넘기면 안 된다 — spring.config.import 로 로드되는 값은 프로필 결정 시점보다 늦게 반영된다.
+  profiles:
+    default: local
+
+  config:
+    # .env 는 backend/ 가 아니라 프로젝트 루트에 둔다 (프론트와 공유하는 위치).
+    # ./gradlew 는 backend/ 를 작업 디렉터리로 실행되므로 한 단계 위를 본다.
+    import:
+      - optional:file:../.env[.properties]
+
+  application:
+    name: ${SPRING_APPLICATION_NAME}
+
+  # DB 접속 정보는 프로필별 파일에 있다 (application-local.yaml, application-prod.yaml).
+  flyway:
+    enabled: ${SPRING_FLYWAY_ENABLED:true}
+
+  modulith:
+    events:
+      # 모듈 간 도메인 이벤트 발행 이력을 event_publication 테이블에 기록해 durability를 보장한다.
+      jdbc:
+        schema-initialization:
+          enabled: true
+      republish-outstanding-events-on-restart: true
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+
+noomit:
+  # 브라우저 CORS 허용 오리진.
+  cors:
+    allowed-origins: ${NOOMIT_CORS_ALLOWED_ORIGINS:http://localhost:3000}
+
+  security:
+    csrf:
+      secure-cookie: ${NOOMIT_CSRF_SECURE_COOKIE:false}
