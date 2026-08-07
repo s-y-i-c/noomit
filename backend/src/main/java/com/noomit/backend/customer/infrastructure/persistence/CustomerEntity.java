@@ -74,6 +74,11 @@ public class CustomerEntity {
         this.status = Customer.Status.ACTIVE;
     }
 
+    // 관리자가 다른 필드는 안 건드리고 상태만 직접 바꿀 때 쓴다 (활성 재접수와는 별개 경로).
+    public void changeStatus(Customer.Status status) {
+        this.status = status;
+    }
+
     public Customer toDomain() {
         return new Customer(id, name, phoneNumber, zipCode, address, detailAddress, memo, status, createdAt);
     }

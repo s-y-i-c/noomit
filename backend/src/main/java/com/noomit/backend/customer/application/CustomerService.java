@@ -37,4 +37,9 @@ public class CustomerService {
     public CustomerPage list(String keyword, Pageable pageable) {
         return customerRepository.search(keyword, pageable);
     }
+
+    @Transactional
+    public Customer changeStatus(long id, Customer.Status status) {
+        return customerRepository.changeStatus(id, status);
+    }
 }

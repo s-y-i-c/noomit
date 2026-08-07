@@ -16,4 +16,6 @@ public interface CustomerRepository {
             String detailAddress, String memo);
 
     Customer update(long id, String name, String zipCode, String address, String detailAddress, String memo);
+
+    Customer changeStatus(long id, Customer.Status status);
 }
