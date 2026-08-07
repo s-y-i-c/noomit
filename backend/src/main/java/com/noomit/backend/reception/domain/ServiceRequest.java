@@ -24,4 +24,12 @@ public record ServiceRequest(
         long version,
         Instant createdAt,
         Instant updatedAt) {
+
+    public boolean canAssign() {
+        return status == ServiceRequestStatus.RECEIVED;
+    }
+
+    public boolean canReassign() {
+        return status == ServiceRequestStatus.ASSIGNED;
+    }
 }
