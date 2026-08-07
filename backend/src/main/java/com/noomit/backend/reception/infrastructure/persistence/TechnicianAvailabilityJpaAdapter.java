@@ -1,0 +1,52 @@
+package com.noomit.backend.reception.infrastructure.persistence;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Optional;
+import com.noomit.backend.reception.application.TechnicianAvailabilityRepository;
+import com.noomit.backend.reception.domain.TechnicianAvailability;
+import com.noomit.backend.shared.error.BusinessException;
+import com.noomit.backend.shared.error.ErrorCode;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+@Repository
+@RequiredArgsConstructor
+class TechnicianAvailabilityJpaAdapter implements TechnicianAvailabilityRepository {
+    private final TechnicianAvailabilityJpaRepository technicianAvailabilities;
+
+    @Override
+    public TechnicianAvailability create(long technicianId, LocalDate availableDate, LocalTime startTime, LocalTime endTime) {
+        TechnicianAvailabilityEntity entity = new TechnicianAvailabilityEntity(technicianId, availableDate, startTime, endTime);
+        return technicianAvailabilities.save(entity).toDomain();
+    }
+
+    @Override
+    public Optional<TechnicianAvailability> findById(long id) {
+        return technicianAvailabilities.findById(id).map(TechnicianAvailabilityEntity::toDomain);
+    }
+
+    @Override
+    public void occupySlot(long id) {
+        int updated = technicianAvailabilities.occupySlot(id);
+        if (updated == 0) {
+            throw new BusinessException(ErrorCode.RECEPTION_INVALID_STATUS, "이미 사용된 슬롯입니다.");
+        }
+    }
+
+    @Override
+    public void releaseSlot(long id) {
+        int updated = technicianAvailabilities.releaseSlot(id);
+        if (updated == 0) {
+            throw new BusinessException(ErrorCode.RECEPTION_INVALID_STATUS, "이미 사용 가능한 슬롯입니다.");
+        }
+    }
+
+    @Override
+    public void toggleAvailability(long id, long technicianId) {
+        int updated = technicianAvailabilities.toggleAvailability(id, technicianId);
+        if (updated == 0) {
+            throw new BusinessException(ErrorCode.RECEPTION_INVALID_REQUEST, "본인 슬롯만 변경할 수 있습니다.");
+        }
+    }
+}
