@@ -20,7 +20,12 @@ public class ServiceRequestService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public ServiceRequest assignInitial(long id, long technicianId, long slotId, Instant assignedAt) {
+    public ServiceRequest assignInitial(AssignServiceRequestCommand command) {
+        long id = command.id();
+        long technicianId = command.technicianId();
+        long slotId = command.slotId();
+        Instant assignedAt = command.assignedAt();
+
         ServiceRequest request = findRequest(id);
         if (request.status() != ServiceRequestStatus.RECEIVED) {
             throw new BusinessException(ErrorCode.RECEPTION_INVALID_STATUS, "접수 대기 상태에서만 배정할 수 있습니다.");
@@ -36,7 +41,13 @@ public class ServiceRequestService {
     }
 
     @Transactional
-    public ServiceRequest reassign(long id, long technicianId, long slotId, Instant assignedAt, long version) {
+    public ServiceRequest reassign(ReassignServiceRequestCommand command) {
+        long id = command.id();
+        long technicianId = command.technicianId();
+        long slotId = command.slotId();
+        Instant assignedAt = command.assignedAt();
+        long version = command.version();
+
         ServiceRequest request = findRequest(id);
         // 동시성 제어: 슬롯 변경 전에 version을 먼저 검증하여 이미 변경된 요청에 대한 불필요한 슬롯 UPDATE를 방지한다.
         // 최종 검증은 UPDATE 시 WHERE version 조건으로 보장한다.
@@ -49,10 +60,14 @@ public class ServiceRequestService {
         TechnicianAvailability slot = findSlot(slotId);
         validateSlotOwnership(slot, technicianId);
 
-        if (request.reservedSlotId() != null) {
-            availabilityRepository.releaseSlot(request.reservedSlotId());
+        Long previousSlotId = request.reservedSlotId();
+        boolean slotChanged = previousSlotId == null || previousSlotId != slotId;
+        if (slotChanged) {
+            availabilityRepository.occupySlot(slotId);
+            if (previousSlotId != null) {
+                availabilityRepository.releaseSlot(previousSlotId);
+            }
         }
-        availabilityRepository.occupySlot(slotId);
         requestRepository.reassign(id, technicianId, slotId, slot.availableDate(), slot.startTime(), slot.endTime(), assignedAt, version);
 
         publishServiceRequestAssigned(request, technicianId, assignedAt);
