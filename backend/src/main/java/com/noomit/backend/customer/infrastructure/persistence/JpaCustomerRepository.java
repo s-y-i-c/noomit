@@ -68,6 +68,14 @@ class JpaCustomerRepository implements CustomerRepository {
         return reactivate(entity, name, zipCode, address, detailAddress, memo);
     }
 
+    @Override
+    public Customer changeStatus(long id, Customer.Status status) {
+        CustomerEntity entity = customers.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.CUSTOMER_NOT_FOUND, "고객을 찾을 수 없습니다."));
+        entity.changeStatus(status);
+        return entity.toDomain();
+    }
+
     private Customer reactivate(CustomerEntity entity, String name, String zipCode, String address,
             String detailAddress, String memo) {
         entity.reactivateWith(name, zipCode, address, detailAddress, memo);
