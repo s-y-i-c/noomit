@@ -30,9 +30,10 @@ class JpaCustomerRepository implements CustomerRepository {
     }
 
     @Override
-    public CustomerPage search(String keyword, Pageable pageable) {
-        String verifiedKeyword = keyword == null ? "" : keyword.trim().toLowerCase();
-        Page<CustomerEntity> result = customers.search(verifiedKeyword, pageable);
+    public CustomerPage search(String keyword, Customer.Status status, Pageable pageable) {
+        // 검색어에 낀 공백도 이름 쪽과 똑같이 지워서 비교한다 (SpringDataCustomerRepository.search 참고).
+        String verifiedKeyword = keyword == null ? "" : keyword.toLowerCase().replace(" ", "");
+        Page<CustomerEntity> result = customers.search(verifiedKeyword, status, pageable);
         List<Customer> found = result.stream().map(CustomerEntity::toDomain).toList();
         return new CustomerPage(found, pageable.getPageNumber(), pageable.getPageSize(),
                 result.getTotalElements(), result.getTotalPages());
