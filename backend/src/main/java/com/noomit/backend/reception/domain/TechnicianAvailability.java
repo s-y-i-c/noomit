@@ -13,4 +13,8 @@ public record TechnicianAvailability(
         TechnicianAvailabilityStatus status,
         Instant createdAt,
         Instant updatedAt) {
+
+    public boolean isOwnedBy(long technicianId) {
+        return this.technicianId == technicianId;
+    }
 }
