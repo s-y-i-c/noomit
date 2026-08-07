@@ -3,12 +3,21 @@ package com.noomit.backend.reception.infrastructure.persistence;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import com.noomit.backend.reception.domain.ServiceRequestStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 interface ServiceRequestJpaRepository extends JpaRepository<ServiceRequestEntity, Long> {
+
+    @Query("""
+            SELECT e FROM ServiceRequestEntity e
+            WHERE (:status IS NULL OR e.status = :status)
+            """)
+    Page<ServiceRequestEntity> search(@Param("status") ServiceRequestStatus status, Pageable pageable);
 
     @Modifying(clearAutomatically = true)
     @Query("""
