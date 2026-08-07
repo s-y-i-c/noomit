@@ -3,7 +3,6 @@ package com.noomit.backend.repair.presentation;
 import com.noomit.backend.repair.application.RepairCaseService;
 import com.noomit.backend.repair.domain.RepairCase;
 import com.noomit.backend.shared.ApiResponse;
-import com.noomit.backend.user.infrastructure.security.NoomitPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,16 +29,16 @@ class RepairCaseController {
     private final RepairCaseService repairCaseService;
 
     @GetMapping("/my")
-    ApiResponse<List<RepairCaseResponse>> getMyRepairCases(@AuthenticationPrincipal NoomitPrincipal principal) {
-        List<RepairCase> cases = repairCaseService.getMyRepairCases(principal.userId());
+    ApiResponse<List<RepairCaseResponse>> getMyRepairCases(@AuthenticationPrincipal(expression = "userId") long userId) {
+        List<RepairCase> cases = repairCaseService.getMyRepairCases(userId);
         return ApiResponse.success(cases.stream().map(RepairCaseResponse::from).toList());
     }
 
     @GetMapping("/{id}")
     ApiResponse<RepairCaseResponse> getRepairCase(
             @PathVariable Long id,
-            @AuthenticationPrincipal NoomitPrincipal principal) {
-        RepairCase repairCase = repairCaseService.getRepairCase(id, principal.userId());
+            @AuthenticationPrincipal(expression = "userId") long userId) {
+        RepairCase repairCase = repairCaseService.getRepairCase(id, userId);
         return ApiResponse.success(RepairCaseResponse.from(repairCase));
     }
 
@@ -47,8 +46,8 @@ class RepairCaseController {
     ApiResponse<RepairCaseResponse> addDetail(
             @PathVariable Long id,
             @RequestBody AddRepairDetailRequest request,
-            @AuthenticationPrincipal NoomitPrincipal principal) {
-        RepairCase repairCase = repairCaseService.addDetail(id, principal.userId(), request.description(), request.amount());
+            @AuthenticationPrincipal(expression = "userId") long userId) {
+        RepairCase repairCase = repairCaseService.addDetail(id, userId, request.description(), request.amount());
         return ApiResponse.success("수리내역을 추가했습니다.", RepairCaseResponse.from(repairCase));
     }
 
@@ -57,15 +56,15 @@ class RepairCaseController {
     void deleteDetail(
             @PathVariable Long id,
             @PathVariable Long detailId,
-            @AuthenticationPrincipal NoomitPrincipal principal) {
-        repairCaseService.deleteDetail(id, detailId, principal.userId());
+            @AuthenticationPrincipal(expression = "userId") long userId) {
+        repairCaseService.deleteDetail(id, detailId, userId);
     }
 
     @PutMapping("/{id}/submit")
     ApiResponse<RepairCaseResponse> submit(
             @PathVariable Long id,
-            @AuthenticationPrincipal NoomitPrincipal principal) {
-        RepairCase repairCase = repairCaseService.submit(id, principal.userId());
+            @AuthenticationPrincipal(expression = "userId") long userId) {
+        RepairCase repairCase = repairCaseService.submit(id, userId);
         return ApiResponse.success("완료 제출했습니다.", RepairCaseResponse.from(repairCase));
     }
 
