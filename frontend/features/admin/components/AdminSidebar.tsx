@@ -1,6 +1,15 @@
+"use client";
+
 import Link from "next/link";
-import { BarChart3, LogOut, PanelLeftClose, PanelLeftOpen, Users } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { LogOut, PanelLeftClose, PanelLeftOpen, type LucideIcon } from "lucide-react";
 import styles from "./AdminSidebar.module.css";
+
+export interface SidebarNavItem {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+}
 
 interface AdminSidebarProps {
   isOpen: boolean;
@@ -8,6 +17,9 @@ interface AdminSidebarProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   onLogout: () => void;
+  /** 사이드바 로고 아래 서브 라벨. 역할별 화면 이름 (예: "Admin", "상담원"). */
+  brandSub: string;
+  navItems: SidebarNavItem[];
 }
 
 export function AdminSidebar({
@@ -16,7 +28,12 @@ export function AdminSidebar({
   isCollapsed,
   onToggleCollapse,
   onLogout,
+  brandSub,
+  navItems,
 }: AdminSidebarProps) {
+  const pathname = usePathname();
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+
   return (
     <>
       {isOpen ? <div onClick={onClose} className={styles.backdrop} /> : null}
@@ -30,7 +47,7 @@ export function AdminSidebar({
               <div className={styles.logoBadge}>N</div>
               <span className={styles.collapsible}>
                 <span className={styles.logoBrand}>Noomit</span>
-                <span className={styles.logoSub}>Admin</span>
+                <span className={styles.logoSub}>{brandSub}</span>
               </span>
             </div>
             <button
@@ -43,14 +60,18 @@ export function AdminSidebar({
             </button>
           </div>
           <nav className={styles.nav}>
-            <Link href="/admin/members" className={styles.navItem} data-active="true" onClick={onClose}>
-              <Users className={styles.icon} />
-              <span className={styles.collapsible}>회원 관리</span>
-            </Link>
-            <Link href="/admin/statistics" className={styles.navItem} onClick={onClose}>
-              <BarChart3 className={styles.icon} />
-              <span className={styles.collapsible}>통계</span>
-            </Link>
+            {navItems.map(({ href, label, icon: Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                className={styles.navItem}
+                data-active={isActive(href)}
+                onClick={onClose}
+              >
+                <Icon className={styles.icon} />
+                <span className={styles.collapsible}>{label}</span>
+              </Link>
+            ))}
           </nav>
         </div>
         <div className={styles.bottom}>
