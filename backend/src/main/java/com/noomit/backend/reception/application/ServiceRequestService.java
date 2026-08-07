@@ -81,17 +81,17 @@ public class ServiceRequestService {
 
     private ServiceRequest findRequest(long id) {
         return requestRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_INVALID_REQUEST, "접수를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "접수를 찾을 수 없습니다."));
     }
 
     private TechnicianAvailability findSlot(long slotId) {
         return availabilityRepository.findById(slotId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_INVALID_REQUEST, "슬롯을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "슬롯을 찾을 수 없습니다."));
     }
 
     private void validateSlotOwnership(TechnicianAvailability slot, long technicianId) {
         if (slot.technicianId() != technicianId) {
-            throw new BusinessException(ErrorCode.RECEPTION_INVALID_REQUEST, "슬롯이 해당 기사의 것이 아닙니다.");
+            throw new BusinessException(ErrorCode.RECEPTION_SLOT_NOT_OWNED, "슬롯이 해당 기사의 것이 아닙니다.");
         }
     }
 }

@@ -46,7 +46,7 @@ class TechnicianAvailabilityJpaAdapter implements TechnicianAvailabilityReposito
     public void toggleAvailability(long id, long technicianId) {
         int updated = technicianAvailabilities.toggleAvailability(id, technicianId);
         if (updated == 0) {
-            throw new BusinessException(ErrorCode.RECEPTION_INVALID_REQUEST, "본인 슬롯만 변경할 수 있습니다.");
+            throw new BusinessException(ErrorCode.RECEPTION_SLOT_NOT_OWNED, "본인 슬롯만 변경할 수 있습니다.");
         }
     }
 }
