@@ -1,0 +1,69 @@
+package com.noomit.backend.reception.infrastructure.persistence;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+interface ServiceRequestJpaRepository extends JpaRepository<ServiceRequestEntity, Long> {
+
+    @Modifying
+    @Query("""
+            UPDATE ServiceRequestEntity e
+            SET e.technicianId = :technicianId,
+                e.reservedSlotId = :slotId,
+                e.visitDate = :visitDate,
+                e.visitStartTime = :visitStartTime,
+                e.visitEndTime = :visitEndTime,
+                e.status = com.noomit.backend.reception.domain.ServiceRequestStatus.ASSIGNED,
+                e.assignedAt = :assignedAt
+            WHERE e.id = :id
+                AND e.status = com.noomit.backend.reception.domain.ServiceRequestStatus.RECEIVED
+            """)
+    int assign(@Param("id") long id,
+               @Param("technicianId") long technicianId,
+               @Param("slotId") long slotId,
+               @Param("visitDate") LocalDate visitDate,
+               @Param("visitStartTime") LocalTime visitStartTime,
+               @Param("visitEndTime") LocalTime visitEndTime,
+               @Param("assignedAt") Instant assignedAt);
+
+    @Modifying
+    @Query("""
+            UPDATE ServiceRequestEntity e
+            SET e.technicianId = :technicianId,
+                e.reservedSlotId = :slotId,
+                e.visitDate = :visitDate,
+                e.visitStartTime = :visitStartTime,
+                e.visitEndTime = :visitEndTime,
+                e.assignedAt = :assignedAt,
+                e.version = e.version + 1
+            WHERE e.id = :id
+                AND e.status = com.noomit.backend.reception.domain.ServiceRequestStatus.ASSIGNED
+                AND e.version = :version
+            """)
+    int reassign(@Param("id") long id,
+                 @Param("technicianId") long technicianId,
+                 @Param("slotId") long slotId,
+                 @Param("visitDate") LocalDate visitDate,
+                 @Param("visitStartTime") LocalTime visitStartTime,
+                 @Param("visitEndTime") LocalTime visitEndTime,
+                 @Param("assignedAt") Instant assignedAt,
+                 @Param("version") long version);
+
+    @Modifying
+    @Query("""
+            UPDATE ServiceRequestEntity e
+            SET e.status = com.noomit.backend.reception.domain.ServiceRequestStatus.CANCELLED,
+                e.cancelReason = :reason,
+                e.cancelledAt = :cancelledAt
+            WHERE e.id = :id
+                AND e.status <> com.noomit.backend.reception.domain.ServiceRequestStatus.CANCELLED
+            """)
+    int cancel(@Param("id") long id,
+               @Param("reason") String reason,
+               @Param("cancelledAt") Instant cancelledAt);
+}
