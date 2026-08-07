@@ -1,104 +1,26 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
-import { ModeSwitcher } from "@/features/auth/components/ModeSwitcher";
-import { useAuth } from "@/features/auth/hooks/useAuth";
-import { useLogoutMutation } from "@/features/auth/api/authApi";
-import { MobileBottomNav } from "@/features/shell/components/MobileBottomNav";
-import { UserSidebar } from "@/features/shell/components/UserSidebar";
-import { ThemeToggle } from "@/features/theme/components/ThemeToggle/ThemeToggle";
-import styles from "./layout.module.css";
+import type { ReactNode } from "react";
+import { Home } from "lucide-react";
+import { RoleLayout } from "@/features/admin/components/RoleLayout";
+import type { SidebarNavItem } from "@/features/admin/components/AdminSidebar";
+
+const NAV_ITEMS: SidebarNavItem[] = [
+  { href: "/", label: "홈", icon: Home },
+];
+
+// PENDING은 모든 사용자가 항상 보유하는 기본 권한이라, 사실상 로그인한 누구나 통과한다.
+const REQUIRED_ROLES = ["PENDING", "COUNSELOR", "ENGINEER", "ADMIN", "DEVELOPER"];
 
 export default function UserLayout({ children }: { children: ReactNode }) {
-  const router = useRouter();
-  const { status: authStatus, user, error: authError } = useAuth();
-  const [logout] = useLogoutMutation();
-  const [isUserSidebarCollapsed, setIsUserSidebarCollapsed] = useState(false);
-
-  useEffect(() => {
-    if (authStatus === "unauthenticated") router.replace("/login");
-  }, [authStatus, router]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      const saved = localStorage.getItem("noomit-user-sidebar-collapsed");
-      if (saved !== null) setIsUserSidebarCollapsed(saved === "true");
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  const handleToggleCollapse = () => {
-    const collapsed = !isUserSidebarCollapsed;
-    setIsUserSidebarCollapsed(collapsed);
-    localStorage.setItem("noomit-user-sidebar-collapsed", String(collapsed));
-  };
-
-  const handleLogout = async () => {
-    await logout();
-    router.replace("/login");
-  };
-
-  const displayName = user?.name?.trim() || user?.email?.trim() || null;
-
   return (
-    <div className={styles.shell}>
-      {authStatus === "loading" || authStatus === "unauthenticated" ? (
-        <div className={styles.state}>로그인 확인 중...</div>
-      ) : authStatus === "error" ? (
-        <div className={styles.state}>
-          <p className={styles.stateTitle}>로그인 상태를 확인할 수 없습니다.</p>
-          <p className={styles.stateDetail}>{authError}</p>
-        </div>
-      ) : (
-        <>
-          <UserSidebar
-            isCollapsed={isUserSidebarCollapsed}
-            onToggleCollapse={handleToggleCollapse}
-            onLogout={handleLogout}
-          />
-
-          <div className={styles.main}>
-            <header className={styles.desktopHeader}>
-              <div className={styles.titleGroup}>
-                <h2 className={styles.title}>홈</h2>
-                <span className={styles.subtitle}>서비스 홈</span>
-              </div>
-              <div className={styles.actions}>
-                <ModeSwitcher activeMode="user" roles={user?.roles ?? []} />
-                <div className={styles.profileGroup}>
-                  {displayName ? (
-                    <div className={styles.profile}>
-                      <div className={styles.avatar}>{displayName[0]}</div>
-                      <div className={styles.profileText}>
-                        <span className={styles.profileName}>{displayName}</span>
-                        <span className={styles.profileGoal}>{user?.email}</span>
-                      </div>
-                    </div>
-                  ) : null}
-                  <button onClick={handleLogout} className={styles.logoutButton}>로그아웃</button>
-                  <ThemeToggle />
-                </div>
-              </div>
-            </header>
-
-            <div className={styles.viewport}>
-              <div className={styles.contentBox}>
-                <div className={styles.mobileHeader}>
-                  <h1 className={styles.mobileTitle}>홈</h1>
-                  <div className={styles.mobileActions}>
-                    <ModeSwitcher activeMode="user" roles={user?.roles ?? []} compact />
-                    <button onClick={handleLogout} className={styles.mobileLogout}>로그아웃</button>
-                    <ThemeToggle />
-                  </div>
-                </div>
-                {children}
-                <MobileBottomNav />
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-    </div>
+    <RoleLayout
+      requiredRoles={REQUIRED_ROLES}
+      brandSub="홈"
+      navItems={NAV_ITEMS}
+      storageKey="noomit-user-sidebar-collapsed"
+    >
+      {children}
+    </RoleLayout>
   );
 }
