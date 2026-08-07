@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 interface TechnicianAvailabilityJpaRepository extends JpaRepository<TechnicianAvailabilityEntity, Long> {
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("""
             UPDATE TechnicianAvailabilityEntity e
             SET e.status = com.noomit.backend.reception.domain.TechnicianAvailabilityStatus.UNAVAILABLE
@@ -16,7 +16,7 @@ interface TechnicianAvailabilityJpaRepository extends JpaRepository<TechnicianAv
             """)
     int occupySlot(@Param("id") long id);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("""
             UPDATE TechnicianAvailabilityEntity e
             SET e.status = com.noomit.backend.reception.domain.TechnicianAvailabilityStatus.AVAILABLE
@@ -25,7 +25,7 @@ interface TechnicianAvailabilityJpaRepository extends JpaRepository<TechnicianAv
             """)
     int releaseSlot(@Param("id") long id);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("""
             UPDATE TechnicianAvailabilityEntity e
             SET e.status = CASE

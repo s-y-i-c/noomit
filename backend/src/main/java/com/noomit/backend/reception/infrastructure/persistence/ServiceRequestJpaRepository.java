@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 interface ServiceRequestJpaRepository extends JpaRepository<ServiceRequestEntity, Long> {
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("""
             UPDATE ServiceRequestEntity e
             SET e.technicianId = :technicianId,
@@ -23,7 +23,7 @@ interface ServiceRequestJpaRepository extends JpaRepository<ServiceRequestEntity
             WHERE e.id = :id
                 AND e.status = com.noomit.backend.reception.domain.ServiceRequestStatus.RECEIVED
             """)
-    int assign(@Param("id") long id,
+    int assignInitial(@Param("id") long id,
                @Param("technicianId") long technicianId,
                @Param("slotId") long slotId,
                @Param("visitDate") LocalDate visitDate,
@@ -31,7 +31,7 @@ interface ServiceRequestJpaRepository extends JpaRepository<ServiceRequestEntity
                @Param("visitEndTime") LocalTime visitEndTime,
                @Param("assignedAt") Instant assignedAt);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("""
             UPDATE ServiceRequestEntity e
             SET e.technicianId = :technicianId,
@@ -54,7 +54,7 @@ interface ServiceRequestJpaRepository extends JpaRepository<ServiceRequestEntity
                  @Param("assignedAt") Instant assignedAt,
                  @Param("version") long version);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("""
             UPDATE ServiceRequestEntity e
             SET e.status = com.noomit.backend.reception.domain.ServiceRequestStatus.CANCELLED,
