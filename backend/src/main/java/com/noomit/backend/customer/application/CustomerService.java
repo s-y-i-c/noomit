@@ -34,8 +34,8 @@ public class CustomerService {
     }
 
     @Transactional(readOnly = true)
-    public CustomerPage list(String keyword, Pageable pageable) {
-        return customerRepository.search(keyword, pageable);
+    public CustomerPage list(String keyword, Customer.Status status, Pageable pageable) {
+        return customerRepository.search(keyword, status, pageable);
     }
 
     @Transactional

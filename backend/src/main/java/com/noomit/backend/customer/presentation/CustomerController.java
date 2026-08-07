@@ -45,12 +45,14 @@ class CustomerController {
         return ApiResponse.success(CustomerResponse.from(customer));
     }
 
-    // ?page=0&size=20&sort=name&keyword=홍길동(또는 전화번호) — 상태 무관(비활성 포함) 검색
+    // ?page=0&size=20&sort=name&keyword=홍길동(또는 전화번호)&status=ACTIVE(또는 INACTIVE, 생략 시 전체)
     @GetMapping
     ApiResponse<CustomerPageResponse> listCustomers(
             @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(required = false) String status,
             @PageableDefault(sort = "name") Pageable pageable) {
-        CustomerPage result = customerService.list(keyword, pageable);
+        Customer.Status parsedStatus = (status == null || status.isBlank()) ? null : Customer.Status.from(status);
+        CustomerPage result = customerService.list(keyword, parsedStatus, pageable);
         return ApiResponse.success(CustomerPageResponse.from(result));
     }
 
