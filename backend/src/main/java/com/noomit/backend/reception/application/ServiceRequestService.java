@@ -15,8 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class ServiceRequestService {
-    private final ServiceRequestRepository serviceRequests;
-    private final TechnicianAvailabilityRepository technicianAvailabilities;
+    private final ServiceRequestRepository requestRepository;
+    private final TechnicianAvailabilityRepository availabilityRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
@@ -28,8 +28,8 @@ public class ServiceRequestService {
         TechnicianAvailability slot = findSlot(slotId);
         validateSlotOwnership(slot, technicianId);
 
-        technicianAvailabilities.occupySlot(slotId);
-        serviceRequests.assignInitial(id, technicianId, slotId, slot.availableDate(), slot.startTime(), slot.endTime(), assignedAt);
+        availabilityRepository.occupySlot(slotId);
+        requestRepository.assignInitial(id, technicianId, slotId, slot.availableDate(), slot.startTime(), slot.endTime(), assignedAt);
 
         publishServiceRequestAssigned(request, technicianId, assignedAt);
         return findRequest(id);
@@ -38,6 +38,11 @@ public class ServiceRequestService {
     @Transactional
     public ServiceRequest reassign(long id, long technicianId, long slotId, Instant assignedAt, long version) {
         ServiceRequest request = findRequest(id);
+        // 동시성 제어: 슬롯 변경 전에 version을 먼저 검증하여 이미 변경된 요청에 대한 불필요한 슬롯 UPDATE를 방지한다.
+        // 최종 검증은 UPDATE 시 WHERE version 조건으로 보장한다.
+        if (request.version() != version) {
+            throw new BusinessException(ErrorCode.RECEPTION_CONCURRENT_MODIFICATION, "이미 변경된 접수입니다. 새로고침 후 다시 시도해주세요.");
+        }
         if (request.status() != ServiceRequestStatus.ASSIGNED) {
             throw new BusinessException(ErrorCode.RECEPTION_INVALID_STATUS, "배정된 접수만 재배정할 수 있습니다.");
         }
@@ -45,10 +50,10 @@ public class ServiceRequestService {
         validateSlotOwnership(slot, technicianId);
 
         if (request.reservedSlotId() != null) {
-            technicianAvailabilities.releaseSlot(request.reservedSlotId());
+            availabilityRepository.releaseSlot(request.reservedSlotId());
         }
-        technicianAvailabilities.occupySlot(slotId);
-        serviceRequests.reassign(id, technicianId, slotId, slot.availableDate(), slot.startTime(), slot.endTime(), assignedAt, version);
+        availabilityRepository.occupySlot(slotId);
+        requestRepository.reassign(id, technicianId, slotId, slot.availableDate(), slot.startTime(), slot.endTime(), assignedAt, version);
 
         publishServiceRequestAssigned(request, technicianId, assignedAt);
         return findRequest(id);
@@ -60,12 +65,12 @@ public class ServiceRequestService {
     }
 
     private ServiceRequest findRequest(long id) {
-        return serviceRequests.findById(id)
+        return requestRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_INVALID_REQUEST, "접수를 찾을 수 없습니다."));
     }
 
     private TechnicianAvailability findSlot(long slotId) {
-        return technicianAvailabilities.findById(slotId)
+        return availabilityRepository.findById(slotId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_INVALID_REQUEST, "슬롯을 찾을 수 없습니다."));
     }
 
