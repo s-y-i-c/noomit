@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # deploy/.env.prod 는 인스턴스에 이미 있는 걸 그대로 쓴다 — 리포에는 없으니(gitignore)
       # 여기서 옮기는 deploy/ 에는 포함되지 않고, 서버 쪽 파일이 덮어써지지도 않는다.
