@@ -11,13 +11,13 @@ public interface ServiceRequestRepository {
 
     Optional<ServiceRequest> findById(long id);
 
-    /** RECEIVED 상태에서만 성공. 아니면 RECEPTION_INVALID_STATUS */
-    void assignInitial(long id, long technicianId, long slotId, LocalDate visitDate,
-                        LocalTime visitStartTime, LocalTime visitEndTime, Instant assignedAt);
+    /** RECEIVED 상태에서만 성공. */
+    int assignInitial(long id, long technicianId, long slotId, LocalDate visitDate,
+                       LocalTime visitStartTime, LocalTime visitEndTime, Instant assignedAt);
 
-    /** ASSIGNED 상태에서만 성공. 아니면 RECEPTION_INVALID_STATUS */
-    void reassign(long id, long technicianId, long slotId, LocalDate visitDate,
-                  LocalTime visitStartTime, LocalTime visitEndTime, Instant assignedAt, long version);
+    /** ASSIGNED 상태 + version 일치할 때만 성공. */
+    int reassign(long id, long technicianId, long slotId, LocalDate visitDate,
+                 LocalTime visitStartTime, LocalTime visitEndTime, Instant assignedAt, long version);
 
     /** 이미 CANCELLED면 RECEPTION_ALREADY_CANCELLED */
     void cancel(long id, String reason, Instant cancelledAt);
