@@ -1,0 +1,70 @@
+### 기사용 API
+
+# 내 담당 수리 건 목록
+GET http://localhost:8080/api/repair-cases/my
+Cookie: SESSION={{session}}
+
+###
+
+# 수리 건 상세
+GET http://localhost:8080/api/repair-cases/{{repairCaseId}}
+Cookie: SESSION={{session}}
+
+###
+
+# 수리내역 추가
+POST http://localhost:8080/api/repair-cases/{{repairCaseId}}/details
+Cookie: SESSION={{session}}
+Content-Type: application/json
+X-NOOMIT-XSRF-TOKEN: {{csrfToken}}
+
+{
+  "description": "부품 교체",
+  "amount": 50000
+}
+
+###
+
+# 수리내역 삭제
+DELETE http://localhost:8080/api/repair-cases/{{repairCaseId}}/details/{{detailId}}
+Cookie: SESSION={{session}}
+X-NOOMIT-XSRF-TOKEN: {{csrfToken}}
+
+###
+
+# 완료 제출
+PUT http://localhost:8080/api/repair-cases/{{repairCaseId}}/submit
+Cookie: SESSION={{session}}
+X-NOOMIT-XSRF-TOKEN: {{csrfToken}}
+
+###
+### 관리자용 API
+
+# 전체 목록 (전체)
+GET http://localhost:8080/api/repair-cases
+Cookie: SESSION={{session}}
+
+###
+
+# 전체 목록 (상태 필터)
+GET http://localhost:8080/api/repair-cases?status=SUBMITTED
+Cookie: SESSION={{session}}
+
+###
+
+# 완료 승인
+PUT http://localhost:8080/api/repair-cases/{{repairCaseId}}/approve
+Cookie: SESSION={{session}}
+X-NOOMIT-XSRF-TOKEN: {{csrfToken}}
+
+###
+
+# 반려
+PUT http://localhost:8080/api/repair-cases/{{repairCaseId}}/reject
+Cookie: SESSION={{session}}
+Content-Type: application/json
+X-NOOMIT-XSRF-TOKEN: {{csrfToken}}
+
+{
+  "reason": "수리 내역 누락"
+}
