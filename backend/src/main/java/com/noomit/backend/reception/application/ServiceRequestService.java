@@ -33,7 +33,7 @@ public class ServiceRequestService {
         }
         ServiceRequest request = ServiceRequest.create(command.customerId(), command.productId(),
                 command.symptom(), command.remarks(), DEFAULT_BASE_FEE, command.requestedAt());
-        return requestRepository.save(request);
+        return requestRepository.create(request);
     }
 
     @Transactional

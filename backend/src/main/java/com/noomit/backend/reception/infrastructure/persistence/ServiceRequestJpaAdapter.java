@@ -18,7 +18,7 @@ class ServiceRequestJpaAdapter implements ServiceRequestRepository {
     private final ServiceRequestJpaRepository requestJpaRepository;
 
     @Override
-    public ServiceRequest save(ServiceRequest request) {
+    public ServiceRequest create(ServiceRequest request) {
         ServiceRequestEntity entity = new ServiceRequestEntity(request.customerId(), request.productId(),
                 request.symptom(), request.remarks(), request.baseFee(), request.requestedAt());
         return requestJpaRepository.save(entity).toDomain();
