@@ -1,0 +1,59 @@
+.page { display: grid; gap: 22px; color: var(--color-text-primary); }
+.hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; padding: 8px 2px; }
+.hero h1 { margin-top: 4px; font-size: clamp(26px, 4vw, 38px); font-weight: 800; letter-spacing: -1.4px; }
+.hero > div > p:last-child { margin-top: 7px; color: var(--color-text-secondary); font-size: 14px; }
+.eyebrow { display: flex; align-items: center; gap: 7px; color: var(--color-primary); font-size: 12px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; }
+.total { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; padding: 9px 12px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-card-background); color: var(--color-text-secondary); font-size: 12px; font-weight: 700; }
+
+.tabs { display: flex; gap: 6px; }
+.tab { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1px solid var(--color-border); border-radius: 99px; background: var(--color-card-background); color: var(--color-text-secondary); font-size: 12px; font-weight: 700; transition: all 150ms ease; }
+.tab:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.tab[data-active="true"] { border-color: var(--color-primary); background: var(--color-primary); color: white; }
+
+.error { border-radius: 14px; padding: 14px 16px; border: 1px solid color-mix(in srgb, var(--color-danger) 28%, transparent); background: color-mix(in srgb, var(--color-danger) 8%, transparent); color: var(--color-danger); font-size: 13px; font-weight: 700; }
+
+.panel { padding: 20px; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-card-background); }
+
+.tableWrap { overflow-x: auto; }
+.tableWrap table { width: 100%; min-width: 720px; }
+.tableWrap th { padding: 9px 12px; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); font-size: 10px; font-weight: 800; text-align: left; }
+.tableWrap td { padding: 13px 12px; border-bottom: 1px solid color-mix(in srgb, var(--color-border) 65%, transparent); font-size: 12px; vertical-align: middle; }
+.tableWrap tr:last-child td { border-bottom: 0; }
+.tableWrap td strong { display: block; }
+.tableWrap td small { color: var(--color-text-secondary); font-size: 11px; }
+
+.statusBadge { display: inline-flex; justify-content: center; min-width: 52px; padding: 4px 8px; border-radius: 99px; font-size: 10px; font-weight: 800; }
+.statusBadge[data-status="in-progress"] { background: color-mix(in srgb, var(--color-primary) 12%, transparent); color: var(--color-primary); }
+.statusBadge[data-status="submitted"] { background: color-mix(in srgb, #f59e0b 12%, transparent); color: #d97706; }
+.statusBadge[data-status="completed"] { background: color-mix(in srgb, var(--color-success) 12%, transparent); color: var(--color-success); }
+
+.actions { display: flex; gap: 6px; }
+.approveButton { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 8px; background: var(--color-success); color: white; font-size: 11px; font-weight: 800; }
+.approveButton:hover { opacity: .85; }
+.approveButton:disabled { opacity: .5; cursor: wait; }
+.rejectButton { padding: 6px 12px; border-radius: 8px; border: 1px solid color-mix(in srgb, var(--color-danger) 40%, transparent); background: color-mix(in srgb, var(--color-danger) 8%, transparent); color: var(--color-danger); font-size: 11px; font-weight: 800; }
+.rejectButton:hover { background: color-mix(in srgb, var(--color-danger) 14%, transparent); }
+.noAction { color: var(--color-text-secondary); }
+
+.empty { display: grid; min-height: 160px; place-items: center; border: 1px dashed var(--color-border); border-radius: 12px; color: var(--color-text-secondary); font-size: 12px; }
+
+.backdrop { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: rgb(0 0 0 / 45%); padding: 20px; }
+.rejectModal { width: 100%; max-width: 400px; border-radius: 20px; background: var(--color-card-background); border: 1px solid var(--color-border); box-shadow: 0 24px 60px rgb(0 0 0 / 22%); padding: 28px; display: grid; gap: 14px; }
+.rejectModal h3 { font-size: 17px; font-weight: 800; }
+.rejectModal p { font-size: 13px; color: var(--color-text-secondary); }
+.textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-content-background); font-size: 13px; resize: vertical; outline: none; }
+.textarea:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent); }
+.formError { font-size: 12px; color: var(--color-danger); font-weight: 700; }
+.rejectActions { display: flex; gap: 8px; justify-content: flex-end; }
+.cancelButton { padding: 9px 16px; border-radius: 10px; border: 1px solid var(--color-border); background: var(--color-content-background); font-size: 13px; font-weight: 700; }
+.confirmRejectButton { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 10px; background: var(--color-danger); color: white; font-size: 13px; font-weight: 800; }
+.confirmRejectButton:disabled { opacity: .6; cursor: wait; }
+
+.spinning { animation: spin 900ms linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 760px) {
+  .page { gap: 15px; }
+  .hero { align-items: flex-start; flex-direction: column; }
+  .tabs { flex-wrap: wrap; }
+}
