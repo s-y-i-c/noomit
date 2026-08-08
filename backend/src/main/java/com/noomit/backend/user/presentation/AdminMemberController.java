@@ -27,10 +27,10 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>ID 는 문자열로 내보낸다. bigserial id가 2^53 을 넘으면 JS Number 로는 정확히
  * 표현되지 않기 때문이다(프로젝트 공통 규약).</p>
  *
- * <p>경로가 {@code /api/v1/admin/**} 라 SecurityConfig 에서 ROLE_ADMIN/ROLE_DEVELOPER만 접근 가능하다.</p>
+ * <p>경로가 {@code /api/admin/**} 라 SecurityConfig 에서 ROLE_ADMIN만 접근 가능하다.</p>
  */
 @RestController
-@RequestMapping("/api/v1/admin")
+@RequestMapping("/api/admin")
 @RequiredArgsConstructor
 class AdminMemberController {
     private final AdminMemberService adminMemberService;

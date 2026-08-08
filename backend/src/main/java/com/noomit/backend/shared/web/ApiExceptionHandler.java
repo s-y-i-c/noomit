@@ -16,10 +16,15 @@ class ApiExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     ResponseEntity<ErrorResponse> handleBusinessException(BusinessException exception) {
         HttpStatus status = switch (exception.errorCode()) {
-            case ADMIN_MEMBER_NOT_FOUND, REPAIR_CASE_NOT_FOUND, CUSTOMER_NOT_FOUND -> HttpStatus.NOT_FOUND;
-            case INVALID_REQUEST, ADMIN_ROLE_INVALID -> HttpStatus.BAD_REQUEST;
-            case AUTH_EMAIL_ALREADY_EXISTS, ADMIN_SELF_DEMOTION, CUSTOMER_PHONE_ALREADY_EXISTS -> HttpStatus.CONFLICT;
+            case ADMIN_MEMBER_NOT_FOUND, REPAIR_CASE_NOT_FOUND, REPAIR_DETAIL_NOT_FOUND,
+                 CUSTOMER_NOT_FOUND, RECEPTION_INVALID_REQUEST, RECEPTION_NOT_FOUND -> HttpStatus.NOT_FOUND;
+            case INVALID_REQUEST, ADMIN_ROLE_INVALID, REPAIR_DETAIL_NOT_IN_CASE -> HttpStatus.BAD_REQUEST;
+            case AUTH_EMAIL_ALREADY_EXISTS, ADMIN_SELF_DEMOTION, CUSTOMER_PHONE_ALREADY_EXISTS,
+                 RECEPTION_ALREADY_CANCELLED, RECEPTION_CONCURRENT_MODIFICATION, RECEPTION_INVALID_STATUS,
+                 RECEPTION_SLOT_ALREADY_BOOKED, REPAIR_CASE_INVALID_STATUS
+                    -> HttpStatus.CONFLICT;
             case AUTH_INVALID_CREDENTIALS -> HttpStatus.UNAUTHORIZED;
+            case RECEPTION_SLOT_NOT_OWNED, REPAIR_CASE_ACCESS_DENIED -> HttpStatus.FORBIDDEN;
         };
         return ResponseEntity.status(status).body(
                 new ErrorResponse(false, exception.errorCode().name(), exception.getMessage()));

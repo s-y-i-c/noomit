@@ -41,7 +41,7 @@ export function AdminHeader({ onMenuToggle, user, onLogout }: AdminHeaderProps) 
 
       {/* 우측 영역 */}
       <div className={styles.rightSection}>
-        <ModeSwitcher activeMode="admin" roles={user?.roles ?? []} compact />
+        <ModeSwitcher roles={user?.roles ?? []} compact />
         <div className={styles.userGroup}>
           {displayName ? (
             <div className={styles.userArea}>
