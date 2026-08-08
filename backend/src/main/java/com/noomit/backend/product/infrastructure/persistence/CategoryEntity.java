@@ -1,5 +1,6 @@
 package com.noomit.backend.product.infrastructure.persistence;
 
+import com.noomit.backend.product.domain.Category;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -17,4 +18,8 @@ public class CategoryEntity {
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;
+
+    public Category toDomain() {
+        return new Category(id, name);
+    }
 }
