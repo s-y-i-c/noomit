@@ -7,7 +7,7 @@ import java.util.Optional;
 import com.noomit.backend.reception.domain.ServiceRequest;
 
 public interface ServiceRequestRepository {
-    ServiceRequest create(long customerId, long productId, String symptom, String remarks, int baseFee, Instant requestedAt);
+    ServiceRequest create(ServiceRequest request);
 
     Optional<ServiceRequest> findById(long id);
 

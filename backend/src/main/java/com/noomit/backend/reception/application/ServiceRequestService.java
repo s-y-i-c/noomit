@@ -18,10 +18,23 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class ServiceRequestService {
+    /** MVP 고정 출장비. 책정 정책은 추후 도입. */
+    private static final int DEFAULT_BASE_FEE = 20000;
+
     private final ServiceRequestRepository requestRepository;
     private final TechnicianAvailabilityRepository availabilityRepository;
     private final UserDirectory userDirectory;
     private final ApplicationEventPublisher eventPublisher;
+
+    @Transactional
+    public ServiceRequest create(CreateServiceRequestCommand command) {
+        if (command.symptom() == null || command.symptom().isBlank()) {
+            throw new BusinessException(ErrorCode.RECEPTION_INVALID_REQUEST, "고장 증상 내용이 필요합니다.");
+        }
+        ServiceRequest request = ServiceRequest.create(command.customerId(), command.productId(),
+                command.symptom(), command.remarks(), DEFAULT_BASE_FEE, command.requestedAt());
+        return requestRepository.create(request);
+    }
 
     @Transactional
     public AssignmentResult assignInitial(AssignServiceRequestCommand command) {

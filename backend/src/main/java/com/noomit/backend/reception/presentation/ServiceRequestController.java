@@ -6,24 +6,37 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import com.noomit.backend.reception.application.AssignServiceRequestCommand;
 import com.noomit.backend.reception.application.AssignmentResult;
+import com.noomit.backend.reception.application.CreateServiceRequestCommand;
 import com.noomit.backend.reception.application.ReassignServiceRequestCommand;
 import com.noomit.backend.reception.application.ServiceRequestService;
+import com.noomit.backend.reception.domain.ServiceRequest;
 import com.noomit.backend.shared.ApiResponse;
 import com.noomit.backend.shared.error.BusinessException;
 import com.noomit.backend.shared.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/reception/service-requests")
+@RequestMapping("/api/counselor/reception/requests")
 @RequiredArgsConstructor
 class ServiceRequestController {
     private final ServiceRequestService serviceRequestService;
     private final Clock clock;
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    ApiResponse<ServiceRequestResponse> create(@RequestBody CreateRequest request) {
+        ServiceRequest created = serviceRequestService.create(new CreateServiceRequestCommand(
+                parseId(request.customerId()), parseId(request.productId()),
+                request.symptom(), request.remarks(), Instant.now(clock)));
+        return ApiResponse.success("접수를 생성했습니다.", ServiceRequestResponse.from(created));
+    }
 
     @PostMapping("/{id}/assign")
     ApiResponse<AssignResponse> assign(@PathVariable String id, @RequestBody AssignRequest request) {
@@ -44,16 +57,33 @@ class ServiceRequestController {
     }
 
     private long parseId(String value) {
-        long id;
         try {
-            id = Long.parseLong(value);
+            long id = Long.parseLong(value);
+            if (id <= 0) throw new NumberFormatException();
+            return id;
         } catch (NumberFormatException exception) {
             throw new BusinessException(ErrorCode.RECEPTION_INVALID_REQUEST, "ID가 올바르지 않습니다.");
         }
-        if (id <= 0) {
-            throw new BusinessException(ErrorCode.RECEPTION_INVALID_REQUEST, "ID가 올바르지 않습니다.");
+    }
+
+    record CreateRequest(String customerId, String productId, String symptom, String remarks) {}
+
+    record ServiceRequestResponse(
+            String id,
+            String status,
+            String symptom,
+            String remarks,
+            int baseFee,
+            Instant requestedAt) {
+        static ServiceRequestResponse from(ServiceRequest r) {
+            return new ServiceRequestResponse(
+                    Long.toString(r.id()),
+                    r.status().name(),
+                    r.symptom(),
+                    r.remarks(),
+                    r.baseFee(),
+                    r.requestedAt());
         }
-        return id;
     }
 
     record AssignRequest(String technicianId, String slotId) {}

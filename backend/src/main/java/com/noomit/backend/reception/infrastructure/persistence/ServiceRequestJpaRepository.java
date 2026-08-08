@@ -3,6 +3,9 @@ package com.noomit.backend.reception.infrastructure.persistence;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import com.noomit.backend.reception.domain.ServiceRequestStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,7 +13,13 @@ import org.springframework.data.repository.query.Param;
 
 interface ServiceRequestJpaRepository extends JpaRepository<ServiceRequestEntity, Long> {
 
-    @Modifying
+    @Query("""
+            SELECT e FROM ServiceRequestEntity e
+            WHERE (:status IS NULL OR e.status = :status)
+            """)
+    Page<ServiceRequestEntity> search(@Param("status") ServiceRequestStatus status, Pageable pageable);
+
+    @Modifying(clearAutomatically = true)
     @Query("""
             UPDATE ServiceRequestEntity e
             SET e.technicianId = :technicianId,
@@ -23,7 +32,7 @@ interface ServiceRequestJpaRepository extends JpaRepository<ServiceRequestEntity
             WHERE e.id = :id
                 AND e.status = com.noomit.backend.reception.domain.ServiceRequestStatus.RECEIVED
             """)
-    int assign(@Param("id") long id,
+    int assignInitial(@Param("id") long id,
                @Param("technicianId") long technicianId,
                @Param("slotId") long slotId,
                @Param("visitDate") LocalDate visitDate,
@@ -31,7 +40,7 @@ interface ServiceRequestJpaRepository extends JpaRepository<ServiceRequestEntity
                @Param("visitEndTime") LocalTime visitEndTime,
                @Param("assignedAt") Instant assignedAt);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("""
             UPDATE ServiceRequestEntity e
             SET e.technicianId = :technicianId,
@@ -54,7 +63,7 @@ interface ServiceRequestJpaRepository extends JpaRepository<ServiceRequestEntity
                  @Param("assignedAt") Instant assignedAt,
                  @Param("version") long version);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("""
             UPDATE ServiceRequestEntity e
             SET e.status = com.noomit.backend.reception.domain.ServiceRequestStatus.CANCELLED,

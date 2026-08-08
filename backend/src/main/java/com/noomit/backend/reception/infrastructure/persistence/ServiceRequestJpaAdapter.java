@@ -18,8 +18,9 @@ class ServiceRequestJpaAdapter implements ServiceRequestRepository {
     private final ServiceRequestJpaRepository requestJpaRepository;
 
     @Override
-    public ServiceRequest create(long customerId, long productId, String symptom, String remarks, int baseFee, Instant requestedAt) {
-        ServiceRequestEntity entity = new ServiceRequestEntity(customerId, productId, symptom, remarks, baseFee, requestedAt);
+    public ServiceRequest create(ServiceRequest request) {
+        ServiceRequestEntity entity = new ServiceRequestEntity(request.customerId(), request.productId(),
+                request.symptom(), request.remarks(), request.baseFee(), request.requestedAt());
         return requestJpaRepository.save(entity).toDomain();
     }
 
@@ -32,7 +33,7 @@ class ServiceRequestJpaAdapter implements ServiceRequestRepository {
     public int assignInitial(long id, long technicianId, long slotId, LocalDate visitDate,
                               LocalTime visitStartTime, LocalTime visitEndTime, Instant assignedAt) {
         try {
-            return requestJpaRepository.assign(id, technicianId, slotId, visitDate, visitStartTime, visitEndTime, assignedAt);
+            return requestJpaRepository.assignInitial(id, technicianId, slotId, visitDate, visitStartTime, visitEndTime, assignedAt);
         } catch (DataIntegrityViolationException exception) {
             throw new BusinessException(ErrorCode.RECEPTION_SLOT_ALREADY_BOOKED, "이미 예약된 슬롯입니다.");
         }
