@@ -11,6 +11,8 @@ import com.noomit.backend.reception.application.customer.CustomerQueryPort;
 import com.noomit.backend.reception.application.product.ProductInfo;
 import com.noomit.backend.reception.application.product.ProductQueryPort;
 import com.noomit.backend.reception.domain.ServiceRequest;
+import com.noomit.backend.shared.error.BusinessException;
+import com.noomit.backend.shared.error.ErrorCode;
 import com.noomit.backend.user.UserDirectory;
 import com.noomit.backend.user.UserRef;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ServiceRequestQueryService {
     private final ServiceRequestQueryRepository requestQueryRepository;
@@ -25,8 +28,7 @@ public class ServiceRequestQueryService {
     private final CustomerQueryPort customerQueryPort;
     private final ProductQueryPort productQueryPort;
 
-    @Transactional(readOnly = true)
-    public PageResult<ServiceRequestListItem> findList(ServiceRequestListQuery query) {
+    public PageResult<ServiceRequestListItem> getList(ServiceRequestListQuery query) {
         PageResult<ServiceRequest> page = requestQueryRepository.search(
                 query.status(), query.ascending(), query.page(), query.size());
 
@@ -38,6 +40,43 @@ public class ServiceRequestQueryService {
         }
 
         return new PageResult<>(items, page.page(), page.size(), page.totalElements());
+    }
+
+    public ServiceRequestDetail getDetail(long id) {
+        ServiceRequest request = requestQueryRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "접수를 찾을 수 없습니다."));
+
+        CustomerInfo customer = customerQueryPort.getCustomer(request.customerId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "고객 정보를 찾을 수 없습니다."));
+        ProductInfo product = productQueryPort.getProduct(request.productId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "제품 정보를 찾을 수 없습니다."));
+        String technicianName = request.technicianId() == null ? null : findTechnician(request.technicianId()).name();
+
+        return new ServiceRequestDetail(
+                request.id(),
+                customer.name(),
+                customer.phoneNumber(),
+                customer.address(),
+                customer.detailAddress(),
+                product.modelName(),
+                request.symptom(),
+                request.status(),
+                technicianName,
+                request.visitDate(),
+                request.visitStartTime(),
+                request.visitEndTime(),
+                request.remarks(),
+                request.baseFee(),
+                request.requestedAt(),
+                request.assignedAt(),
+                request.cancelledAt(),
+                request.cancelReason());
+    }
+
+    private UserRef findTechnician(long technicianId) {
+        return userDirectory.findActiveByIds(List.of(technicianId)).stream()
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "기사를 찾을 수 없습니다."));
     }
 
     // 필요한 ID를 모아서 3개 Port를 배치 호출

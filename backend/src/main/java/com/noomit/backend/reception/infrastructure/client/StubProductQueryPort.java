@@ -2,6 +2,7 @@ package com.noomit.backend.reception.infrastructure.client;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.noomit.backend.reception.application.product.ProductInfo;
@@ -15,8 +16,8 @@ import org.springframework.stereotype.Component;
 public class StubProductQueryPort implements ProductQueryPort {
 
     @Override
-    public ProductInfo getProduct(Long productId) {
-        return new ProductInfo(productId, "제품" + productId);
+    public Optional<ProductInfo> getProduct(Long productId) {
+        return Optional.of(new ProductInfo(productId, "제품" + productId));
     }
 
     @Override

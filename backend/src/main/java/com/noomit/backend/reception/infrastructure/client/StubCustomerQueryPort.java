@@ -2,6 +2,7 @@ package com.noomit.backend.reception.infrastructure.client;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.noomit.backend.reception.application.customer.CustomerInfo;
@@ -15,8 +16,8 @@ import org.springframework.stereotype.Component;
 public class StubCustomerQueryPort implements CustomerQueryPort {
 
     @Override
-    public CustomerInfo getCustomer(Long customerId) {
-        return new CustomerInfo(customerId, "홍길동", "010-0000-0000", "서울시 강남구", "101동 101호");
+    public Optional<CustomerInfo> getCustomer(Long customerId) {
+        return Optional.of(new CustomerInfo(customerId, "홍길동", "010-0000-0000", "서울시 강남구", "101동 101호"));
     }
 
     @Override
