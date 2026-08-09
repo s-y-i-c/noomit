@@ -1,4 +1,4 @@
 package com.noomit.backend.product.domain;
 
-public class SubCategory {
+public record SubCategory(long id, long categoryId, String name) {
 }
