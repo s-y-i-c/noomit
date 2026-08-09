@@ -6,10 +6,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.noomit.backend.reception.application.customer.CustomerInfo;
-import com.noomit.backend.reception.application.customer.CustomerQueryPort;
-import com.noomit.backend.reception.application.product.ProductInfo;
-import com.noomit.backend.reception.application.product.ProductQueryPort;
+import com.noomit.backend.customer.CustomerDirectory;
+import com.noomit.backend.customer.CustomerInfo;
+import com.noomit.backend.product.ProductDirectory;
+import com.noomit.backend.product.ProductInfo;
 import com.noomit.backend.reception.domain.ServiceRequest;
 import com.noomit.backend.shared.error.BusinessException;
 import com.noomit.backend.shared.error.ErrorCode;
@@ -25,8 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class ServiceRequestQueryService {
     private final ServiceRequestQueryRepository requestQueryRepository;
     private final UserDirectory userDirectory;
-    private final CustomerQueryPort customerQueryPort;
-    private final ProductQueryPort productQueryPort;
+    private final CustomerDirectory customerDirectory;
+    private final ProductDirectory productDirectory;
 
     public PageResult<ServiceRequestListItem> getList(ServiceRequestListQuery query) {
         PageResult<ServiceRequest> page = requestQueryRepository.search(
@@ -46,9 +46,9 @@ public class ServiceRequestQueryService {
         ServiceRequest request = requestQueryRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "접수를 찾을 수 없습니다."));
 
-        CustomerInfo customer = customerQueryPort.getCustomer(request.customerId())
+        CustomerInfo customer = customerDirectory.findById(request.customerId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "고객 정보를 찾을 수 없습니다."));
-        ProductInfo product = productQueryPort.getProduct(request.productId())
+        ProductInfo product = productDirectory.findById(request.productId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "제품 정보를 찾을 수 없습니다."));
         String technicianName = request.technicianId() == null ? null : findTechnician(request.technicianId()).name();
 
@@ -98,12 +98,12 @@ public class ServiceRequestQueryService {
     // 빈 리스트 방어 -> 불필요한 호출 X
     private Map<Long, CustomerInfo> getCustomers(List<Long> ids) {
         if (ids.isEmpty()) { return Map.of(); }
-        return customerQueryPort.getCustomers(ids);
+        return customerDirectory.findByIds(ids);
     }
 
     private Map<Long, ProductInfo> getProducts(List<Long> ids) {
         if (ids.isEmpty()) { return Map.of(); }
-        return productQueryPort.getProducts(ids);
+        return productDirectory.findByIds(ids);
     }
 
     private Map<Long, UserRef> getTechnicians(List<Long> ids) {
