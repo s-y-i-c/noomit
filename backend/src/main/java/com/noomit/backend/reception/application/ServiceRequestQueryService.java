@@ -1,5 +1,6 @@
 package com.noomit.backend.reception.application;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +72,65 @@ public class ServiceRequestQueryService {
                 request.assignedAt(),
                 request.cancelledAt(),
                 request.cancelReason());
+    }
+
+    public List<MyAssignedRequest> getMyAssignedRequests(long technicianId, LocalDate date) {
+        List<ServiceRequest> requests = requestQueryRepository.findAssignedByTechnicianAndDate(technicianId, date);
+        if (requests.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> customerIds = requests.stream()
+                .map(ServiceRequest::customerId)
+                .distinct()
+                .toList();
+
+        List<Long> productIds = requests.stream()
+                .map(ServiceRequest::productId)
+                .distinct()
+                .toList();
+
+        Map<Long, CustomerInfo> customers = getCustomers(customerIds);
+        Map<Long, ProductInfo> products = getProducts(productIds);
+
+        return requests.stream()
+                .map(r -> toMyAssignedRequest(r, customers, products))
+                .toList();
+    }
+
+    public MyAssignedRequestDetail getMyAssignedRequestDetail(long technicianId, long requestId) {
+        ServiceRequest request = requestQueryRepository.findAssignedByTechnicianAndId(technicianId, requestId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "접수를 찾을 수 없습니다."));
+
+        CustomerInfo customer = customerDirectory.findById(request.customerId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "고객 정보를 찾을 수 없습니다."));
+        ProductInfo product = productDirectory.findById(request.productId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "제품 정보를 찾을 수 없습니다."));
+
+        return new MyAssignedRequestDetail(
+                request.id(),
+                customer.name(),
+                customer.phoneNumber(),
+                customer.address(),
+                customer.detailAddress(),
+                product.modelName(),
+                request.symptom(),
+                request.remarks(),
+                request.visitDate(),
+                request.visitStartTime(),
+                request.visitEndTime());
+    }
+
+    private MyAssignedRequest toMyAssignedRequest(ServiceRequest r, Map<Long, CustomerInfo> customers, Map<Long, ProductInfo> products) {
+        CustomerInfo customer = customers.get(r.customerId());
+        ProductInfo product = products.get(r.productId());
+        return new MyAssignedRequest(
+                r.id(),
+                customer == null ? null : customer.name(),
+                customer == null ? null : customer.address(),
+                product == null ? null : product.modelName(),
+                r.visitStartTime(),
+                r.visitEndTime());
     }
 
     private UserRef findTechnician(long technicianId) {
