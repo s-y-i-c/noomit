@@ -1,7 +1,9 @@
 package com.noomit.backend.reception.infrastructure.persistence;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+import com.noomit.backend.reception.domain.TechnicianAvailabilityStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -36,6 +38,9 @@ interface TechnicianAvailabilityJpaRepository extends JpaRepository<TechnicianAv
             ORDER BY e.startTime
             """)
     List<Object[]> findByDate(@Param("date") LocalDate date);
+
+    List<TechnicianAvailabilityEntity> findByAvailableDateAndStartTimeAndEndTimeAndStatus(
+            LocalDate availableDate, LocalTime startTime, LocalTime endTime, TechnicianAvailabilityStatus status);
 
     @Modifying(clearAutomatically = true)
     @Query("""

@@ -5,6 +5,8 @@ import java.time.LocalTime;
 import java.util.List;
 import com.noomit.backend.reception.application.AvailabilityTimeSlot;
 import com.noomit.backend.reception.application.TechnicianAvailabilityQueryRepository;
+import com.noomit.backend.reception.domain.TechnicianAvailability;
+import com.noomit.backend.reception.domain.TechnicianAvailabilityStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -17,6 +19,15 @@ class TechnicianAvailabilityJpaQueryAdapter implements TechnicianAvailabilityQue
     public List<AvailabilityTimeSlot> findByDate(LocalDate date) {
         return technicianAvailabilities.findByDate(date).stream()
                 .map(this::toAvailabilityTimeSlot)
+                .toList();
+    }
+
+    @Override
+    public List<TechnicianAvailability> findAvailableSlots(LocalDate date, LocalTime startTime, LocalTime endTime) {
+        return technicianAvailabilities
+                .findByAvailableDateAndStartTimeAndEndTimeAndStatus(date, startTime, endTime, TechnicianAvailabilityStatus.AVAILABLE)
+                .stream()
+                .map(TechnicianAvailabilityEntity::toDomain)
                 .toList();
     }
 
