@@ -3,6 +3,7 @@ package com.noomit.backend.reception.infrastructure.persistence;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import com.noomit.backend.reception.application.MyAvailabilitySlot;
 import com.noomit.backend.reception.domain.TechnicianAvailabilityStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -42,6 +43,22 @@ interface TechnicianAvailabilityJpaRepository extends JpaRepository<TechnicianAv
     List<TechnicianAvailabilityEntity> findByAvailableDateAndStartTimeAndEndTimeAndStatus(
             LocalDate availableDate, LocalTime startTime, LocalTime endTime, TechnicianAvailabilityStatus status);
 
+    @Query("""
+            SELECT NEW com.noomit.backend.reception.application.MyAvailabilitySlot(
+                a.id, a.startTime, a.endTime, a.status,
+                CASE WHEN EXISTS (
+                    SELECT 1 FROM ServiceRequestEntity sr
+                    WHERE sr.reservedSlotId = a.id
+                ) THEN true ELSE false END
+            )
+            FROM TechnicianAvailabilityEntity a
+            WHERE a.technicianId = :technicianId
+                AND a.availableDate = :date
+            ORDER BY a.startTime
+            """)
+    List<MyAvailabilitySlot> findByTechnicianAndDate(@Param("technicianId") long technicianId,
+                                                       @Param("date") LocalDate date);
+    
     @Modifying(clearAutomatically = true)
     @Query("""
             UPDATE TechnicianAvailabilityEntity e

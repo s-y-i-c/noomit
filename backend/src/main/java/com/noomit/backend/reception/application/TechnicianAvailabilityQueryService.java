@@ -25,6 +25,10 @@ public class TechnicianAvailabilityQueryService {
         return technicianQueryRepository.findByDate(date);
     }
 
+    public List<MyAvailabilitySlot> getMyAvailabilitySlots(long technicianId, LocalDate date) {
+        return technicianQueryRepository.findByTechnicianAndDate(technicianId, date);
+    }
+
     public List<AvailableTechnician> getAvailableTechnicians(LocalDate date, LocalTime startTime, LocalTime endTime) {
         List<TechnicianAvailability> slots = technicianQueryRepository.findAvailableSlots(date, startTime, endTime);
 

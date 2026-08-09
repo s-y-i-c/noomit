@@ -5,7 +5,9 @@ import java.time.LocalTime;
 import java.util.List;
 import com.noomit.backend.reception.application.MyAssignedRequest;
 import com.noomit.backend.reception.application.MyAssignedRequestDetail;
+import com.noomit.backend.reception.application.MyAvailabilitySlot;
 import com.noomit.backend.reception.application.ServiceRequestQueryService;
+import com.noomit.backend.reception.application.TechnicianAvailabilityQueryService;
 import com.noomit.backend.shared.ApiResponse;
 import com.noomit.backend.shared.error.BusinessException;
 import com.noomit.backend.shared.error.ErrorCode;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 class TechnicianController {
     private final ServiceRequestQueryService serviceRequestQueryService;
+    private final TechnicianAvailabilityQueryService technicianAvailabilityQueryService;
 
     @GetMapping("/requests")
     ApiResponse<List<MyAssignedRequestResponse>> getMyRequests(
@@ -40,6 +43,16 @@ class TechnicianController {
             @PathVariable String requestId) {
         MyAssignedRequestDetail detail = serviceRequestQueryService.getMyAssignedRequestDetail(technicianId, parseId(requestId));
         return ApiResponse.success(MyAssignedRequestDetailResponse.from(detail));
+    }
+
+    @GetMapping("/availability")
+    ApiResponse<List<MyAvailabilitySlotResponse>> getMyAvailability(
+            @AuthenticationPrincipal(expression = "userId") long technicianId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        List<MyAvailabilitySlot> slots = technicianAvailabilityQueryService.getMyAvailabilitySlots(technicianId, date);
+        return ApiResponse.success(slots.stream()
+                .map(MyAvailabilitySlotResponse::from)
+                .toList());
     }
 
     private long parseId(String value) {
@@ -95,6 +108,22 @@ class TechnicianController {
                     d.visitDate(),
                     d.startTime(),
                     d.endTime());
+        }
+    }
+
+    record MyAvailabilitySlotResponse(
+            String slotId,
+            LocalTime startTime,
+            LocalTime endTime,
+            String status,
+            boolean isAssigned) {
+        static MyAvailabilitySlotResponse from(MyAvailabilitySlot s) {
+            return new MyAvailabilitySlotResponse(
+                    Long.toString(s.slotId()),
+                    s.startTime(),
+                    s.endTime(),
+                    s.status().name(),
+                    s.isAssigned());
         }
     }
 }
