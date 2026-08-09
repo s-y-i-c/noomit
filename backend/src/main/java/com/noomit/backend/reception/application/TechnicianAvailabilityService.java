@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalTime;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import com.noomit.backend.reception.domain.TechnicianAvailability;
 import com.noomit.backend.reception.domain.TechnicianAvailabilityStatus;
