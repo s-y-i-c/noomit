@@ -51,10 +51,7 @@ class ServiceRequestJpaAdapter implements ServiceRequestRepository {
     }
 
     @Override
-    public void cancel(long id, String reason, Instant cancelledAt) {
-        int updated = requestJpaRepository.cancel(id, reason, cancelledAt);
-        if (updated == 0) {
-            throw new BusinessException(ErrorCode.RECEPTION_ALREADY_CANCELLED, "이미 취소되었거나 취소할 수 없는 접수입니다.");
-        }
+    public int cancel(long id, String reason, Instant cancelledAt) {
+        return requestJpaRepository.cancel(id, reason, cancelledAt);
     }
 }

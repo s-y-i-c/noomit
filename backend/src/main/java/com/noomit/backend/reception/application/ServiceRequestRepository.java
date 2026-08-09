@@ -19,6 +19,6 @@ public interface ServiceRequestRepository {
     int reassign(long id, long technicianId, long slotId, LocalDate visitDate,
                  LocalTime visitStartTime, LocalTime visitEndTime, Instant assignedAt, long version);
 
-    /** 이미 CANCELLED면 RECEPTION_ALREADY_CANCELLED */
-    void cancel(long id, String reason, Instant cancelledAt);
+    /** RECEIVED/ASSIGNED 상태에서만 성공. */
+    int cancel(long id, String reason, Instant cancelledAt);
 }

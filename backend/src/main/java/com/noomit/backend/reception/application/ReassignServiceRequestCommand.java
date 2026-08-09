@@ -1,6 +1,4 @@
 package com.noomit.backend.reception.application;
 
-import java.time.Instant;
-
-public record ReassignServiceRequestCommand(long id, long technicianId, long slotId, Instant assignedAt, long version) {
+public record ReassignServiceRequestCommand(long id, long technicianId, long slotId, long version) {
 }
