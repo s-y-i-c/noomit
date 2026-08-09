@@ -1,0 +1,10 @@
+apiVersion: 1
+
+providers:
+  - name: noomit
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    options:
+      # 이 디렉터리의 JSON 파일을 전부 대시보드로 로드.
+      path: /etc/grafana/provisioning/dashboards
