@@ -30,6 +30,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 
+    // actuator 지표를 Prometheus 포맷(/actuator/prometheus)으로 노출하는 어댑터
+    runtimeOnly("io.micrometer:micrometer-registry-prometheus")
+
     // DB 의존성 (PostgreSQL 호환)
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
