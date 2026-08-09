@@ -68,9 +68,14 @@ interface ServiceRequestJpaRepository extends JpaRepository<ServiceRequestEntity
             UPDATE ServiceRequestEntity e
             SET e.status = com.noomit.backend.reception.domain.ServiceRequestStatus.CANCELLED,
                 e.cancelReason = :reason,
-                e.cancelledAt = :cancelledAt
+                e.cancelledAt = :cancelledAt,
+                e.reservedSlotId = NULL,
+                e.technicianId = NULL
             WHERE e.id = :id
-                AND e.status <> com.noomit.backend.reception.domain.ServiceRequestStatus.CANCELLED
+                AND e.status IN (
+                    com.noomit.backend.reception.domain.ServiceRequestStatus.RECEIVED,
+                    com.noomit.backend.reception.domain.ServiceRequestStatus.ASSIGNED
+                )
             """)
     int cancel(@Param("id") long id,
                @Param("reason") String reason,

@@ -43,4 +43,8 @@ public record ServiceRequest(
     public boolean canReassign() {
         return status == ServiceRequestStatus.ASSIGNED;
     }
+
+    public boolean canCancel() {
+        return status == ServiceRequestStatus.RECEIVED || status == ServiceRequestStatus.ASSIGNED;
+    }
 }
