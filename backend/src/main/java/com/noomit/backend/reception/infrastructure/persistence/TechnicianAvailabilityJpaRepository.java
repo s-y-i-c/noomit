@@ -62,12 +62,14 @@ interface TechnicianAvailabilityJpaRepository extends JpaRepository<TechnicianAv
     @Modifying(clearAutomatically = true)
     @Query("""
             UPDATE TechnicianAvailabilityEntity e
-            SET e.status = CASE
-                WHEN e.status = com.noomit.backend.reception.domain.TechnicianAvailabilityStatus.AVAILABLE
-                THEN com.noomit.backend.reception.domain.TechnicianAvailabilityStatus.UNAVAILABLE
-                ELSE com.noomit.backend.reception.domain.TechnicianAvailabilityStatus.AVAILABLE
-            END
-            WHERE e.id = :id AND e.technicianId = :technicianId
+            SET e.status = :status
+            WHERE e.id = :id
+                AND e.technicianId = :technicianId
+                AND NOT EXISTS (
+                    SELECT 1 FROM ServiceRequestEntity sr
+                    WHERE sr.reservedSlotId = e.id
+                )
             """)
-    int toggleAvailability(@Param("id") long id, @Param("technicianId") long technicianId);
+    int updateAvailabilityStatus(@Param("id") long id, @Param("technicianId") long technicianId,
+                            @Param("status") TechnicianAvailabilityStatus status);
 }

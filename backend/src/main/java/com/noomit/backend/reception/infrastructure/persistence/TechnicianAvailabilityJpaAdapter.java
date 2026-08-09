@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.Optional;
 import com.noomit.backend.reception.application.TechnicianAvailabilityRepository;
 import com.noomit.backend.reception.domain.TechnicianAvailability;
+import com.noomit.backend.reception.domain.TechnicianAvailabilityStatus;
 import com.noomit.backend.shared.error.BusinessException;
 import com.noomit.backend.shared.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -43,10 +44,7 @@ class TechnicianAvailabilityJpaAdapter implements TechnicianAvailabilityReposito
     }
 
     @Override
-    public void toggleAvailability(long id, long technicianId) {
-        int updated = availabilityJpaRepository.toggleAvailability(id, technicianId);
-        if (updated == 0) {
-            throw new BusinessException(ErrorCode.RECEPTION_SLOT_NOT_OWNED, "본인 슬롯만 변경할 수 있습니다.");
-        }
+    public int updateAvailabilityStatus(long id, long technicianId, TechnicianAvailabilityStatus status) {
+        return availabilityJpaRepository.updateAvailabilityStatus(id, technicianId, status);
     }
 }
