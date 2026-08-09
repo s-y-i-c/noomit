@@ -3,6 +3,8 @@ package com.noomit.backend.reception.infrastructure.persistence;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
+
 import com.noomit.backend.reception.domain.ServiceRequestStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -80,4 +82,14 @@ interface ServiceRequestJpaRepository extends JpaRepository<ServiceRequestEntity
     int cancel(@Param("id") long id,
                @Param("reason") String reason,
                @Param("cancelledAt") Instant cancelledAt);
+
+    @Query("""
+            SELECT e FROM ServiceRequestEntity e
+            WHERE e.status = com.noomit.backend.reception.domain.ServiceRequestStatus.ASSIGNED
+                AND e.technicianId = :technicianId
+                AND e.visitDate = :date
+            ORDER BY e.visitStartTime ASC
+            """)
+    List<ServiceRequestEntity> findAssignedByTechnicianAndDate(@Param("technicianId") long technicianId, @Param("date") LocalDate date);
+
 }

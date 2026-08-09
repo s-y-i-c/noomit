@@ -1,5 +1,6 @@
 package com.noomit.backend.reception.application;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +72,42 @@ public class ServiceRequestQueryService {
                 request.assignedAt(),
                 request.cancelledAt(),
                 request.cancelReason());
+    }
+
+    public List<MyAssignedRequest> getMyAssignedRequests(long technicianId, LocalDate date) {
+        List<ServiceRequest> requests = requestQueryRepository.findAssignedByTechnicianAndDate(technicianId, date);
+        if (requests.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> customerIds = requests.stream()
+                .map(ServiceRequest::customerId)
+                .distinct()
+                .toList();
+
+        List<Long> productIds = requests.stream()
+                .map(ServiceRequest::productId)
+                .distinct()
+                .toList();
+
+        Map<Long, CustomerInfo> customers = getCustomers(customerIds);
+        Map<Long, ProductInfo> products = getProducts(productIds);
+
+        return requests.stream()
+                .map(r -> toMyAssignedRequest(r, customers, products))
+                .toList();
+    }
+
+    private MyAssignedRequest toMyAssignedRequest(ServiceRequest r, Map<Long, CustomerInfo> customers, Map<Long, ProductInfo> products) {
+        CustomerInfo customer = customers.get(r.customerId());
+        ProductInfo product = products.get(r.productId());
+        return new MyAssignedRequest(
+                r.id(),
+                customer == null ? null : customer.name(),
+                customer == null ? null : customer.address(),
+                product == null ? null : product.modelName(),
+                r.visitStartTime(),
+                r.visitEndTime());
     }
 
     private UserRef findTechnician(long technicianId) {
