@@ -44,4 +44,10 @@ class ServiceRequestJpaQueryAdapter implements ServiceRequestQueryRepository {
                 .map(ServiceRequestEntity::toDomain)
                 .toList();
     }
+
+    @Override
+    public Optional<ServiceRequest> findAssignedByTechnicianAndId(long technicianId, long requestId) {
+        return requestJpaRepository.findAssignedByTechnicianAndId(technicianId, requestId)
+                .map(ServiceRequestEntity::toDomain);
+    }
 }

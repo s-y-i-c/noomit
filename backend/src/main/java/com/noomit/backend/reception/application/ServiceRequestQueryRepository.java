@@ -12,4 +12,6 @@ public interface ServiceRequestQueryRepository {
     Optional<ServiceRequest> findById(long id);
     
     List<ServiceRequest> findAssignedByTechnicianAndDate(long technicianId, LocalDate date);
+
+    Optional<ServiceRequest> findAssignedByTechnicianAndId(long technicianId, long requestId);
 }

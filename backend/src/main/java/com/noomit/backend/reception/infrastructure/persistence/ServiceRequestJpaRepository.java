@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import com.noomit.backend.reception.domain.ServiceRequestStatus;
 import org.springframework.data.domain.Page;
@@ -92,4 +93,11 @@ interface ServiceRequestJpaRepository extends JpaRepository<ServiceRequestEntity
             """)
     List<ServiceRequestEntity> findAssignedByTechnicianAndDate(@Param("technicianId") long technicianId, @Param("date") LocalDate date);
 
+    @Query("""
+            SELECT e FROM ServiceRequestEntity e
+            WHERE e.id = :requestId
+                AND e.technicianId = :technicianId
+                AND e.status = com.noomit.backend.reception.domain.ServiceRequestStatus.ASSIGNED
+            """)
+    Optional<ServiceRequestEntity> findAssignedByTechnicianAndId(@Param("technicianId") long technicianId, @Param("requestId") long requestId);
 }

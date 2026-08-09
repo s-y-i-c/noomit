@@ -98,6 +98,29 @@ public class ServiceRequestQueryService {
                 .toList();
     }
 
+    public MyAssignedRequestDetail getMyAssignedRequestDetail(long technicianId, long requestId) {
+        ServiceRequest request = requestQueryRepository.findAssignedByTechnicianAndId(technicianId, requestId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "접수를 찾을 수 없습니다."));
+
+        CustomerInfo customer = customerDirectory.findById(request.customerId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "고객 정보를 찾을 수 없습니다."));
+        ProductInfo product = productDirectory.findById(request.productId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "제품 정보를 찾을 수 없습니다."));
+
+        return new MyAssignedRequestDetail(
+                request.id(),
+                customer.name(),
+                customer.phoneNumber(),
+                customer.address(),
+                customer.detailAddress(),
+                product.modelName(),
+                request.symptom(),
+                request.remarks(),
+                request.visitDate(),
+                request.visitStartTime(),
+                request.visitEndTime());
+    }
+
     private MyAssignedRequest toMyAssignedRequest(ServiceRequest r, Map<Long, CustomerInfo> customers, Map<Long, ProductInfo> products) {
         CustomerInfo customer = customers.get(r.customerId());
         ProductInfo product = products.get(r.productId());
