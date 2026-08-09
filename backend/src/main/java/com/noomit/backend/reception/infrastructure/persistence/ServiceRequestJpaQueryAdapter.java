@@ -1,6 +1,7 @@
 package com.noomit.backend.reception.infrastructure.persistence;
 
 import java.util.List;
+import java.util.Optional;
 import com.noomit.backend.reception.application.PageResult;
 import com.noomit.backend.reception.application.ServiceRequestQueryRepository;
 import com.noomit.backend.reception.domain.ServiceRequest;
@@ -29,5 +30,10 @@ class ServiceRequestJpaQueryAdapter implements ServiceRequestQueryRepository {
                 .toList();
 
         return new PageResult<>(content, page, size, result.getTotalElements());
+    }
+
+    @Override
+    public Optional<ServiceRequest> findById(long id) {
+        return requestJpaRepository.findById(id).map(ServiceRequestEntity::toDomain);
     }
 }
