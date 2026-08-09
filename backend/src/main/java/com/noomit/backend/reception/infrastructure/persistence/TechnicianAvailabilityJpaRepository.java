@@ -1,5 +1,7 @@
 package com.noomit.backend.reception.infrastructure.persistence;
 
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -24,6 +26,16 @@ interface TechnicianAvailabilityJpaRepository extends JpaRepository<TechnicianAv
                 AND e.status = com.noomit.backend.reception.domain.TechnicianAvailabilityStatus.UNAVAILABLE
             """)
     int releaseSlot(@Param("id") long id);
+
+    @Query("""
+            SELECT e.startTime, e.endTime,
+                MAX(CASE WHEN e.status = com.noomit.backend.reception.domain.TechnicianAvailabilityStatus.AVAILABLE THEN 1 ELSE 0 END)
+            FROM TechnicianAvailabilityEntity e
+            WHERE e.availableDate = :date
+            GROUP BY e.startTime, e.endTime
+            ORDER BY e.startTime
+            """)
+    List<Object[]> findByDate(@Param("date") LocalDate date);
 
     @Modifying(clearAutomatically = true)
     @Query("""
