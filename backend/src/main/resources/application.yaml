@@ -33,6 +33,20 @@ spring:
       ddl-auto: none
     open-in-view: false
 
+# 부하테스트 모니터링용 actuator 설정. 로컬 Prometheus 가 /actuator/prometheus 를
+# SSH 터널로 긁어간다 — 자세한 구조는 monitoring/README.md 참고.
+management:
+  endpoints:
+    web:
+      exposure:
+        # health(헬스체크) 와 prometheus(지표 스크레이프)만 노출한다.
+        # env, beans 처럼 민감할 수 있는 엔드포인트는 열지 않는다.
+        include: health, prometheus
+  metrics:
+    tags:
+      # Grafana/PromQL 에서 앱을 구분하는 공통 라벨.
+      application: noomit-backend
+
 noomit:
   # 브라우저 CORS 허용 오리진.
   cors:

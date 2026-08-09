@@ -30,7 +30,7 @@ services:
     healthcheck:
       # $$ 는 컨테이너 안에서 셸이 런타임에 풀어주는 환경변수 참조 — 위와 같은 이유로
       # compose 파싱 시점 치환(${...})이 아니라 컨테이너 실행 시점 치환을 써야 한다.
-      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d noomit"]
+      test: ["CMD-SHELL", 'pg_isready -U "$$POSTGRES_USER" -d noomit']
       interval: 5s
       timeout: 5s
       retries: 10
@@ -46,6 +46,12 @@ services:
       # 필요한 값은 전부 env_file(.env.prod)로 주입한다.
       JAVA_TOOL_OPTIONS: >-
         -Xmx256m -Xss256k -XX:MaxMetaspaceSize=128m -XX:+UseSerialGC
+    # actuator 지표(/actuator/prometheus)를 로컬 Prometheus 가 긁어갈 수 있도록
+    # 호스트 루프백에만 게시한다 — DB(127.0.0.1:5432)와 같은 패턴.
+    # 개발자는 SSH 터널(ssh -L 8080:localhost:8080 ...)로만 닿고, 인터넷에는 노출되지 않는다.
+    # 0.0.0.0 로 열면 actuator 가 공인 IP 로 그대로 노출되므로 반드시 127.0.0.1 로 바인딩한다.
+    ports:
+      - "127.0.0.1:8080:8080"
     depends_on:
       db:
         condition: service_healthy
