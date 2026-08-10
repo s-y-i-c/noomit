@@ -6,7 +6,7 @@ import { RoleLayout } from "@/features/admin/components/RoleLayout";
 import type { SidebarNavItem } from "@/features/admin/components/AdminSidebar";
 
 const NAV_ITEMS: SidebarNavItem[] = [
-  { href: "/counselor", label: "상담", icon: Headset },
+  { href: "/counselor", label: "접수 관리", icon: Headset },
 ];
 
 export default function CounselorLayout({ children }: { children: ReactNode }) {
