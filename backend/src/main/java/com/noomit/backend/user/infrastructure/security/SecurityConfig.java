@@ -26,7 +26,10 @@ class SecurityConfig {
 
     @Bean
     PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        // BCrypt cost factor. 기본값 10(2^10 라운드)은 로그인마다 CPU를 크게 써서, 부하테스트
+        // 결과 1GB 인스턴스에서 낮은 동시성에도 CPU가 먼저 포화됐다. cost 8(2^8)로 낮춰 로그인
+        // CPU 부담을 약 4배 줄인다 — 무차별 대입 방어력을 그만큼 낮추는 성능/보안 트레이드오프다.
+        return new BCryptPasswordEncoder(8);
     }
 
     @Bean
