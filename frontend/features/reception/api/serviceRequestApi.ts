@@ -4,6 +4,7 @@ import { serviceRequestService } from "../services/serviceRequestService";
 import type {
   AssignServiceRequestRequest,
   AssignServiceRequestResponse,
+  BaseFeeResponse,
   CancelServiceRequestRequest,
   CancelServiceRequestResponse,
   CreateServiceRequestRequest,
@@ -17,6 +18,11 @@ import type {
 
 const serviceRequestApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
+    // 접수 생성 화면 열 때마다 재요청 안 되도록 캐싱
+    getBaseFee: build.query<BaseFeeResponse, void>({
+      queryFn: (_arg, api) => queryResult(serviceRequestService.getBaseFee(api.signal)),
+      keepUnusedDataFor: 60 * 60 * 24,
+    }),
     getServiceRequests: build.query<ServiceRequestPageData, ServiceRequestFilters>({
       queryFn: (filters, api) => queryResult(serviceRequestService.getServiceRequests(filters, api.signal)),
       providesTags: (result) =>
@@ -67,6 +73,7 @@ const serviceRequestApi = baseApi.injectEndpoints({
 });
 
 export const {
+  useGetBaseFeeQuery,
   useGetServiceRequestsQuery,
   useCreateServiceRequestMutation,
   useAssignServiceRequestMutation,

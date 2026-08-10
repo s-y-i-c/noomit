@@ -2,6 +2,7 @@ import { getCsrfToken } from "@/features/shared/api/csrf";
 import type {
   AssignServiceRequestRequest,
   AssignServiceRequestResponse,
+  BaseFeeResponse,
   CancelServiceRequestRequest,
   CancelServiceRequestResponse,
   CreateServiceRequestRequest,
@@ -26,6 +27,27 @@ function isEnvelope<T>(value: unknown): value is ApiEnvelope<T> {
 }
 
 export const serviceRequestService = {
+  /** 기본 출장비 조회. GET /api/counselor/reception/requests/base-fee */
+  async getBaseFee(signal?: AbortSignal): Promise<BaseFeeResponse> {
+    const response = await fetch(`${API_BASE_URL}/api/counselor/reception/requests/base-fee`, {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+      signal,
+    });
+    const body: unknown = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message = isEnvelope<BaseFeeResponse>(body) && body.message
+        ? body.message
+        : `출장비 정보를 조회하지 못했습니다. (${response.status})`;
+      throw new Error(message);
+    }
+    if (!isEnvelope<BaseFeeResponse>(body) || !body.success || !body.data) {
+      throw new Error("출장비 응답 형식이 올바르지 않습니다.");
+    }
+    return body.data;
+  },
+
   async getServiceRequests(filters: ServiceRequestFilters, signal?: AbortSignal): Promise<ServiceRequestPageData> {
     const params = new URLSearchParams({
       page: String(filters.page),

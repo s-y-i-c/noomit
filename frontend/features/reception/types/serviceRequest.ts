@@ -43,6 +43,10 @@ export interface UpdateServiceRequestRequest extends CreateServiceRequestRequest
   version: number;
 }
 
+export interface BaseFeeResponse {
+  baseFee: number;
+}
+
 export interface ServiceRequestCreateResponse {
   id: string;
   requestNumber: string;
