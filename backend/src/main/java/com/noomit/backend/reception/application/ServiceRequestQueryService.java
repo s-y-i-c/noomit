@@ -11,6 +11,7 @@ import com.noomit.backend.customer.CustomerDirectory;
 import com.noomit.backend.customer.CustomerInfo;
 import com.noomit.backend.product.ProductDirectory;
 import com.noomit.backend.product.ProductInfo;
+import com.noomit.backend.product.SubCategoryInfo;
 import com.noomit.backend.reception.domain.ServiceRequest;
 import com.noomit.backend.shared.error.BusinessException;
 import com.noomit.backend.shared.error.ErrorCode;
@@ -49,8 +50,20 @@ public class ServiceRequestQueryService {
 
         CustomerInfo customer = customerDirectory.findById(request.customerId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "고객 정보를 찾을 수 없습니다."));
-        ProductInfo product = productDirectory.findById(request.productId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "제품 정보를 찾을 수 없습니다."));
+
+        String modelName;
+        String subCategoryName;
+        // 모델 코드 입력 vs 서브카테고리 + 모델명 입력 처리 구분
+        if (request.productId() != null) {
+            ProductInfo product = productDirectory.findById(request.productId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "제품 정보를 찾을 수 없습니다."));
+            modelName = product.modelName();
+            subCategoryName = null;
+        } else {
+            SubCategoryInfo subCategory = findSubCategory(request.selectedSubCategoryId());
+            modelName = request.selectedModelName();
+            subCategoryName = subCategory.name();
+        }
         String technicianName = request.technicianId() == null ? null : findTechnician(request.technicianId()).name();
         String receptionistName = findReceptionist(request.receptionistId()).name();
 
@@ -63,7 +76,8 @@ public class ServiceRequestQueryService {
                 customer.address(),
                 customer.detailAddress(),
                 request.productId(),
-                product.modelName(),
+                modelName,
+                subCategoryName,
                 request.symptom(),
                 request.status(),
                 receptionistName,
@@ -93,6 +107,7 @@ public class ServiceRequestQueryService {
 
         List<Long> productIds = requests.stream()
                 .map(ServiceRequest::productId)
+                .filter(Objects::nonNull)
                 .distinct()
                 .toList();
 
@@ -110,8 +125,11 @@ public class ServiceRequestQueryService {
 
         CustomerInfo customer = customerDirectory.findById(request.customerId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "고객 정보를 찾을 수 없습니다."));
-        ProductInfo product = productDirectory.findById(request.productId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "제품 정보를 찾을 수 없습니다."));
+        String modelName = request.productId() != null
+                ? productDirectory.findById(request.productId())
+                        .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "제품 정보를 찾을 수 없습니다."))
+                        .modelName()
+                : request.selectedModelName();
 
         return new MyAssignedRequestDetail(
                 request.id(),
@@ -120,7 +138,7 @@ public class ServiceRequestQueryService {
                 customer.phoneNumber(),
                 customer.address(),
                 customer.detailAddress(),
-                product.modelName(),
+                modelName,
                 request.symptom(),
                 request.remarks(),
                 request.visitDate(),
@@ -130,13 +148,13 @@ public class ServiceRequestQueryService {
 
     private MyAssignedRequest toMyAssignedRequest(ServiceRequest r, Map<Long, CustomerInfo> customers, Map<Long, ProductInfo> products) {
         CustomerInfo customer = customers.get(r.customerId());
-        ProductInfo product = products.get(r.productId());
+        String modelName = resolveModelName(r, products);
         return new MyAssignedRequest(
                 r.id(),
                 r.requestNumber(),
                 customer == null ? null : customer.name(),
                 customer == null ? null : customer.address(),
-                product == null ? null : product.modelName(),
+                modelName,
                 r.visitStartTime(),
                 r.visitEndTime());
     }
@@ -153,12 +171,22 @@ public class ServiceRequestQueryService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "접수자를 찾을 수 없습니다."));
     }
 
-    // 필요한 ID를 모아서 4개 Port를 배치 호출
+    private SubCategoryInfo findSubCategory(long subCategoryId) {
+        SubCategoryInfo subCategory = productDirectory.findSubCategoriesByIds(List.of(subCategoryId)).get(subCategoryId);
+        if (subCategory == null) {
+            throw new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "서브카테고리 정보를 찾을 수 없습니다.");
+        }
+        return subCategory;
+    }
+
+    // 필요한 ID를 모아서 5개 Port를 배치 호출
     private RequestViewContext loadRequestViewContext(List<ServiceRequest> requests) {
         List<Long> customerIds = requests.stream()
                 .map(ServiceRequest::customerId).distinct().toList();
         List<Long> productIds = requests.stream()
-                .map(ServiceRequest::productId).distinct().toList();
+                .map(ServiceRequest::productId).filter(Objects::nonNull).distinct().toList();
+        List<Long> subCategoryIds = requests.stream()
+                .map(ServiceRequest::selectedSubCategoryId).filter(Objects::nonNull).distinct().toList();
         List<Long> technicianIds = requests.stream()
                 .map(ServiceRequest::technicianId).filter(Objects::nonNull).distinct().toList(); // null인 기사는 조회 X
         List<Long> receptionistIds = requests.stream()
@@ -167,6 +195,7 @@ public class ServiceRequestQueryService {
         return new RequestViewContext(
                 getCustomers(customerIds),
                 getProducts(productIds),
+                getSubCategories(subCategoryIds),
                 getTechnicians(technicianIds),
                 getReceptionists(receptionistIds)
         );
@@ -183,6 +212,11 @@ public class ServiceRequestQueryService {
         return productDirectory.findByIds(ids);
     }
 
+    private Map<Long, SubCategoryInfo> getSubCategories(List<Long> ids) {
+        if (ids.isEmpty()) { return Map.of(); }
+        return productDirectory.findSubCategoriesByIds(ids);
+    }
+
     private Map<Long, UserRef> getTechnicians(List<Long> ids) {
         if (ids.isEmpty()) { return Map.of(); }
         return userDirectory.findActiveByIds(ids).stream()
@@ -195,10 +229,27 @@ public class ServiceRequestQueryService {
                 .collect(Collectors.toMap(UserRef::id, ref -> ref));
     }
 
+    // 모델 코드가 확정된 제품이면 Product 조회 결과, 아니면 고객이 입력한 모델명
+    private String resolveModelName(ServiceRequest r, Map<Long, ProductInfo> products) {
+        if (r.productId() != null) {
+            ProductInfo product = products.get(r.productId());
+            return product == null ? null : product.modelName();
+        }
+        return r.selectedModelName();
+    }
+
+    // 제품이 확정된 경우 서브카테고리는 표시 X
+    private String resolveSubCategoryName(ServiceRequest r, Map<Long, SubCategoryInfo> subCategories) {
+        if (r.productId() != null) {
+            return null;
+        }
+        SubCategoryInfo subCategory = subCategories.get(r.selectedSubCategoryId());
+        return subCategory == null ? null : subCategory.name();
+    }
+
     // row 하나 조립
     private ServiceRequestListItem toListItem(ServiceRequest r, RequestViewContext c) {
         CustomerInfo customer = c.customers().get(r.customerId());
-        ProductInfo product = c.products().get(r.productId());
         UserRef technician = r.technicianId() == null ? null : c.technicians().get(r.technicianId());
         UserRef receptionist = c.receptionists().get(r.receptionistId());
 
@@ -207,7 +258,8 @@ public class ServiceRequestQueryService {
                 r.requestNumber(),
                 customer == null ? null : customer.name(),
                 customer == null ? null : customer.phoneNumber(),
-                product == null ? null : product.modelName(),
+                resolveModelName(r, c.products()),
+                resolveSubCategoryName(r, c.subCategories()),
                 r.symptom(),
                 r.status(),
                 receptionist == null ? null : receptionist.name(),
@@ -218,10 +270,11 @@ public class ServiceRequestQueryService {
                 r.requestedAt());
     }
 
-    // 4개 Port 결과를 한 번에 들고 다니는 내부 전용 묶음
+    // 5개 Port 결과를 한 번에 들고 다니는 내부 전용 묶음
     private record RequestViewContext(
             Map<Long, CustomerInfo> customers,
             Map<Long, ProductInfo> products,
+            Map<Long, SubCategoryInfo> subCategories,
             Map<Long, UserRef> technicians,
             Map<Long, UserRef> receptionists) {
     }

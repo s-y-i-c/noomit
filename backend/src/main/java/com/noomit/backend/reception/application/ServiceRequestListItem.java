@@ -11,6 +11,7 @@ public record ServiceRequestListItem(
         String customerName,
         String customerPhone,
         String modelName,
+        String subCategoryName,
         String symptom,
         ServiceRequestStatus status,
         String receptionistName,
