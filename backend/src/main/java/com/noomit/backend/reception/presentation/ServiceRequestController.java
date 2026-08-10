@@ -16,6 +16,7 @@ import com.noomit.backend.shared.error.BusinessException;
 import com.noomit.backend.shared.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,9 +33,11 @@ class ServiceRequestController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    ApiResponse<ServiceRequestResponse> create(@RequestBody CreateRequest request) {
+    ApiResponse<ServiceRequestResponse> create(
+            @AuthenticationPrincipal(expression = "userId") long receptionistId,
+            @RequestBody CreateRequest request) {
         ServiceRequest created = serviceRequestService.create(new CreateServiceRequestCommand(
-                parseId(request.customerId()), parseId(request.productId()),
+                parseId(request.customerId()), parseId(request.productId()), receptionistId,
                 request.symptom(), request.remarks()));
         return ApiResponse.success("접수를 생성했습니다.", ServiceRequestResponse.from(created));
     }

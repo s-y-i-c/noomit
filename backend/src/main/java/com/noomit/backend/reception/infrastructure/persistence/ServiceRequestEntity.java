@@ -36,6 +36,9 @@ class ServiceRequestEntity {
     @Column(name = "product_id", nullable = false)
     private Long productId;
 
+    @Column(name = "receptionist_id", nullable = false)
+    private Long receptionistId;
+
     @Column(name = "symptom", nullable = false)
     private String symptom;
 
@@ -88,9 +91,10 @@ class ServiceRequestEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    ServiceRequestEntity(Long customerId, Long productId, String symptom, String remarks, Integer baseFee, Instant requestedAt) {
+    ServiceRequestEntity(Long customerId, Long productId, Long receptionistId, String symptom, String remarks, Integer baseFee, Instant requestedAt) {
         this.customerId = customerId;
         this.productId = productId;
+        this.receptionistId = receptionistId;
         this.symptom = symptom;
         this.remarks = remarks;
         this.baseFee = baseFee;
@@ -103,6 +107,7 @@ class ServiceRequestEntity {
                 id,
                 customerId,
                 productId,
+                receptionistId,
                 symptom,
                 remarks,
                 baseFee,

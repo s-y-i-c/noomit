@@ -20,7 +20,7 @@ class ServiceRequestJpaAdapter implements ServiceRequestRepository {
     @Override
     public ServiceRequest create(ServiceRequest request) {
         ServiceRequestEntity entity = new ServiceRequestEntity(request.customerId(), request.productId(),
-                request.symptom(), request.remarks(), request.baseFee(), request.requestedAt());
+                request.receptionistId(), request.symptom(), request.remarks(), request.baseFee(), request.requestedAt());
         return requestJpaRepository.save(entity).toDomain();
     }
 
