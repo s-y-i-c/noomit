@@ -26,7 +26,16 @@ const customersApi = baseApi.injectEndpoints({
         { type: "Customer", id: "LIST" },
       ],
     }),
+    // 전화번호 조회는 버튼 클릭으로 그때그때 트리거하는 거라 lazy 쿼리로 뺀다.
+    findCustomerByPhoneNumber: build.query<Customer | null, string>({
+      queryFn: (phoneNumber, api) => queryResult(customerService.findCustomerByPhoneNumber(phoneNumber, api.signal)),
+    }),
   }),
 });
 
-export const { useGetCustomersQuery, useGetCustomerByIdQuery, useChangeCustomerStatusMutation } = customersApi;
+export const {
+  useGetCustomersQuery,
+  useGetCustomerByIdQuery,
+  useChangeCustomerStatusMutation,
+  useLazyFindCustomerByPhoneNumberQuery,
+} = customersApi;

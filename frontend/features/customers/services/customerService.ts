@@ -62,6 +62,28 @@ export const customerService = {
     return body.data;
   },
 
+  /** 전화번호로 조회. 없으면 null(신규 고객) — 에러가 아니다. */
+  async findCustomerByPhoneNumber(phoneNumber: string, signal?: AbortSignal): Promise<Customer | null> {
+    const params = new URLSearchParams({ phoneNumber });
+    const response = await fetch(`${API_BASE_URL}/api/customers/phone?${params}`, {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+      signal,
+    });
+    const body: unknown = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message = isEnvelope<Customer>(body) && body.message
+        ? body.message
+        : `고객 조회에 실패했습니다. (${response.status})`;
+      throw new Error(message);
+    }
+    if (!isEnvelope<Customer>(body) || !body.success) {
+      throw new Error("고객 조회 응답 형식이 올바르지 않습니다.");
+    }
+    return body.data ?? null;
+  },
+
   /** 관리자 전용 상태 변경. PUT /api/v1/admin/customers/{id}/status — CSRF 보호 대상. */
   async changeStatus(id: string, status: CustomerStatus, signal?: AbortSignal): Promise<void> {
     const csrf = await getCsrfToken(signal);
