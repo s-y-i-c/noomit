@@ -31,6 +31,7 @@ export function ServiceRequestTable({ items }: ServiceRequestTableProps) {
             <th>제품 모델명</th>
             <th>증상</th>
             <th>상태</th>
+            <th>접수자</th>
             <th>담당기사</th>
             <th>방문예정일시</th>
           </tr>
@@ -55,6 +56,7 @@ export function ServiceRequestTable({ items }: ServiceRequestTableProps) {
                   {statusLabel(item.status)}
                 </span>
               </td>
+              <td>{item.receptionistName ?? "-"}</td>
               <td>{item.technicianName ?? "-"}</td>
               <td>{formatVisit(item.visitDate, item.visitStartTime, item.visitEndTime)}</td>
             </tr>

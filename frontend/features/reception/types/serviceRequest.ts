@@ -7,6 +7,7 @@ export interface ServiceRequestListItem {
   modelName: string;
   symptom: string;
   status: ServiceRequestStatus;
+  receptionistName: string | null;
   technicianName: string | null;
   visitDate: string | null;
   visitStartTime: string | null;
