@@ -2,6 +2,7 @@ export type ServiceRequestStatus = "RECEIVED" | "ASSIGNED" | "CANCELLED";
 
 export interface ServiceRequestListItem {
   id: string;
+  requestNumber: string;
   customerName: string;
   customerPhone: string;
   modelName: string;

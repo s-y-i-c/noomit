@@ -26,6 +26,7 @@ export function ServiceRequestTable({ items }: ServiceRequestTableProps) {
       <table>
         <thead>
           <tr>
+            <th>접수번호</th>
             <th>고객명</th>
             <th>전화번호</th>
             <th>제품 모델명</th>
@@ -43,6 +44,7 @@ export function ServiceRequestTable({ items }: ServiceRequestTableProps) {
               className={styles.row}
               onClick={() => router.push(`/counselor/reception/${item.id}`)}
             >
+              <td>{item.requestNumber}</td>
               <td><strong>{item.customerName}</strong></td>
               <td>{item.customerPhone}</td>
               <td>{item.modelName}</td>
