@@ -26,3 +26,13 @@ export interface CustomerPageData {
   totalElements: number;
   totalPages: number;
 }
+
+/** CustomerInfoForm이 다루는 편집 가능한 필드. 제출(POST /api/customers) 바디로 그대로 쓸 수 있다. */
+export interface CustomerInfoFormValue {
+  phoneNumber: string;
+  name: string;
+  zipCode: string;
+  address: string;
+  detailAddress: string;
+  memo: string;
+}
