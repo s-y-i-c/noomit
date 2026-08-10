@@ -19,6 +19,9 @@ const productsApi = baseApi.injectEndpoints({
     getSubCategories: build.query<SubCategory[], void>({
       queryFn: (_arg, api) => queryResult(productService.getSubCategories(api.signal)),
     }),
+    searchProducts: build.query<Product[], string>({
+      queryFn: (keyword, api) => queryResult(productService.searchProducts(keyword, api.signal)),
+    }),
     getProducts: build.query<ProductPageData, ProductFilters>({
       queryFn: (filters, api) => queryResult(productService.getProducts(filters, api.signal)),
       providesTags: (result) =>
@@ -50,6 +53,7 @@ const productsApi = baseApi.injectEndpoints({
 export const {
   useGetCategoriesQuery,
   useGetSubCategoriesQuery,
+  useLazySearchProductsQuery,
   useGetProductsQuery,
   useGetProductByIdQuery,
   useRegisterProductMutation,
