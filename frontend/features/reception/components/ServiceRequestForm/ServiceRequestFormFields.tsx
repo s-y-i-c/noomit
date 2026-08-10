@@ -1,13 +1,14 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { CustomerSelectorPlaceholder } from "./CustomerSelectorPlaceholder";
-import { ProductSelectorPlaceholder } from "./ProductSelectorPlaceholder";
-import styles from "./ServiceRequestCreateForm.module.css";
+import { CustomerSelectorPlaceholder } from "../ServiceRequestEdit/CustomerSelectorPlaceholder";
+import { ProductFields } from "./ProductFields";
+import type { ProductFieldsValue } from "./productFieldsUtils";
+import styles from "../ServiceRequestCreateForm.module.css";
 
 export interface ServiceRequestFormValues {
   customerId: string;
-  productId: string;
+  product: ProductFieldsValue;
   symptom: string;
   remarks: string;
 }
@@ -33,11 +34,10 @@ export function ServiceRequestFormFields({ form, onChange, baseFeeContent }: Ser
 
       <article className={styles.panel}>
         <h2 className={styles.sectionTitle}>제품 정보</h2>
-        <ProductSelectorPlaceholder
-          initialValue={form.productId}
-          onSelect={(product) => onChange({ productId: product.productId })}
+        <ProductFields
+          initialValue={form.product}
+          onChange={(product) => onChange({ product })}
         />
-        {form.productId ? <p className={styles.selectedHint}>선택된 제품 ID: {form.productId}</p> : null}
       </article>
 
       <article className={styles.panel}>

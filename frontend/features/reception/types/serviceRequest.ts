@@ -5,7 +5,7 @@ export interface ServiceRequestListItem {
   requestNumber: string;
   customerName: string;
   customerPhone: string;
-  modelName: string;
+  modelName: string | null;
   symptom: string;
   status: ServiceRequestStatus;
   receptionistName: string | null;
@@ -32,9 +32,15 @@ export interface ServiceRequestPageData {
 
 export interface CreateServiceRequestRequest {
   customerId: string;
-  productId: string;
+  productId: string | null;
+  selectedSubCategoryId: string | null;
+  selectedModelName: string | null;
   symptom: string;
   remarks: string;
+}
+
+export interface UpdateServiceRequestRequest extends CreateServiceRequestRequest {
+  version: number;
 }
 
 export interface ServiceRequestCreateResponse {
@@ -88,8 +94,10 @@ export interface ServiceRequestDetail {
   customerId: string;
   customerName: string;
   customerPhone: string;
-  productId: string;
-  modelName: string;
+  productId: string | null;
+  selectedSubCategoryId: string | null;
+  modelName: string | null;
+  subCategoryName: string | null;
   symptom: string;
   status: ServiceRequestStatus;
   receptionistName: string | null;

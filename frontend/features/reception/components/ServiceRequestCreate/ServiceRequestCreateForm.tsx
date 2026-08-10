@@ -4,12 +4,13 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { FilePlus2 } from "lucide-react";
 import { queryErrorMessage } from "@/features/store/api/queryError";
-import { useCreateServiceRequestMutation } from "../api/serviceRequestApi";
-import { ServiceRequestFormFields, type ServiceRequestFormValues } from "./ServiceRequestFormFields";
-import styles from "./ServiceRequestCreateForm.module.css";
+import { useCreateServiceRequestMutation } from "../../api/serviceRequestApi";
+import { emptyProductFieldsValue, isProductFieldsValid, toProductSelection } from "../ServiceRequestForm/productFieldsUtils";
+import { ServiceRequestFormFields, type ServiceRequestFormValues } from "../ServiceRequestForm/ServiceRequestFormFields";
+import styles from "../ServiceRequestCreateForm.module.css";
 
 function initialForm(): ServiceRequestFormValues {
-  return { customerId: "", productId: "", symptom: "", remarks: "" };
+  return { customerId: "", product: emptyProductFieldsValue(), symptom: "", remarks: "" };
 }
 
 export function ServiceRequestCreateForm() {
@@ -21,7 +22,7 @@ export function ServiceRequestCreateForm() {
     ? queryErrorMessage(createState.error, "접수를 생성하지 못했습니다.")
     : null;
 
-  const canSubmit = form.customerId !== "" && form.productId !== "" && form.symptom.trim() !== "";
+  const canSubmit = form.customerId !== "" && isProductFieldsValid(form.product) && form.symptom.trim() !== "";
 
   const handleReset = () => setForm(initialForm());
 
@@ -32,7 +33,7 @@ export function ServiceRequestCreateForm() {
     try {
       const result = await createServiceRequest({
         customerId: form.customerId,
-        productId: form.productId,
+        ...toProductSelection(form.product),
         symptom: form.symptom.trim(),
         remarks: form.remarks.trim(),
       }).unwrap();

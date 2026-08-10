@@ -4,33 +4,19 @@ import { useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 import { useGetCategoriesQuery, useGetSubCategoriesQuery } from "@/features/products/api/productsApi";
 import type { Product } from "@/features/products/types/product";
-import { ProductSearchModal } from "./ProductSearchModal";
-import styles from "./ProductFields.module.css";
+import { ProductSearchModal } from "../ProductSearchModal";
+import { emptyProductFieldsValue, type ProductFieldsValue } from "./productFieldsUtils";
+import styles from "../ProductFields.module.css";
 
-/**
- * 접수 화면이 이어받는 제품 입력값.
- * modelCode는 검색으로 찾았을 때만 채워지는 읽기 전용 값이다 — 직접 타이핑해서 넣을 수 없다.
- * (검증 안 된 모델코드가 접수 데이터로 들어가면 안 되기 때문. 모르면 빈 값 그대로 두고
- * 카테고리·서브카테고리·모델명만 직접 입력한다.)
- */
-export interface ProductFieldsValue {
-  categoryId: string;
-  subCategoryId: string;
-  modelName: string;
-  modelCode: string;
-  matchedProductId: string | null;
-}
+export type { ProductFieldsValue };
 
 interface ProductFieldsProps {
+  initialValue?: ProductFieldsValue; // 접수 수정 화면에 기존값 표시 위함
   onChange: (value: ProductFieldsValue) => void;
 }
 
-function initialValue(): ProductFieldsValue {
-  return { categoryId: "", subCategoryId: "", modelName: "", modelCode: "", matchedProductId: null };
-}
-
-export function ProductFields({ onChange }: ProductFieldsProps) {
-  const [value, setValue] = useState<ProductFieldsValue>(initialValue);
+export function ProductFields({ initialValue, onChange }: ProductFieldsProps) {
+  const [value, setValue] = useState<ProductFieldsValue>(initialValue ?? emptyProductFieldsValue);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const { data: categories, isLoading: categoriesLoading } = useGetCategoriesQuery();

@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { ServiceRequestListItem } from "../types/serviceRequest";
-import { statusLabel, statusBadgeData } from "./serviceRequestStatusUtils";
-import styles from "./ServiceRequestList.module.css";
+import type { ServiceRequestListItem } from "../../types/serviceRequest";
+import { statusLabel, statusBadgeData } from "../serviceRequestStatusUtils";
+import styles from "../ServiceRequestList.module.css";
 
 function toMinute(time: string): string {
   return time.slice(0, 5);
@@ -47,7 +47,7 @@ export function ServiceRequestTable({ items }: ServiceRequestTableProps) {
               <td>{item.requestNumber}</td>
               <td><strong>{item.customerName}</strong></td>
               <td>{item.customerPhone}</td>
-              <td>{item.modelName}</td>
+              <td>{item.modelName ?? "-"}</td>
               <td>
                 <span className={styles.symptomText} title={item.symptom}>
                   {item.symptom}

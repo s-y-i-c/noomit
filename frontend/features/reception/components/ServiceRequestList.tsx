@@ -7,7 +7,7 @@ import { useGetServiceRequestsQuery } from "../api/serviceRequestApi";
 import type { ServiceRequestFilters, ServiceRequestStatus } from "../types/serviceRequest";
 import { Dropdown } from "./Dropdown";
 import { Pagination } from "./Pagination";
-import { ServiceRequestTable } from "./ServiceRequestTable";
+import { ServiceRequestTable } from "./ServiceRequestList/ServiceRequestTable";
 import styles from "./ServiceRequestList.module.css";
 
 const PAGE_SIZE = 15;
