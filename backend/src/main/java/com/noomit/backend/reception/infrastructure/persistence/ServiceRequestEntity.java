@@ -30,11 +30,17 @@ class ServiceRequestEntity {
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "request_number", nullable = false, updatable = false, length = 30)
+    private String requestNumber;
+
     @Column(name = "customer_id", nullable = false)
     private Long customerId;
 
     @Column(name = "product_id", nullable = false)
     private Long productId;
+
+    @Column(name = "receptionist_id", nullable = false)
+    private Long receptionistId;
 
     @Column(name = "symptom", nullable = false)
     private String symptom;
@@ -88,9 +94,11 @@ class ServiceRequestEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    ServiceRequestEntity(Long customerId, Long productId, String symptom, String remarks, Integer baseFee, Instant requestedAt) {
+    ServiceRequestEntity(Long customerId, Long productId, Long receptionistId, String requestNumber, String symptom, String remarks, Integer baseFee, Instant requestedAt) {
         this.customerId = customerId;
         this.productId = productId;
+        this.receptionistId = receptionistId;
+        this.requestNumber = requestNumber;
         this.symptom = symptom;
         this.remarks = remarks;
         this.baseFee = baseFee;
@@ -101,8 +109,10 @@ class ServiceRequestEntity {
     ServiceRequest toDomain() {
         return new ServiceRequest(
                 id,
+                requestNumber,
                 customerId,
                 productId,
+                receptionistId,
                 symptom,
                 remarks,
                 baseFee,

@@ -61,11 +61,13 @@ class ServiceRequestQueryController {
             int totalPages) {
         record Item(
                 String id,
+                String requestNumber,
                 String customerName,
                 String customerPhone,
                 String modelName,
                 String symptom,
                 String status,
+                String receptionistName,
                 String technicianName,
                 LocalDate visitDate,
                 LocalTime visitStartTime,
@@ -74,11 +76,13 @@ class ServiceRequestQueryController {
             static Item from(ServiceRequestListItem item) {
                 return new Item(
                         Long.toString(item.id()),
+                        item.requestNumber(),
                         item.customerName(),
                         item.customerPhone(),
                         item.modelName(),
                         item.symptom(),
                         item.status().name(),
+                        item.receptionistName(),
                         item.technicianName(),
                         item.visitDate(),
                         item.visitStartTime(),
@@ -97,11 +101,13 @@ class ServiceRequestQueryController {
 
     record ServiceRequestDetailResponse(
             String id,
+            String requestNumber,
             String customerName,
             String customerPhone,
             String modelName,
             String symptom,
             String status,
+            String receptionistName,
             String technicianName,
             LocalDate visitDate,
             LocalTime visitStartTime,
@@ -117,11 +123,13 @@ class ServiceRequestQueryController {
         static ServiceRequestDetailResponse from(ServiceRequestDetail detail) {
             return new ServiceRequestDetailResponse(
                     Long.toString(detail.id()),
+                    detail.requestNumber(),
                     detail.customerName(),
                     detail.customerPhone(),
                     detail.modelName(),
                     detail.symptom(),
                     detail.status().name(),
+                    detail.receptionistName(),
                     detail.technicianName(),
                     detail.visitDate(),
                     detail.visitStartTime(),

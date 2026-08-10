@@ -88,6 +88,7 @@ class TechnicianController {
 
     record MyAssignedRequestResponse(
             String serviceRequestId,
+            String requestNumber,
             String customerName,
             String address,
             String modelName,
@@ -96,6 +97,7 @@ class TechnicianController {
         static MyAssignedRequestResponse from(MyAssignedRequest r) {
             return new MyAssignedRequestResponse(
                     Long.toString(r.serviceRequestId()),
+                    r.requestNumber(),
                     r.customerName(),
                     r.address(),
                     r.modelName(),
@@ -106,6 +108,7 @@ class TechnicianController {
 
     record MyAssignedRequestDetailResponse(
             String serviceRequestId,
+            String requestNumber,
             String customerName,
             String customerPhone,
             String address,
@@ -119,6 +122,7 @@ class TechnicianController {
         static MyAssignedRequestDetailResponse from(MyAssignedRequestDetail d) {
             return new MyAssignedRequestDetailResponse(
                     Long.toString(d.serviceRequestId()),
+                    d.requestNumber(),
                     d.customerName(),
                     d.customerPhone(),
                     d.address(),
