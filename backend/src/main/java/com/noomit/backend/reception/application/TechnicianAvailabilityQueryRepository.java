@@ -7,8 +7,10 @@ import com.noomit.backend.reception.domain.TechnicianAvailability;
 
 public interface TechnicianAvailabilityQueryRepository {
     List<AvailabilityTimeSlot> findByDate(LocalDate date);
-    
+
     List<TechnicianAvailability> findAvailableSlots(LocalDate date, LocalTime startTime, LocalTime endTime);
-    
+
     List<MyAvailabilitySlot> findByTechnicianAndDate(long technicianId, LocalDate date);
+
+    List<LocalDate> findAvailableDatesFrom(LocalDate from);
 }

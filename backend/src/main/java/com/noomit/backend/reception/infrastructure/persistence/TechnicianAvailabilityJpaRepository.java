@@ -12,6 +12,15 @@ import org.springframework.data.repository.query.Param;
 
 interface TechnicianAvailabilityJpaRepository extends JpaRepository<TechnicianAvailabilityEntity, Long> {
 
+    // 실제 슬롯이 생성돼 있고 예약 가능한 상태인 날짜만 모아 반환
+    @Query("""
+            SELECT DISTINCT e.availableDate FROM TechnicianAvailabilityEntity e
+            WHERE e.availableDate > :from
+                AND e.status = com.noomit.backend.reception.domain.TechnicianAvailabilityStatus.AVAILABLE
+            ORDER BY e.availableDate ASC
+            """)
+    List<LocalDate> findDistinctAvailableDatesFrom(@Param("from") LocalDate from);
+
     @Modifying(clearAutomatically = true)
     @Query("""
             UPDATE TechnicianAvailabilityEntity e

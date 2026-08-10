@@ -37,6 +37,11 @@ class TechnicianAvailabilityJpaQueryAdapter implements TechnicianAvailabilityQue
         return availabilityJpaRepository.findByTechnicianAndDate(technicianId, date);
     }
 
+    @Override
+    public List<LocalDate> findAvailableDatesFrom(LocalDate from) {
+        return availabilityJpaRepository.findDistinctAvailableDatesFrom(from);
+    }
+
     private AvailabilityTimeSlot toAvailabilityTimeSlot(Object[] row) {
         return new AvailabilityTimeSlot(
                 (LocalTime) row[0],
