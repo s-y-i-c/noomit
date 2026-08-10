@@ -6,9 +6,9 @@ import java.time.temporal.ChronoUnit;
 public record StatisticsQuery(
         LocalDate from,
         LocalDate to,
-        String technicianId,
-        String customerId,
-        String productId,
+        Long technicianId,
+        Long customerId,
+        Long productId,
         RequestStatus status,
         int repeatWindowDays) {
 
@@ -27,17 +27,19 @@ public record StatisticsQuery(
         if (repeatWindowDays < 1 || repeatWindowDays > 365) {
             throw new IllegalArgumentException("재수리 판정 기간은 1일부터 365일 사이여야 합니다.");
         }
-        technicianId = normalize(technicianId);
-        customerId = normalize(customerId);
-        productId = normalize(productId);
+        requirePositive(technicianId, "기사 ID");
+        requirePositive(customerId, "고객 ID");
+        requirePositive(productId, "제품 ID");
     }
 
     public static StatisticsQuery defaults(LocalDate today) {
         return new StatisticsQuery(today.minusDays(29), today, null, null, null, null, 30);
     }
 
-    private static String normalize(String value) {
-        return value == null || value.isBlank() ? null : value.trim();
+    private static void requirePositive(Long value, String name) {
+        if (value != null && value < 1) {
+            throw new IllegalArgumentException(name + "는 1 이상이어야 합니다.");
+        }
     }
 
     public enum RequestStatus {
