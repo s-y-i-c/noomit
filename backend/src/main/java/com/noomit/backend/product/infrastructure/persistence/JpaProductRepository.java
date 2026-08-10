@@ -1,12 +1,16 @@
 package com.noomit.backend.product.infrastructure.persistence;
 
+import java.util.List;
 import java.util.Optional;
+import com.noomit.backend.product.application.ProductPage;
 import com.noomit.backend.product.application.ProductRepository;
 import com.noomit.backend.product.domain.Product;
 import com.noomit.backend.shared.error.BusinessException;
 import com.noomit.backend.shared.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -21,6 +25,15 @@ class JpaProductRepository implements ProductRepository {
     }
 
     @Override
+    public ProductPage search(String keyword, Long categoryId, Long subCategoryId, Product.Status status,
+            Pageable pageable) {
+        String verifiedKeyword = keyword == null ? "" : keyword.toLowerCase();
+        Page<ProductEntity> result = products.search(verifiedKeyword, categoryId, subCategoryId, status, pageable);
+        List<Product> found = result.stream().map(ProductEntity::toDomain).toList();
+        return new ProductPage(found, pageable.getPageNumber(), result.getTotalElements(), result.getTotalPages());
+    }
+
+    @Override
     public Product insert(long subCategoryId, String modelName, String modelCode, String memo) {
         SubCategoryEntity subCategory = subCategories.findById(subCategoryId)
                 .orElseThrow(() -> new BusinessException(
@@ -32,5 +45,13 @@ class JpaProductRepository implements ProductRepository {
             throw new BusinessException(
                     ErrorCode.PRODUCT_MODEL_CODE_ALREADY_EXISTS, "이미 등록된 모델코드입니다.");
         }
+    }
+
+    @Override
+    public Product changeStatus(long id, Product.Status status) {
+        ProductEntity entity = products.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND, "제품을 찾을 수 없습니다."));
+        entity.changeStatus(status);
+        return entity.toDomain();
     }
 }

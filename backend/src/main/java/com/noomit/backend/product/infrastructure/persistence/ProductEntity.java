@@ -6,7 +6,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
@@ -14,7 +13,6 @@ import java.time.OffsetDateTime;
 @Entity
 @Getter
 @Table(name = "product")
-@SQLRestriction("deleted_at IS NULL")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProductEntity {
     @Id
@@ -39,8 +37,9 @@ public class ProductEntity {
     @Column(name = "memo")
     private String memo;
 
-    @Column(name = "deleted_at")
-    private OffsetDateTime deletedAt;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private Product.Status status;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -59,6 +58,7 @@ public class ProductEntity {
         product.modelName = modelName;
         product.modelCode = modelCode;
         product.memo = memo;
+        product.status = Product.Status.ACTIVE;
         return product;
     }
 
@@ -68,8 +68,12 @@ public class ProductEntity {
         this.category = subCategory.getCategory();
     }
 
+    // 관리자가 판매중/단종 상태만 바꿀 때 쓴다.
+    public void changeStatus(Product.Status status) {
+        this.status = status;
+    }
+
     public Product toDomain() {
-        return new Product(id, category.getId(), subCategory.getId(), modelName, modelCode, memo, createdAt);
+        return new Product(id, category.getId(), subCategory.getId(), modelName, modelCode, memo, status, createdAt);
     }
 }
-
