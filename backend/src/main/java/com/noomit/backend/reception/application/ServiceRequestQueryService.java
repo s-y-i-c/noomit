@@ -76,6 +76,7 @@ public class ServiceRequestQueryService {
                 customer.address(),
                 customer.detailAddress(),
                 request.productId(),
+                request.selectedSubCategoryId(),
                 modelName,
                 subCategoryName,
                 request.symptom(),

@@ -14,6 +14,7 @@ public record ServiceRequestDetail(
         String address,
         String detailAddress,
         Long productId,
+        Long selectedSubCategoryId,
         String modelName,
         String subCategoryName,
         String symptom,
