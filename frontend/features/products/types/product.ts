@@ -9,6 +9,8 @@ export interface SubCategory {
   name: string;
 }
 
+export type ProductStatus = "ACTIVE" | "INACTIVE";
+
 export interface Product {
   id: string;
   categoryId: number;
@@ -16,6 +18,7 @@ export interface Product {
   modelName: string;
   modelCode: string;
   memo: string;
+  status: ProductStatus;
 }
 
 export interface RegisterProductRequest {
@@ -23,4 +26,21 @@ export interface RegisterProductRequest {
   modelName: string;
   modelCode: string;
   memo: string;
+}
+
+export interface ProductFilters {
+  keyword: string;
+  categoryId: string;
+  subCategoryId: string;
+  status: ProductStatus | "";
+  page: number;
+  size: number;
+  sort: string;
+}
+
+export interface ProductPageData {
+  products: Product[];
+  page: number;
+  totalElements: number;
+  totalPages: number;
 }

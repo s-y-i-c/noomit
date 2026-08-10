@@ -32,7 +32,13 @@ export function AdminSidebar({
   navItems,
 }: AdminSidebarProps) {
   const pathname = usePathname();
-  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+  // href가 서로 다른 nav 항목의 prefix인 경우(예: /technicians, /technicians/products)
+  // 가장 구체적인(긴) 항목 하나만 활성화한다.
+  const bestMatchHref = navItems
+    .map((item) => item.href)
+    .filter((href) => pathname === href || pathname.startsWith(`${href}/`))
+    .sort((a, b) => b.length - a.length)[0];
+  const isActive = (href: string) => href === bestMatchHref;
 
   return (
     <>
