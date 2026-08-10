@@ -55,6 +55,13 @@ const serviceRequestApi = baseApi.injectEndpoints({
         { type: "ServiceRequest", id: "LIST" },
       ],
     }),
+    updateServiceRequest: build.mutation<ServiceRequestCreateResponse, { id: string; request: CreateServiceRequestRequest }>({
+      queryFn: ({ id, request }, api) => queryResult(serviceRequestService.updateServiceRequest(id, request, api.signal)),
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: "ServiceRequest", id },
+        { type: "ServiceRequest", id: "LIST" },
+      ],
+    }),
   }),
 });
 
@@ -65,4 +72,5 @@ export const {
   useGetServiceRequestDetailQuery,
   useCancelServiceRequestMutation,
   useReassignServiceRequestMutation,
+  useUpdateServiceRequestMutation,
 } = serviceRequestApi;
