@@ -22,6 +22,8 @@ class ReceptionStatisticsAdapterTest {
                 Clock.systemUTC());
 
         assertThat(adapter.connected()).isFalse();
-        assertThat(adapter.read(StatisticsQuery.defaults(LocalDate.of(2026, 8, 10)))).isEmpty();
+        LocalDate today = LocalDate.of(2026, 8, 10);
+        assertThat(adapter.read(new StatisticsQuery(
+                today.minusDays(29), today, null, null, null, null, 30))).isEmpty();
     }
 }

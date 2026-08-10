@@ -43,7 +43,7 @@ public class StatisticsDashboardService {
         List<ReceptionSnapshot> allReceptions = List.copyOf(receptionReader.read(query));
         Set<Long> serviceRequestIds = ids(allReceptions, ReceptionSnapshot::serviceRequestId);
         Map<Long, RepairSnapshot> repairs = repairReader.readRepairs(serviceRequestIds).stream()
-                .collect(Collectors.toMap(RepairSnapshot::serviceRequestId, identity(), (left, right) -> left));
+                .collect(Collectors.toMap(RepairSnapshot::serviceRequestId, identity()));
 
         List<ReceptionSnapshot> receptions = allReceptions.stream()
                 .filter(item -> query.status() == null
@@ -51,10 +51,10 @@ public class StatisticsDashboardService {
                 .toList();
         Map<Long, String> customers = customerReader.readCustomers(ids(receptions, ReceptionSnapshot::customerId)).stream()
                 .collect(Collectors.toMap(CustomerStatisticsReader.CustomerSnapshot::customerId,
-                        CustomerStatisticsReader.CustomerSnapshot::customerName, (left, right) -> left));
+                        CustomerStatisticsReader.CustomerSnapshot::customerName));
         Map<Long, String> products = productReader.readProducts(ids(receptions, ReceptionSnapshot::productId)).stream()
                 .collect(Collectors.toMap(ProductStatisticsReader.ProductSnapshot::productId,
-                        ProductStatisticsReader.ProductSnapshot::productName, (left, right) -> left));
+                        ProductStatisticsReader.ProductSnapshot::productName));
 
         long received = receptions.size();
         long completed = countByStatus(receptions, repairs, RequestStatus.COMPLETED);
@@ -160,11 +160,8 @@ public class StatisticsDashboardService {
                 case IN_PROGRESS, SUBMITTED -> RequestStatus.IN_PROGRESS;
             };
         }
-        return switch (reception.status()) {
-            case RECEIVED -> RequestStatus.RECEIVED;
-            case ASSIGNED -> RequestStatus.ASSIGNED;
-            case CANCELLED -> RequestStatus.CANCELLED;
-        };
+        return reception.status() == ReceptionStatisticsReader.ReceptionState.RECEIVED
+                ? RequestStatus.RECEIVED : RequestStatus.ASSIGNED;
     }
 
     private long countByStatus(

@@ -32,10 +32,6 @@ public record StatisticsQuery(
         requirePositive(productId, "제품 ID");
     }
 
-    public static StatisticsQuery defaults(LocalDate today) {
-        return new StatisticsQuery(today.minusDays(29), today, null, null, null, null, 30);
-    }
-
     private static void requirePositive(Long value, String name) {
         if (value != null && value < 1) {
             throw new IllegalArgumentException(name + "는 1 이상이어야 합니다.");

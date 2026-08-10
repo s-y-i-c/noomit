@@ -40,10 +40,10 @@ class ReceptionStatisticsAdapter implements ReceptionStatisticsReader {
 
         Map<Long, String> technicianNames = userDirectory.findActiveByIds(records.stream()
                         .map(ReceptionStatisticsSource.ReceptionRecord::technicianId)
-                        .filter(Objects::nonNull)
-                        .distinct()
-                        .toList()).stream()
-                .collect(Collectors.toMap(UserRef::id, UserRef::name, (left, right) -> left));
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList()).stream()
+                .collect(Collectors.toMap(UserRef::id, UserRef::name));
         return records.stream().map(item -> new ReceptionSnapshot(
                 item.serviceRequestId(),
                 item.customerId(),
