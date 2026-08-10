@@ -1,10 +1,13 @@
 package com.noomit.backend.product.infrastructure.persistence;
 
+import com.noomit.backend.product.domain.Product;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
 
@@ -39,9 +42,11 @@ public class ProductEntity {
     @Column(name = "deleted_at")
     private OffsetDateTime deletedAt;
 
+    @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private OffsetDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
 
@@ -63,5 +68,8 @@ public class ProductEntity {
         this.category = subCategory.getCategory();
     }
 
+    public Product toDomain() {
+        return new Product(id, category.getId(), subCategory.getId(), modelName, modelCode, memo, createdAt);
+    }
 }
 

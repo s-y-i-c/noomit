@@ -1,5 +1,6 @@
 package com.noomit.backend.product.infrastructure.persistence;
 
+import com.noomit.backend.product.domain.SubCategory;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -21,4 +22,8 @@ public class SubCategoryEntity {
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    public SubCategory toDomain() {
+        return new SubCategory(id, category.getId(), name);
+    }
 }
