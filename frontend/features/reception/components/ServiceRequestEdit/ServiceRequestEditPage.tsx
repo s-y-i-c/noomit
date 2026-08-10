@@ -4,7 +4,7 @@ import { useGetSubCategoriesQuery } from "@/features/products/api/productsApi";
 import { useGetServiceRequestDetailQuery } from "../../api/serviceRequestApi";
 import type { ProductFieldsValue } from "../ServiceRequestForm/productFieldsUtils";
 import { ServiceRequestEditForm } from "./ServiceRequestEditForm";
-import styles from "../ServiceRequestCreateForm.module.css";
+import styles from "../ServiceRequestCreate/ServiceRequestCreateForm.module.css";
 
 interface ServiceRequestEditPageProps {
   id: string;

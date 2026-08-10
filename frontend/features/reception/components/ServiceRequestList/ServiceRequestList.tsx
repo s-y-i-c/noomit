@@ -3,11 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Inbox, Plus, RefreshCw } from "lucide-react";
-import { useGetServiceRequestsQuery } from "../api/serviceRequestApi";
-import type { ServiceRequestFilters, ServiceRequestStatus } from "../types/serviceRequest";
+import { useGetServiceRequestsQuery } from "../../api/serviceRequestApi";
+import type { ServiceRequestFilters, ServiceRequestStatus } from "../../types/serviceRequest";
 import { Dropdown } from "./Dropdown";
 import { Pagination } from "./Pagination";
-import { ServiceRequestTable } from "./ServiceRequestList/ServiceRequestTable";
+import { ServiceRequestTable } from "./ServiceRequestTable";
 import styles from "./ServiceRequestList.module.css";
 
 const PAGE_SIZE = 15;

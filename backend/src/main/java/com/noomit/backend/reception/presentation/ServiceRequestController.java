@@ -18,6 +18,7 @@ import com.noomit.backend.shared.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +32,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 class ServiceRequestController {
     private final ServiceRequestService serviceRequestService;
+
+    @GetMapping("/base-fee")
+    ApiResponse<BaseFeeResponse> getBaseFee() {
+        return ApiResponse.success(new BaseFeeResponse(serviceRequestService.getBaseFeePolicy()));
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -93,6 +99,8 @@ class ServiceRequestController {
     private Long parseOptionalId(String value) {
         return (value == null || value.isBlank()) ? null : parseId(value);
     }
+
+    record BaseFeeResponse(int baseFee) {}
 
     record CreateRequest(
             String customerId,

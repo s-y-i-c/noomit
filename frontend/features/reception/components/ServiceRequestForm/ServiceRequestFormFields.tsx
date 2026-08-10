@@ -1,10 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { CustomerSelectorPlaceholder } from "../ServiceRequestEdit/CustomerSelectorPlaceholder";
+import { CustomerSelectorPlaceholder } from "./CustomerSelectorPlaceholder";
 import { ProductFields } from "./ProductFields";
 import type { ProductFieldsValue } from "./productFieldsUtils";
-import styles from "../ServiceRequestCreateForm.module.css";
+import styles from "../ServiceRequestCreate/ServiceRequestCreateForm.module.css";
 
 export interface ServiceRequestFormValues {
   customerId: string;

@@ -7,7 +7,7 @@ import { queryErrorMessage } from "@/features/store/api/queryError";
 import { useUpdateServiceRequestMutation } from "../../api/serviceRequestApi";
 import { isProductFieldsValid, toProductSelection } from "../ServiceRequestForm/productFieldsUtils";
 import { ServiceRequestFormFields, type ServiceRequestFormValues } from "../ServiceRequestForm/ServiceRequestFormFields";
-import styles from "../ServiceRequestCreateForm.module.css";
+import styles from "../ServiceRequestCreate/ServiceRequestCreateForm.module.css";
 
 interface ServiceRequestEditFormProps {
   serviceRequestId: string;

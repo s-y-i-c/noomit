@@ -4,10 +4,10 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { FilePlus2 } from "lucide-react";
 import { queryErrorMessage } from "@/features/store/api/queryError";
-import { useCreateServiceRequestMutation } from "../../api/serviceRequestApi";
+import { useCreateServiceRequestMutation, useGetBaseFeeQuery } from "../../api/serviceRequestApi";
 import { emptyProductFieldsValue, isProductFieldsValid, toProductSelection } from "../ServiceRequestForm/productFieldsUtils";
 import { ServiceRequestFormFields, type ServiceRequestFormValues } from "../ServiceRequestForm/ServiceRequestFormFields";
-import styles from "../ServiceRequestCreateForm.module.css";
+import styles from "./ServiceRequestCreateForm.module.css";
 
 function initialForm(): ServiceRequestFormValues {
   return { customerId: "", product: emptyProductFieldsValue(), symptom: "", remarks: "" };
@@ -17,6 +17,7 @@ export function ServiceRequestCreateForm() {
   const router = useRouter();
   const [form, setForm] = useState(initialForm);
   const [createServiceRequest, createState] = useCreateServiceRequestMutation();
+  const { data: baseFee } = useGetBaseFeeQuery();
 
   const submitErrorMessage = createState.isError
     ? queryErrorMessage(createState.error, "접수를 생성하지 못했습니다.")
@@ -57,7 +58,7 @@ export function ServiceRequestCreateForm() {
         <ServiceRequestFormFields
           form={form}
           onChange={(patch) => setForm((current) => ({ ...current, ...patch }))}
-          baseFeeContent={<p className={styles.hint}>출장비는 접수 완료 후 확인됩니다.</p>}
+          baseFeeContent={<p className={styles.hint}>{baseFee ? `${baseFee.baseFee.toLocaleString("ko-KR")}원` : "-"}</p>}
         />
 
         {submitErrorMessage ? <p className={styles.error}>{submitErrorMessage}</p> : null}

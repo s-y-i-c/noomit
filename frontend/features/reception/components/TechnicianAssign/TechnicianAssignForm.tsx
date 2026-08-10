@@ -4,13 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarDays } from "lucide-react";
 import { queryErrorMessage } from "@/features/store/api/queryError";
-import { useAssignmentSubmit } from "../hooks/useAssignmentSubmit";
+import { useAssignmentSubmit } from "../../hooks/useAssignmentSubmit";
+import { useGetServiceRequestDetailQuery } from "../../api/serviceRequestApi";
 import {
   useGetAvailabilitySlotsQuery,
   useGetAvailableDatesQuery,
   useGetAvailableTechniciansQuery,
-} from "../api/technicianAvailabilityApi";
-import type { AssignServiceRequestResponse, AvailabilityTimeSlot, AvailableTechnicianResponse } from "../types/serviceRequest";
+} from "../../api/technicianAvailabilityApi";
+import type { AssignServiceRequestResponse, AvailabilityTimeSlot, AvailableTechnicianResponse } from "../../types/serviceRequest";
 import { AssignmentCompletePanel } from "./AssignmentCompletePanel";
 import { DateSelector } from "./DateSelector";
 import { TimeSlotSelector } from "./TimeSlotSelector";
@@ -28,6 +29,8 @@ interface TechnicianAssignFormProps {
 export function TechnicianAssignForm({ serviceRequestId }: TechnicianAssignFormProps) {
   const router = useRouter();
   const { requestNumber, actionLabel, isSubmitting, errorMessage: assignErrorMessage, submit } = useAssignmentSubmit(serviceRequestId);
+  const { data: serviceRequest } = useGetServiceRequestDetailQuery(serviceRequestId);
+  const baseFee = serviceRequest?.baseFee ?? null;
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<AvailabilityTimeSlot | null>(null);
@@ -70,6 +73,7 @@ export function TechnicianAssignForm({ serviceRequestId }: TechnicianAssignFormP
       <AssignmentCompletePanel
         result={assignResult}
         requestNumber={requestNumber}
+        baseFee={baseFee}
         title={`기사 ${actionLabel}이 완료됐습니다`}
         onConfirm={() => router.push("/counselor")}
       />
@@ -85,6 +89,7 @@ export function TechnicianAssignForm({ serviceRequestId }: TechnicianAssignFormP
           <p>방문 날짜와 시간을 선택하고 담당 기사를 {actionLabel}합니다.</p>
         </div>
         {requestNumber ? <span className={styles.requestNumber}>접수번호 {requestNumber}</span> : null}
+        {baseFee !== null ? <span className={styles.requestNumber}>출장비 {baseFee.toLocaleString("ko-KR")}원</span> : null}
       </header>
 
       <article className={styles.panel}>
