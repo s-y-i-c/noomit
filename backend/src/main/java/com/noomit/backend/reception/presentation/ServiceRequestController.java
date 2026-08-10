@@ -10,6 +10,7 @@ import com.noomit.backend.reception.application.CancellationResult;
 import com.noomit.backend.reception.application.CreateServiceRequestCommand;
 import com.noomit.backend.reception.application.ReassignServiceRequestCommand;
 import com.noomit.backend.reception.application.ServiceRequestService;
+import com.noomit.backend.reception.application.UpdateServiceRequestCommand;
 import com.noomit.backend.reception.domain.ServiceRequest;
 import com.noomit.backend.shared.ApiResponse;
 import com.noomit.backend.shared.error.BusinessException;
@@ -40,6 +41,14 @@ class ServiceRequestController {
                 parseId(request.customerId()), parseId(request.productId()), receptionistId,
                 request.symptom(), request.remarks()));
         return ApiResponse.success("접수를 생성했습니다.", ServiceRequestResponse.from(created));
+    }
+
+    @PatchMapping("/{id}")
+    ApiResponse<ServiceRequestResponse> update(@PathVariable String id, @RequestBody CreateRequest request) {
+        ServiceRequest updated = serviceRequestService.update(new UpdateServiceRequestCommand(
+                parseId(id), parseId(request.customerId()), parseId(request.productId()),
+                request.symptom(), request.remarks()));
+        return ApiResponse.success("접수 정보를 수정했습니다.", ServiceRequestResponse.from(updated));
     }
 
     @PostMapping("/{id}/assign")

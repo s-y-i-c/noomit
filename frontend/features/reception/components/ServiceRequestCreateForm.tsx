@@ -5,11 +5,10 @@ import { useRouter } from "next/navigation";
 import { FilePlus2 } from "lucide-react";
 import { queryErrorMessage } from "@/features/store/api/queryError";
 import { useCreateServiceRequestMutation } from "../api/serviceRequestApi";
-import { CustomerSelectorPlaceholder } from "./CustomerSelectorPlaceholder";
-import { ProductSelectorPlaceholder } from "./ProductSelectorPlaceholder";
+import { ServiceRequestFormFields, type ServiceRequestFormValues } from "./ServiceRequestFormFields";
 import styles from "./ServiceRequestCreateForm.module.css";
 
-function initialForm() {
+function initialForm(): ServiceRequestFormValues {
   return { customerId: "", productId: "", symptom: "", remarks: "" };
 }
 
@@ -54,49 +53,11 @@ export function ServiceRequestCreateForm() {
       </header>
 
       <form className={styles.form} onSubmit={handleSubmit}>
-        <article className={styles.panel}>
-          <h2 className={styles.sectionTitle}>고객 정보</h2>
-          <CustomerSelectorPlaceholder
-            onSelect={(customer) => setForm((current) => ({ ...current, customerId: customer.customerId }))}
-          />
-          {form.customerId ? <p className={styles.selectedHint}>선택된 고객 ID: {form.customerId}</p> : null}
-        </article>
-
-        <article className={styles.panel}>
-          <h2 className={styles.sectionTitle}>제품 정보</h2>
-          <ProductSelectorPlaceholder
-            onSelect={(product) => setForm((current) => ({ ...current, productId: product.productId }))}
-          />
-          {form.productId ? <p className={styles.selectedHint}>선택된 제품 ID: {form.productId}</p> : null}
-        </article>
-
-        <article className={styles.panel}>
-          <h2 className={styles.sectionTitle}>접수 상세 정보</h2>
-          <label className={styles.field}>
-            <span>고장 증상 *</span>
-            <textarea
-              required
-              rows={3}
-              value={form.symptom}
-              onChange={(event) => setForm((current) => ({ ...current, symptom: event.target.value }))}
-              placeholder="고객이 설명한 증상을 입력하세요"
-            />
-          </label>
-          <label className={styles.field}>
-            <span>특이사항</span>
-            <textarea
-              rows={3}
-              value={form.remarks}
-              onChange={(event) => setForm((current) => ({ ...current, remarks: event.target.value }))}
-              placeholder="선택 입력"
-            />
-          </label>
-        </article>
-
-        <article className={styles.panel}>
-          <h2 className={styles.sectionTitle}>출장비 정보</h2>
-          <p className={styles.hint}>출장비는 접수 완료 후 확인됩니다.</p>
-        </article>
+        <ServiceRequestFormFields
+          form={form}
+          onChange={(patch) => setForm((current) => ({ ...current, ...patch }))}
+          baseFeeContent={<p className={styles.hint}>출장비는 접수 완료 후 확인됩니다.</p>}
+        />
 
         {submitErrorMessage ? <p className={styles.error}>{submitErrorMessage}</p> : null}
 

@@ -68,4 +68,9 @@ class ServiceRequestJpaAdapter implements ServiceRequestRepository {
     public int cancel(long id, String reason, Instant cancelledAt) {
         return requestJpaRepository.cancel(id, reason, cancelledAt);
     }
+
+    @Override
+    public int update(long id, long customerId, long productId, String symptom, String remarks) {
+        return requestJpaRepository.update(id, customerId, productId, symptom, remarks);
+    }
 }

@@ -127,6 +127,33 @@ export const serviceRequestService = {
     return body.data;
   },
 
+  /** 접수 정보 수정. PATCH /api/counselor/reception/requests/{id} */
+  async updateServiceRequest(id: string, request: CreateServiceRequestRequest, signal?: AbortSignal): Promise<ServiceRequestCreateResponse> {
+    const csrf = await getCsrfToken(signal);
+    const response = await fetch(`${API_BASE_URL}/api/counselor/reception/requests/${id}`, {
+      method: "PATCH",
+      credentials: "include",
+      cache: "no-store",
+      signal,
+      headers: {
+        "Content-Type": "application/json",
+        [csrf.headerName]: csrf.token,
+      },
+      body: JSON.stringify(request),
+    });
+    const body: unknown = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message = isEnvelope<ServiceRequestCreateResponse>(body) && body.message
+        ? body.message
+        : `접수 정보를 수정하지 못했습니다. (${response.status})`;
+      throw new Error(message);
+    }
+    if (!isEnvelope<ServiceRequestCreateResponse>(body) || !body.success || !body.data) {
+      throw new Error("접수 수정 응답 형식이 올바르지 않습니다.");
+    }
+    return body.data;
+  },
+
   /** 기사 배정. POST /api/counselor/reception/requests/{id}/assign */
   async assignServiceRequest(id: string, request: AssignServiceRequestRequest, signal?: AbortSignal): Promise<AssignServiceRequestResponse> {
     const csrf = await getCsrfToken(signal);

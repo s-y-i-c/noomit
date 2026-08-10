@@ -80,7 +80,7 @@ export function ServiceRequestDetail({ id }: ServiceRequestDetailProps) {
             <p className={styles.requestedAtText}>접수일 {formatDateTime(data.requestedAt)}</p>
             {!isCancelled ? (
               <div className={styles.actionButtons}>
-                <button type="button" className={styles.outlineButton}>
+                <button type="button" className={styles.outlineButton} onClick={() => router.push(`/counselor/reception/${id}/edit`)}>
                   <Pencil size={14} /> 정보 수정
                 </button>
                 <button type="button" className={styles.dangerButton} onClick={() => setShowCancelModal(true)}>

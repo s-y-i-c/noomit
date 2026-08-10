@@ -85,8 +85,10 @@ export interface ReassignServiceRequestRequest {
 export interface ServiceRequestDetail {
   id: string;
   requestNumber: string;
+  customerId: string;
   customerName: string;
   customerPhone: string;
+  productId: string;
   modelName: string;
   symptom: string;
   status: ServiceRequestStatus;

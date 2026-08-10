@@ -57,10 +57,12 @@ public class ServiceRequestQueryService {
         return new ServiceRequestDetail(
                 request.id(),
                 request.requestNumber(),
+                request.customerId(),
                 customer.name(),
                 customer.phoneNumber(),
                 customer.address(),
                 customer.detailAddress(),
+                request.productId(),
                 product.modelName(),
                 request.symptom(),
                 request.status(),
