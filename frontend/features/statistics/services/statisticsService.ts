@@ -24,7 +24,7 @@ export const statisticsService = {
     if (filters.productId) params.set("productId", filters.productId);
     if (filters.status) params.set("status", filters.status);
 
-    const response = await fetch(`${API_BASE_URL}/api/v1/admin/statistics/dashboard?${params}`, {
+    const response = await fetch(`${API_BASE_URL}/api/admin/statistics/dashboard?${params}`, {
       method: "GET",
       credentials: "include",
       cache: "no-store",

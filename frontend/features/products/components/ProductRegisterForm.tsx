@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState, type FormEvent } from "react";
-import { CheckCircle2, PackagePlus } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, CheckCircle2, PackagePlus } from "lucide-react";
 import { useGetCategoriesQuery, useGetSubCategoriesQuery, useRegisterProductMutation } from "../api/productsApi";
 import { queryErrorMessage } from "@/features/store/api/queryError";
 import styles from "./ProductRegisterForm.module.css";
@@ -63,6 +64,9 @@ export function ProductRegisterForm() {
           <h1>제품 등록</h1>
           <p>카테고리와 서브카테고리를 선택하고 모델 정보를 입력해 제품을 등록합니다.</p>
         </div>
+        <Link href="/admin/products" className={styles.backLink}>
+          <ArrowLeft size={15} /> 목록으로
+        </Link>
       </header>
 
       {loadErrorMessage ? <div className={styles.error}>{loadErrorMessage}</div> : null}

@@ -1,5 +1,6 @@
 package com.noomit.backend.statistics.application;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -16,15 +17,15 @@ public record StatisticsDashboard(
     public record Period(LocalDate from, LocalDate to) {}
 
     public record Summary(long receivedCount, long completedCount, long inProgressCount,
-            double completionRate, long averageProcessingMinutes, long medianProcessingMinutes) {}
+            long cancelledCount, double completionRate, BigDecimal totalRepairAmount) {}
 
     public record RepeatRepair(int windowDays, double sameCustomerRate,
             double sameProductRate, double sameTechnicianSameProductRate) {}
 
-    public record TrendPoint(LocalDate date, long receivedCount, long completedCount) {}
+    public record TrendPoint(LocalDate date, long receivedCount) {}
 
     public record TechnicianRow(String technicianId, String technicianName, long assignedCount,
-            long completedCount, double completionRate, long averageProcessingMinutes) {}
+            long completedCount, double completionRate, BigDecimal totalRepairAmount) {}
 
     public record CustomerRow(String customerId, String customerName, long requestCount,
             long completedCount, double repeatRate) {}

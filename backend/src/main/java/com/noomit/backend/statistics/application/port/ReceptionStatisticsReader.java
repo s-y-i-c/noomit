@@ -1,6 +1,6 @@
 package com.noomit.backend.statistics.application.port;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import com.noomit.backend.statistics.application.StatisticsQuery;
 
@@ -13,12 +13,17 @@ public interface ReceptionStatisticsReader {
     }
 
     record ReceptionSnapshot(
-            String requestId,
-            String customerId,
-            String customerProductId,
-            String productId,
-            String technicianId,
+            long serviceRequestId,
+            long customerId,
+            long productId,
+            Long technicianId,
             String technicianName,
-            LocalDateTime receivedAt,
-            StatisticsQuery.RequestStatus status) {}
+            Instant requestedAt,
+            ReceptionState status) {}
+
+    enum ReceptionState {
+        RECEIVED,
+        ASSIGNED,
+        CANCELLED
+    }
 }

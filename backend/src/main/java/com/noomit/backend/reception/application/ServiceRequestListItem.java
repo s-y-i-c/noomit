@@ -7,11 +7,13 @@ import com.noomit.backend.reception.domain.ServiceRequestStatus;
 
 public record ServiceRequestListItem(
         long id,
+        String requestNumber,
         String customerName,
         String customerPhone,
         String modelName,
         String symptom,
         ServiceRequestStatus status,
+        String receptionistName,
         String technicianName,
         LocalDate visitDate,
         LocalTime visitStartTime,

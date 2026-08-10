@@ -34,7 +34,7 @@ public class ServiceRequestService {
         if (command.symptom() == null || command.symptom().isBlank()) {
             throw new BusinessException(ErrorCode.RECEPTION_INVALID_REQUEST, "고장 증상 내용이 필요합니다.");
         }
-        ServiceRequest request = ServiceRequest.create(command.customerId(), command.productId(),
+        ServiceRequest request = ServiceRequest.create(command.customerId(), command.productId(), command.receptionistId(), 
                 command.symptom(), command.remarks(), DEFAULT_BASE_FEE, Instant.now(clock));
         return requestRepository.create(request);
     }

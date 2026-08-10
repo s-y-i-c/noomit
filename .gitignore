@@ -16,5 +16,8 @@ Thumbs.db
 !.env.example
 !.env.prod.example
 
+# 로컬 SSH 키 — 운영 서버/DB 터널용 비밀 키를 커밋하지 않는다.
+.ssh/
+
 # Claude Code — 레포에 올리지 않는다.
 .claude/

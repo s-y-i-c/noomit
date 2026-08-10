@@ -1,0 +1,142 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(0 0 0 / 0.45);
+}
+
+.modal {
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 22px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-card-background);
+  box-shadow: 0 20px 60px rgb(0 0 0 / 0.25);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.header h2 {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.closeButton {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  color: var(--color-text-secondary);
+}
+
+.closeButton:hover {
+  background: var(--color-page-background);
+}
+
+.state {
+  padding: 24px 0;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  text-align: center;
+}
+
+.fields {
+  display: grid;
+  gap: 14px;
+}
+
+.field {
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.field dt {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.field dd {
+  color: var(--color-text-primary);
+  font-size: 13px;
+  word-break: break-all;
+}
+
+.statusButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 72px;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+}
+
+.statusButton:hover {
+  opacity: 0.8;
+}
+
+.statusButton:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.statusButton[data-status="ACTIVE"] {
+  background: color-mix(in srgb, var(--color-success) 11%, transparent);
+  color: var(--color-success);
+}
+
+.statusButton[data-status="INACTIVE"] {
+  background: color-mix(in srgb, var(--color-text-secondary) 14%, transparent);
+  color: var(--color-text-secondary);
+}
+
+.statusBadge {
+  display: inline-flex;
+  justify-content: center;
+  min-width: 44px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.statusBadge[data-status="ACTIVE"] {
+  background: color-mix(in srgb, var(--color-success) 11%, transparent);
+  color: var(--color-success);
+}
+
+.statusBadge[data-status="INACTIVE"] {
+  background: color-mix(in srgb, var(--color-text-secondary) 14%, transparent);
+  color: var(--color-text-secondary);
+}
+
+.spinning {
+  animation: spin 900ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
