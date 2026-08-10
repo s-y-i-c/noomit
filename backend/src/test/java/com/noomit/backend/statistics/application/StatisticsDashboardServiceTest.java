@@ -23,19 +23,19 @@ class StatisticsDashboardServiceTest {
     void aggregatesSnapshotsWithoutOwningAStatisticsDatabase() {
         Instant first = Instant.parse("2026-08-01T00:00:00Z");
         Instant second = Instant.parse("2026-08-10T00:00:00Z");
-        ReceptionStatisticsReader receptions = query -> List.of(
+        ReceptionStatisticsReader receptions = _ -> List.of(
                 new ReceptionStatisticsReader.ReceptionSnapshot(
                         1L, 10L, 20L, 30L, "김기사", first, ReceptionState.ASSIGNED),
                 new ReceptionStatisticsReader.ReceptionSnapshot(
                         2L, 10L, 20L, 30L, "김기사", second, ReceptionState.ASSIGNED));
-        RepairStatisticsReader repairs = requestIds -> List.of(
+        RepairStatisticsReader repairs = _ -> List.of(
                 new RepairStatisticsReader.RepairSnapshot(
                         1L, RepairState.COMPLETED, new BigDecimal("30000")),
                 new RepairStatisticsReader.RepairSnapshot(
                         2L, RepairState.IN_PROGRESS, new BigDecimal("10000")));
-        CustomerStatisticsReader customers = customerIds -> List.of(
+        CustomerStatisticsReader customers = _ -> List.of(
                 new CustomerStatisticsReader.CustomerSnapshot(10L, "홍길동"));
-        ProductStatisticsReader products = productIds -> List.of(
+        ProductStatisticsReader products = _ -> List.of(
                 new ProductStatisticsReader.ProductSnapshot(20L, "냉장고 A"));
 
         StatisticsDashboardService service = new StatisticsDashboardService(
@@ -72,7 +72,7 @@ class StatisticsDashboardServiceTest {
 
     @Test
     void keepsReceptionStatisticsAvailableWhileOptionalDomainsAreDisconnected() {
-        ReceptionStatisticsReader receptions = query -> List.of(
+        ReceptionStatisticsReader receptions = _ -> List.of(
                 new ReceptionStatisticsReader.ReceptionSnapshot(
                         1L, 10L, 20L, 30L, null,
                         Instant.parse("2026-08-01T00:00:00Z"), ReceptionState.ASSIGNED));
