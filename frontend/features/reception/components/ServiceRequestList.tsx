@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Inbox, RefreshCw } from "lucide-react";
+import Link from "next/link";
+import { Inbox, Plus, RefreshCw } from "lucide-react";
 import { useGetServiceRequestsQuery } from "../api/serviceRequestApi";
 import type { ServiceRequestFilters, ServiceRequestStatus } from "../types/serviceRequest";
 import { Dropdown } from "./Dropdown";
@@ -64,6 +65,9 @@ export function ServiceRequestList() {
         <Dropdown label="상태" value={filters.status} options={STATUS_OPTIONS} onChange={changeStatusFilter} />
         <Dropdown label="정렬" value={filters.sort} options={SORT_OPTIONS} onChange={changeSort} />
         {isFetching ? <RefreshCw className={styles.spinning} size={17} /> : null}
+        <Link href="/counselor/reception/new" className={styles.createButton}>
+          <Plus size={15} /> 접수 생성
+        </Link>
       </div>
 
       {errorMessage ? <div className={styles.error}>{errorMessage}</div> : null}
