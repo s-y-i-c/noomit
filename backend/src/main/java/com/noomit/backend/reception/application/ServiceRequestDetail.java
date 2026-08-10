@@ -25,5 +25,6 @@ public record ServiceRequestDetail(
         Instant requestedAt,
         Instant assignedAt,
         Instant cancelledAt,
-        String cancelReason) {
+        String cancelReason,
+        long version) {
 }

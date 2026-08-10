@@ -11,17 +11,18 @@ function toMinutePrefix(time: string): string {
 interface AssignmentCompletePanelProps {
   result: AssignServiceRequestResponse;
   requestNumber: string | null;
+  title?: string;
   onConfirm: () => void;
 }
 
-export function AssignmentCompletePanel({ result, requestNumber, onConfirm }: AssignmentCompletePanelProps) {
+export function AssignmentCompletePanel({ result, requestNumber, title = "기사 배정이 완료됐습니다", onConfirm }: AssignmentCompletePanelProps) {
   return (
     <section className={styles.page}>
       <article className={styles.completePanel}>
         <div className={styles.completeIcon}>
           <CheckCircle2 size={28} />
         </div>
-        <h1>기사 배정이 완료됐습니다</h1>
+        <h1>{title}</h1>
         <dl className={styles.completeSummary}>
           {requestNumber ? (
             <div>

@@ -4,8 +4,12 @@ import { serviceRequestService } from "../services/serviceRequestService";
 import type {
   AssignServiceRequestRequest,
   AssignServiceRequestResponse,
+  CancelServiceRequestRequest,
+  CancelServiceRequestResponse,
   CreateServiceRequestRequest,
+  ReassignServiceRequestRequest,
   ServiceRequestCreateResponse,
+  ServiceRequestDetail,
   ServiceRequestFilters,
   ServiceRequestPageData,
 } from "../types/serviceRequest";
@@ -33,6 +37,24 @@ const serviceRequestApi = baseApi.injectEndpoints({
         { type: "ServiceRequest", id: "LIST" },
       ],
     }),
+    getServiceRequestDetail: build.query<ServiceRequestDetail, string>({
+      queryFn: (id, api) => queryResult(serviceRequestService.getServiceRequestDetail(id, api.signal)),
+      providesTags: (_result, _error, id) => [{ type: "ServiceRequest", id }],
+    }),
+    cancelServiceRequest: build.mutation<CancelServiceRequestResponse, { id: string; request: CancelServiceRequestRequest }>({
+      queryFn: ({ id, request }, api) => queryResult(serviceRequestService.cancelServiceRequest(id, request, api.signal)),
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: "ServiceRequest", id },
+        { type: "ServiceRequest", id: "LIST" },
+      ],
+    }),
+    reassignServiceRequest: build.mutation<AssignServiceRequestResponse, { id: string; request: ReassignServiceRequestRequest }>({
+      queryFn: ({ id, request }, api) => queryResult(serviceRequestService.reassignServiceRequest(id, request, api.signal)),
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: "ServiceRequest", id },
+        { type: "ServiceRequest", id: "LIST" },
+      ],
+    }),
   }),
 });
 
@@ -40,4 +62,7 @@ export const {
   useGetServiceRequestsQuery,
   useCreateServiceRequestMutation,
   useAssignServiceRequestMutation,
+  useGetServiceRequestDetailQuery,
+  useCancelServiceRequestMutation,
+  useReassignServiceRequestMutation,
 } = serviceRequestApi;

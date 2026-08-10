@@ -74,7 +74,8 @@ public class ServiceRequestQueryService {
                 request.requestedAt(),
                 request.assignedAt(),
                 request.cancelledAt(),
-                request.cancelReason());
+                request.cancelReason(),
+                request.version());
     }
 
     public List<MyAssignedRequest> getMyAssignedRequests(long technicianId, LocalDate date) {

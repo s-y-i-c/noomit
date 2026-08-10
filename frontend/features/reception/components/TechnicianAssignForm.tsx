@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { CalendarDays } from "lucide-react";
 import { queryErrorMessage } from "@/features/store/api/queryError";
-import { useAssignServiceRequestMutation } from "../api/serviceRequestApi";
+import { useAssignmentSubmit } from "../hooks/useAssignmentSubmit";
 import {
   useGetAvailabilitySlotsQuery,
   useGetAvailableDatesQuery,
@@ -27,8 +27,7 @@ interface TechnicianAssignFormProps {
 
 export function TechnicianAssignForm({ serviceRequestId }: TechnicianAssignFormProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const requestNumber = searchParams.get("requestNumber");
+  const { requestNumber, actionLabel, isSubmitting, errorMessage: assignErrorMessage, submit } = useAssignmentSubmit(serviceRequestId);
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<AvailabilityTimeSlot | null>(null);
@@ -42,11 +41,8 @@ export function TechnicianAssignForm({ serviceRequestId }: TechnicianAssignFormP
     { skip: !selectedSlot || !selectedDate },
   );
 
-  const [assignServiceRequest, assignState] = useAssignServiceRequestMutation();
-
   const datesErrorMessage = datesError ? queryErrorMessage(datesError, "배정 가능한 날짜를 불러오지 못했습니다.") : null;
   const techniciansErrorMessage = techniciansError ? queryErrorMessage(techniciansError, "가능한 기사 목록을 불러오지 못했습니다.") : null;
-  const assignErrorMessage = assignState.isError ? queryErrorMessage(assignState.error, "기사를 배정하지 못했습니다.") : null;
 
   const handleSelectDate = (date: string) => {
     setSelectedDate(date);
@@ -62,13 +58,10 @@ export function TechnicianAssignForm({ serviceRequestId }: TechnicianAssignFormP
   const handleComplete = async () => {
     if (!selectedTechnician) return;
     try {
-      const result = await assignServiceRequest({
-        id: serviceRequestId,
-        request: { technicianId: selectedTechnician.technicianId, slotId: selectedTechnician.slotId },
-      }).unwrap();
+      const result = await submit(selectedTechnician.technicianId, selectedTechnician.slotId);
       setAssignResult(result);
     } catch {
-      // 에러 메시지는 assignState.error 에서 표시
+      // 에러 메시지는 useAssignmentSubmit 훅에서 표시
     }
   };
 
@@ -77,6 +70,7 @@ export function TechnicianAssignForm({ serviceRequestId }: TechnicianAssignFormP
       <AssignmentCompletePanel
         result={assignResult}
         requestNumber={requestNumber}
+        title={`기사 ${actionLabel}이 완료됐습니다`}
         onConfirm={() => router.push("/counselor")}
       />
     );
@@ -87,8 +81,8 @@ export function TechnicianAssignForm({ serviceRequestId }: TechnicianAssignFormP
       <header className={styles.hero}>
         <div>
           <p className={styles.eyebrow}><CalendarDays size={15} /> Reception</p>
-          <h1>기사 배정</h1>
-          <p>방문 날짜와 시간을 선택하고 담당 기사를 배정합니다.</p>
+          <h1>기사 {actionLabel}</h1>
+          <p>방문 날짜와 시간을 선택하고 담당 기사를 {actionLabel}합니다.</p>
         </div>
         {requestNumber ? <span className={styles.requestNumber}>접수번호 {requestNumber}</span> : null}
       </header>
@@ -143,10 +137,10 @@ export function TechnicianAssignForm({ serviceRequestId }: TechnicianAssignFormP
         <button
           type="button"
           className={styles.completeSubmit}
-          disabled={!selectedTechnician || assignState.isLoading}
+          disabled={!selectedTechnician || isSubmitting}
           onClick={handleComplete}
         >
-          {assignState.isLoading ? "배정 중..." : "배정 완료"}
+          {isSubmitting ? `${actionLabel} 중...` : `${actionLabel} 완료`}
         </button>
       </div>
     </section>

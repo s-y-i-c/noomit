@@ -119,7 +119,8 @@ class ServiceRequestQueryController {
             Instant requestedAt,
             Instant assignedAt,
             Instant cancelledAt,
-            String cancelReason) {
+            String cancelReason,
+            long version) {
         static ServiceRequestDetailResponse from(ServiceRequestDetail detail) {
             return new ServiceRequestDetailResponse(
                     Long.toString(detail.id()),
@@ -141,7 +142,8 @@ class ServiceRequestQueryController {
                     detail.requestedAt(),
                     detail.assignedAt(),
                     detail.cancelledAt(),
-                    detail.cancelReason());
+                    detail.cancelReason(),
+                    detail.version());
         }
     }
 }
