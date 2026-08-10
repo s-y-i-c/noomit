@@ -11,10 +11,18 @@ const productsApi = baseApi.injectEndpoints({
     getSubCategories: build.query<SubCategory[], void>({
       queryFn: (_arg, api) => queryResult(productService.getSubCategories(api.signal)),
     }),
+    searchProducts: build.query<Product[], string>({
+      queryFn: (keyword, api) => queryResult(productService.searchProducts(keyword, api.signal)),
+    }),
     registerProduct: build.mutation<Product, RegisterProductRequest>({
       queryFn: (request, api) => queryResult(productService.registerProduct(request, api.signal)),
     }),
   }),
 });
 
-export const { useGetCategoriesQuery, useGetSubCategoriesQuery, useRegisterProductMutation } = productsApi;
+export const {
+  useGetCategoriesQuery,
+  useGetSubCategoriesQuery,
+  useLazySearchProductsQuery,
+  useRegisterProductMutation,
+} = productsApi;

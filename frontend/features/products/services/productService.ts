@@ -54,6 +54,28 @@ export const productService = {
     return body.data;
   },
 
+  /** 모델명·모델코드 부분 일치 검색. 접수 화면에서 상담사가 모델코드를 몇 글자만 입력해도 후보 목록을 보여주는 데 쓴다. */
+  async searchProducts(keyword: string, signal?: AbortSignal): Promise<Product[]> {
+    const params = new URLSearchParams({ keyword, page: "0", size: "10", sort: "modelName" });
+    const response = await fetch(`${API_BASE_URL}/api/products?${params}`, {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+      signal,
+    });
+    const body: unknown = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message = isEnvelope<{ products: Product[] }>(body) && body.message
+        ? body.message
+        : `제품을 검색하지 못했습니다. (${response.status})`;
+      throw new Error(message);
+    }
+    if (!isEnvelope<{ products: Product[] }>(body) || !body.success || !body.data) {
+      throw new Error("제품 검색 응답 형식이 올바르지 않습니다.");
+    }
+    return body.data.products;
+  },
+
   /** 관리자 전용 제품 등록. POST /api/admin/products — CSRF 보호 대상. */
   async registerProduct(request: RegisterProductRequest, signal?: AbortSignal): Promise<Product> {
     const csrf = await getCsrfToken(signal);
