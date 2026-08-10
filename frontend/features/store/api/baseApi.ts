@@ -9,6 +9,6 @@ import type { QueryError } from "./queryError";
 export const baseApi = createApi({
   reducerPath: "noomitApi",
   baseQuery: fakeBaseQuery<QueryError>(),
-  tagTypes: ["Auth", "Customer", "RepairCase", "Member"],
+  tagTypes: ["Auth", "Customer", "RepairCase", "Member", "ServiceRequest"],
   endpoints: () => ({}),
 });
