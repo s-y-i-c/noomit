@@ -1,0 +1,122 @@
+.page {
+  display: grid;
+  gap: 18px;
+  color: var(--color-text-primary);
+}
+
+.hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 8px 2px;
+}
+
+.hero h1 {
+  margin-top: 4px;
+  font-size: clamp(24px, 4vw, 34px);
+  font-weight: 800;
+  letter-spacing: -1.2px;
+}
+
+.hero > div > p:last-child {
+  margin-top: 7px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.error {
+  border-radius: 14px;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--color-danger) 28%, transparent);
+  background: color-mix(in srgb, var(--color-danger) 8%, transparent);
+  color: var(--color-danger);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.list {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+}
+
+.empty {
+  display: grid;
+  width: 70%;
+  min-height: 160px;
+  place-items: center;
+  border: 1px dashed var(--color-border);
+  border-radius: 16px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+@media (max-width: 600px) {
+  .empty {
+    width: 100%;
+  }
+}
+
+.skeletonRow {
+  width: 70%;
+  height: 65px;
+  border-radius: 14px;
+  background: linear-gradient(
+    90deg,
+    var(--color-card-background) 25%,
+    var(--color-page-background) 37%,
+    var(--color-card-background) 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1400ms ease infinite;
+}
+
+@media (max-width: 600px) {
+  .skeletonRow {
+    width: 100%;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  z-index: 200;
+  padding: 12px 20px;
+  border-radius: 12px;
+  background: var(--color-text-primary);
+  color: var(--color-page-background);
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 25%);
+  transform: translateX(-50%);
+  animation: toastIn 200ms ease;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    align-items: flex-start;
+  }
+}

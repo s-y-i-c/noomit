@@ -1,0 +1,36 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 70%;
+  padding: 17px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-card-background);
+}
+
+@media (max-width: 600px) {
+  .row {
+    width: 100%;
+  }
+}
+
+.time {
+  flex: 0 0 auto;
+  min-width: 96px;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.statusText {
+  flex: 1;
+  min-width: 0;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.statusText[data-dimmed="true"] {
+  color: var(--color-text-secondary);
+}
