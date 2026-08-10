@@ -80,6 +80,7 @@ class ServiceRequestController {
 
     record ServiceRequestResponse(
             String id,
+            String requestNumber,
             String status,
             String symptom,
             String remarks,
@@ -88,6 +89,7 @@ class ServiceRequestController {
         static ServiceRequestResponse from(ServiceRequest r) {
             return new ServiceRequestResponse(
                     Long.toString(r.id()),
+                    r.requestNumber(),
                     r.status().name(),
                     r.symptom(),
                     r.remarks(),

@@ -6,6 +6,7 @@ import java.time.LocalTime;
 
 public record ServiceRequest(
         Long id,
+        String requestNumber,
         long customerId,
         long productId,
         long receptionistId,
@@ -29,7 +30,7 @@ public record ServiceRequest(
     public static ServiceRequest create(long customerId, long productId, long receptionistId, String symptom,
                                          String remarks, int baseFee, Instant requestedAt) {
         return new ServiceRequest(
-                null, customerId, productId, receptionistId, symptom, remarks, baseFee,
+                null, null, customerId, productId, receptionistId, symptom, remarks, baseFee,
                 null, null, null, null, null,
                 ServiceRequestStatus.RECEIVED,
                 requestedAt, null, null, null,
