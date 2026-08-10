@@ -16,4 +16,6 @@ public interface ProductDirectory {
 
     /** 배치 조회. 목록 화면에서 N+1 없이 한 번에 가져오라고 Map으로 돌려준다. 없는 id는 그냥 빠진다. */
     Map<Long, ProductInfo> findByIds(Collection<Long> productIds);
+
+    Map<Long, SubCategoryInfo> findSubCategoriesByIds(Collection<Long> subCategoryIds);
 }
