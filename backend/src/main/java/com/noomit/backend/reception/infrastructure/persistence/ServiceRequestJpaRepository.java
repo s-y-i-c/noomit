@@ -84,6 +84,25 @@ interface ServiceRequestJpaRepository extends JpaRepository<ServiceRequestEntity
                @Param("reason") String reason,
                @Param("cancelledAt") Instant cancelledAt);
 
+    @Modifying(clearAutomatically = true)
+    @Query("""
+            UPDATE ServiceRequestEntity e
+            SET e.customerId = :customerId,
+                e.productId = :productId,
+                e.symptom = :symptom,
+                e.remarks = :remarks
+            WHERE e.id = :id
+                AND e.status IN (
+                    com.noomit.backend.reception.domain.ServiceRequestStatus.RECEIVED,
+                    com.noomit.backend.reception.domain.ServiceRequestStatus.ASSIGNED
+                )
+            """)
+    int update(@Param("id") long id,
+               @Param("customerId") long customerId,
+               @Param("productId") long productId,
+               @Param("symptom") String symptom,
+               @Param("remarks") String remarks);
+
     @Query("""
             SELECT e FROM ServiceRequestEntity e
             WHERE e.status = com.noomit.backend.reception.domain.ServiceRequestStatus.ASSIGNED

@@ -49,4 +49,8 @@ public record ServiceRequest(
     public boolean canCancel() {
         return status == ServiceRequestStatus.RECEIVED || status == ServiceRequestStatus.ASSIGNED;
     }
+
+    public boolean canEdit() {
+        return status == ServiceRequestStatus.RECEIVED || status == ServiceRequestStatus.ASSIGNED;
+    }
 }

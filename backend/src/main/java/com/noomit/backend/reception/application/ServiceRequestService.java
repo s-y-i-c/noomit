@@ -132,6 +132,26 @@ public class ServiceRequestService {
         return new CancellationResult(id, ServiceRequestStatus.CANCELLED, reason, cancelledAt);
     }
 
+    @Transactional
+    public ServiceRequest update(UpdateServiceRequestCommand command) {
+        if (command.symptom() == null || command.symptom().isBlank()) {
+            throw new BusinessException(ErrorCode.RECEPTION_INVALID_REQUEST, "고장 증상 내용이 필요합니다.");
+        }
+
+        ServiceRequest request = findRequest(command.id());
+        if (!request.canEdit()) {
+            throw new BusinessException(ErrorCode.RECEPTION_INVALID_STATUS, "취소된 접수는 수정할 수 없습니다.");
+        }
+
+        int updated = requestRepository.update(command.id(), command.customerId(), command.productId(),
+                command.symptom(), command.remarks());
+        if (updated == 0) {
+            throw new BusinessException(ErrorCode.RECEPTION_INVALID_STATUS, "취소된 접수는 수정할 수 없습니다.");
+        }
+
+        return findRequest(command.id());
+    }
+
     private UserRef findTechnician(long technicianId) {
         return userDirectory.findActiveByIds(List.of(technicianId)).stream()
                 .findFirst()
