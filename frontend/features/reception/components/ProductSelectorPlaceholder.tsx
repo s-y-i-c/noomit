@@ -4,12 +4,13 @@ import { useState } from "react";
 import styles from "./SelectorPlaceholder.module.css";
 
 interface ProductSelectorPlaceholderProps {
+  initialValue?: string;
   onSelect: (product: { productId: string }) => void;
 }
 
 // TODO: ProductSelector(검색/선택 UI) 컴포넌트 구현 후 교체
-export function ProductSelectorPlaceholder({ onSelect }: ProductSelectorPlaceholderProps) {
-  const [tempId, setTempId] = useState("");
+export function ProductSelectorPlaceholder({ initialValue = "", onSelect }: ProductSelectorPlaceholderProps) {
+  const [tempId, setTempId] = useState(initialValue);
 
   const handleChange = (value: string) => {
     setTempId(value);
