@@ -74,3 +74,45 @@ export interface AssignServiceRequestResponse {
   visitStartTime: string;
   visitEndTime: string;
 }
+
+export interface ReassignServiceRequestRequest {
+    technicianId: string;
+    slotId: string;
+    version: number;
+}
+
+
+export interface ServiceRequestDetail {
+  id: string;
+  requestNumber: string;
+  customerName: string;
+  customerPhone: string;
+  modelName: string;
+  symptom: string;
+  status: ServiceRequestStatus;
+  receptionistName: string | null;
+  technicianName: string | null;
+  visitDate: string | null;
+  visitStartTime: string | null;
+  visitEndTime: string | null;
+  address: string;
+  detailAddress: string;
+  remarks: string;
+  baseFee: number;
+  requestedAt: string;
+  assignedAt: string | null;
+  cancelledAt: string | null;
+  cancelReason: string | null;
+  version: number;
+}
+
+export interface CancelServiceRequestRequest {
+  cancelReason: string;
+}
+
+export interface CancelServiceRequestResponse {
+  id: string;
+  status: ServiceRequestStatus;
+  cancelReason: string | null;
+  cancelledAt: string;
+}
