@@ -102,8 +102,10 @@ class ServiceRequestQueryController {
     record ServiceRequestDetailResponse(
             String id,
             String requestNumber,
+            String customerId,
             String customerName,
             String customerPhone,
+            String productId,
             String modelName,
             String symptom,
             String status,
@@ -125,8 +127,10 @@ class ServiceRequestQueryController {
             return new ServiceRequestDetailResponse(
                     Long.toString(detail.id()),
                     detail.requestNumber(),
+                    Long.toString(detail.customerId()),
                     detail.customerName(),
                     detail.customerPhone(),
+                    Long.toString(detail.productId()),
                     detail.modelName(),
                     detail.symptom(),
                     detail.status().name(),

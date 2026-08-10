@@ -8,10 +8,12 @@ import com.noomit.backend.reception.domain.ServiceRequestStatus;
 public record ServiceRequestDetail(
         long id,
         String requestNumber,
+        long customerId,
         String customerName,
         String customerPhone,
         String address,
         String detailAddress,
+        long productId,
         String modelName,
         String symptom,
         ServiceRequestStatus status,
