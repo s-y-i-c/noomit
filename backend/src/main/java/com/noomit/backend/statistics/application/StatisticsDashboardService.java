@@ -2,6 +2,8 @@ package com.noomit.backend.statistics.application;
 
 import static java.util.function.Function.identity;
 
+import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 import com.noomit.backend.statistics.application.StatisticsDashboard.CustomerRow;
 import com.noomit.backend.statistics.application.StatisticsDashboard.ProductRow;
 import com.noomit.backend.statistics.application.StatisticsDashboard.TechnicianRow;
+import com.noomit.backend.statistics.application.StatisticsQuery.RequestStatus;
 import com.noomit.backend.statistics.application.port.CustomerStatisticsReader;
 import com.noomit.backend.statistics.application.port.ProductStatisticsReader;
 import com.noomit.backend.statistics.application.port.ReceptionStatisticsReader;
@@ -34,39 +37,46 @@ public class StatisticsDashboardService {
     private final RepairStatisticsReader repairReader;
     private final CustomerStatisticsReader customerReader;
     private final ProductStatisticsReader productReader;
+    private final Clock clock;
 
     public StatisticsDashboard getDashboard(StatisticsQuery query) {
-        List<ReceptionSnapshot> receptions = List.copyOf(receptionReader.read(query));
-        Set<String> requestIds = ids(receptions, ReceptionSnapshot::requestId);
-        Map<String, RepairSnapshot> repairs = repairReader.readRepairs(requestIds).stream()
-                .collect(Collectors.toMap(RepairSnapshot::requestId, identity(), (left, right) -> left));
-        Map<String, String> customers = customerReader.readCustomers(ids(receptions, ReceptionSnapshot::customerId)).stream()
-                .collect(Collectors.toMap(CustomerStatisticsReader.CustomerSnapshot::customerId,
-                        CustomerStatisticsReader.CustomerSnapshot::customerName, (left, right) -> left));
-        Map<String, String> products = productReader.readProducts(ids(receptions, ReceptionSnapshot::productId)).stream()
-                .collect(Collectors.toMap(ProductStatisticsReader.ProductSnapshot::productId,
-                        ProductStatisticsReader.ProductSnapshot::productName, (left, right) -> left));
+        List<ReceptionSnapshot> allReceptions = List.copyOf(receptionReader.read(query));
+        Set<Long> serviceRequestIds = ids(allReceptions, ReceptionSnapshot::serviceRequestId);
+        Map<Long, RepairSnapshot> repairs = repairReader.readRepairs(serviceRequestIds).stream()
+                .collect(Collectors.toMap(RepairSnapshot::serviceRequestId, identity()));
 
-        List<Long> processingMinutes = receptions.stream()
-                .map(reception -> processingMinutes(reception, repairs.get(reception.requestId())))
-                .filter(Objects::nonNull)
-                .sorted()
+        List<ReceptionSnapshot> receptions = allReceptions.stream()
+                .filter(item -> query.status() == null
+                        || query.status() == currentStatus(item, repairs.get(item.serviceRequestId())))
                 .toList();
-        long completed = processingMinutes.size();
+        Map<Long, String> customers = customerReader.readCustomers(ids(receptions, ReceptionSnapshot::customerId)).stream()
+                .collect(Collectors.toMap(CustomerStatisticsReader.CustomerSnapshot::customerId,
+                        CustomerStatisticsReader.CustomerSnapshot::customerName));
+        Map<Long, String> products = productReader.readProducts(ids(receptions, ReceptionSnapshot::productId)).stream()
+                .collect(Collectors.toMap(ProductStatisticsReader.ProductSnapshot::productId,
+                        ProductStatisticsReader.ProductSnapshot::productName));
+
         long received = receptions.size();
+        long completed = countByStatus(receptions, repairs, RequestStatus.COMPLETED);
+        long inProgress = countByStatus(receptions, repairs, RequestStatus.IN_PROGRESS);
+        long cancelled = countByStatus(receptions, repairs, RequestStatus.CANCELLED);
         StatisticsDashboard.Summary summary = new StatisticsDashboard.Summary(
                 received,
                 completed,
-                Math.max(0, received - completed),
+                inProgress,
+                cancelled,
                 rate(completed, received),
-                average(processingMinutes),
-                median(processingMinutes));
+                totalRepairAmount(receptions, repairs));
 
         StatisticsDashboard.RepeatRepair repeatRepair = new StatisticsDashboard.RepeatRepair(
                 query.repeatWindowDays(),
                 repeatRate(receptions, ReceptionSnapshot::customerId, query.repeatWindowDays()),
-                repeatRate(receptions, ReceptionSnapshot::customerProductId, query.repeatWindowDays()),
-                repeatRate(receptions, item -> join(item.technicianId(), item.productId()), query.repeatWindowDays()));
+                repeatRate(receptions,
+                        item -> new RepeatKey(item.customerId(), item.productId()), query.repeatWindowDays()),
+                repeatRate(receptions,
+                        item -> item.technicianId() == null
+                                ? null : new RepeatKey(item.technicianId(), item.productId()),
+                        query.repeatWindowDays()));
 
         boolean connected = receptionReader.connected() && repairReader.connected()
                 && customerReader.connected() && productReader.connected();
@@ -74,124 +84,146 @@ public class StatisticsDashboardService {
                 new StatisticsDashboard.Period(query.from(), query.to()),
                 summary,
                 repeatRepair,
-                trends(query, receptions, repairs),
+                trends(query, receptions),
                 technicianRows(receptions, repairs),
                 customerRows(receptions, repairs, customers, query.repeatWindowDays()),
                 productRows(receptions, repairs, products, query.repeatWindowDays()),
                 connected ? StatisticsDashboard.Integration.ready() : StatisticsDashboard.Integration.waiting());
     }
 
-    private List<StatisticsDashboard.TrendPoint> trends(StatisticsQuery query,
-            List<ReceptionSnapshot> receptions, Map<String, RepairSnapshot> repairs) {
+    private List<StatisticsDashboard.TrendPoint> trends(
+            StatisticsQuery query, List<ReceptionSnapshot> receptions) {
         Map<LocalDate, Long> received = receptions.stream().collect(Collectors.groupingBy(
-                item -> item.receivedAt().toLocalDate(), Collectors.counting()));
-        Map<LocalDate, Long> completed = repairs.values().stream()
-                .filter(item -> item.completedAt() != null)
-                .filter(item -> !item.completedAt().toLocalDate().isBefore(query.from())
-                        && !item.completedAt().toLocalDate().isAfter(query.to()))
-                .collect(Collectors.groupingBy(item -> item.completedAt().toLocalDate(), Collectors.counting()));
+                item -> item.requestedAt().atZone(clock.getZone()).toLocalDate(), Collectors.counting()));
         return query.from().datesUntil(query.to().plusDays(1))
-                .map(date -> new StatisticsDashboard.TrendPoint(
-                        date, received.getOrDefault(date, 0L), completed.getOrDefault(date, 0L)))
+                .map(date -> new StatisticsDashboard.TrendPoint(date, received.getOrDefault(date, 0L)))
                 .toList();
     }
 
-    private List<TechnicianRow> technicianRows(List<ReceptionSnapshot> receptions,
-            Map<String, RepairSnapshot> repairs) {
-        Map<String, List<ReceptionSnapshot>> groups = group(receptions, ReceptionSnapshot::technicianId);
+    private List<TechnicianRow> technicianRows(
+            List<ReceptionSnapshot> receptions, Map<Long, RepairSnapshot> repairs) {
+        Map<Long, List<ReceptionSnapshot>> groups = group(receptions, ReceptionSnapshot::technicianId);
         return groups.entrySet().stream().map(entry -> {
             List<ReceptionSnapshot> items = entry.getValue();
-            List<Long> minutes = processingMinutes(items, repairs);
+            long completed = countByStatus(items, repairs, RequestStatus.COMPLETED);
             String name = items.stream().map(ReceptionSnapshot::technicianName)
-                    .filter(value -> value != null && !value.isBlank()).findFirst().orElse(entry.getKey());
-            return new TechnicianRow(entry.getKey(), name, items.size(), minutes.size(),
-                    rate(minutes.size(), items.size()), average(minutes));
+                    .filter(value -> value != null && !value.isBlank())
+                    .findFirst().orElse(Long.toString(entry.getKey()));
+            return new TechnicianRow(
+                    Long.toString(entry.getKey()),
+                    name,
+                    items.size(),
+                    completed,
+                    rate(completed, items.size()),
+                    totalRepairAmount(items, repairs));
         }).sorted(Comparator.comparingLong(TechnicianRow::assignedCount).reversed()).toList();
     }
 
-    private List<CustomerRow> customerRows(List<ReceptionSnapshot> receptions,
-            Map<String, RepairSnapshot> repairs, Map<String, String> names, int windowDays) {
-        Map<String, List<ReceptionSnapshot>> groups = group(receptions, ReceptionSnapshot::customerId);
+    private List<CustomerRow> customerRows(
+            List<ReceptionSnapshot> receptions,
+            Map<Long, RepairSnapshot> repairs,
+            Map<Long, String> names,
+            int windowDays) {
+        Map<Long, List<ReceptionSnapshot>> groups = group(receptions, ReceptionSnapshot::customerId);
         return groups.entrySet().stream().map(entry -> new CustomerRow(
-                entry.getKey(), names.getOrDefault(entry.getKey(), entry.getKey()), entry.getValue().size(),
-                processingMinutes(entry.getValue(), repairs).size(),
+                Long.toString(entry.getKey()),
+                names.getOrDefault(entry.getKey(), Long.toString(entry.getKey())),
+                entry.getValue().size(),
+                countByStatus(entry.getValue(), repairs, RequestStatus.COMPLETED),
                 repeatRate(entry.getValue(), ReceptionSnapshot::customerId, windowDays)))
                 .sorted(Comparator.comparingLong(CustomerRow::requestCount).reversed()).toList();
     }
 
-    private List<ProductRow> productRows(List<ReceptionSnapshot> receptions,
-            Map<String, RepairSnapshot> repairs, Map<String, String> names, int windowDays) {
-        Map<String, List<ReceptionSnapshot>> groups = group(receptions, ReceptionSnapshot::productId);
+    private List<ProductRow> productRows(
+            List<ReceptionSnapshot> receptions,
+            Map<Long, RepairSnapshot> repairs,
+            Map<Long, String> names,
+            int windowDays) {
+        Map<Long, List<ReceptionSnapshot>> groups = group(receptions, ReceptionSnapshot::productId);
         return groups.entrySet().stream().map(entry -> new ProductRow(
-                entry.getKey(), names.getOrDefault(entry.getKey(), entry.getKey()), entry.getValue().size(),
-                processingMinutes(entry.getValue(), repairs).size(),
-                repeatRate(entry.getValue(), ReceptionSnapshot::customerProductId, windowDays)))
+                Long.toString(entry.getKey()),
+                names.getOrDefault(entry.getKey(), Long.toString(entry.getKey())),
+                entry.getValue().size(),
+                countByStatus(entry.getValue(), repairs, RequestStatus.COMPLETED),
+                repeatRate(entry.getValue(),
+                        item -> new RepeatKey(item.customerId(), item.productId()), windowDays)))
                 .sorted(Comparator.comparingLong(ProductRow::requestCount).reversed()).toList();
     }
 
-    private Map<String, List<ReceptionSnapshot>> group(List<ReceptionSnapshot> receptions,
-            Function<ReceptionSnapshot, String> classifier) {
-        Map<String, List<ReceptionSnapshot>> groups = new LinkedHashMap<>();
+    private RequestStatus currentStatus(ReceptionSnapshot reception, RepairSnapshot repair) {
+        if (reception.status() == ReceptionStatisticsReader.ReceptionState.CANCELLED) {
+            return RequestStatus.CANCELLED;
+        }
+        if (repair != null) {
+            return switch (repair.status()) {
+                case COMPLETED -> RequestStatus.COMPLETED;
+                case IN_PROGRESS, SUBMITTED -> RequestStatus.IN_PROGRESS;
+            };
+        }
+        return reception.status() == ReceptionStatisticsReader.ReceptionState.RECEIVED
+                ? RequestStatus.RECEIVED : RequestStatus.ASSIGNED;
+    }
+
+    private long countByStatus(
+            Collection<ReceptionSnapshot> receptions,
+            Map<Long, RepairSnapshot> repairs,
+            RequestStatus status) {
+        return receptions.stream()
+                .filter(item -> currentStatus(item, repairs.get(item.serviceRequestId())) == status)
+                .count();
+    }
+
+    private BigDecimal totalRepairAmount(
+            Collection<ReceptionSnapshot> receptions, Map<Long, RepairSnapshot> repairs) {
+        return receptions.stream()
+                .map(item -> repairs.get(item.serviceRequestId()))
+                .filter(Objects::nonNull)
+                .map(RepairSnapshot::totalAmount)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private <K> Map<K, List<ReceptionSnapshot>> group(
+            List<ReceptionSnapshot> receptions, Function<ReceptionSnapshot, K> classifier) {
+        Map<K, List<ReceptionSnapshot>> groups = new LinkedHashMap<>();
         for (ReceptionSnapshot reception : receptions) {
-            String key = classifier.apply(reception);
-            if (key != null && !key.isBlank()) groups.computeIfAbsent(key, ignored -> new ArrayList<>()).add(reception);
+            K key = classifier.apply(reception);
+            if (key != null) groups.computeIfAbsent(key, ignored -> new ArrayList<>()).add(reception);
         }
         return groups;
     }
 
-    private List<Long> processingMinutes(Collection<ReceptionSnapshot> receptions,
-            Map<String, RepairSnapshot> repairs) {
-        return receptions.stream().map(item -> processingMinutes(item, repairs.get(item.requestId())))
-                .filter(Objects::nonNull).sorted().toList();
-    }
-
-    private Long processingMinutes(ReceptionSnapshot reception, RepairSnapshot repair) {
-        if (repair == null || repair.completedAt() == null || reception.receivedAt() == null) return null;
-        long minutes = Duration.between(reception.receivedAt(), repair.completedAt()).toMinutes();
-        return Math.max(0, minutes);
-    }
-
-    private double repeatRate(List<ReceptionSnapshot> receptions,
-            Function<ReceptionSnapshot, String> keySelector, int windowDays) {
-        Map<String, List<ReceptionSnapshot>> groups = new HashMap<>();
+    private <K> double repeatRate(
+            List<ReceptionSnapshot> receptions,
+            Function<ReceptionSnapshot, K> keySelector,
+            int windowDays) {
+        Map<K, List<ReceptionSnapshot>> groups = new HashMap<>();
         for (ReceptionSnapshot reception : receptions) {
-            String key = keySelector.apply(reception);
-            if (key != null && !key.isBlank() && reception.receivedAt() != null) {
+            K key = keySelector.apply(reception);
+            if (key != null && reception.requestedAt() != null) {
                 groups.computeIfAbsent(key, ignored -> new ArrayList<>()).add(reception);
             }
         }
         long eligible = groups.values().stream().mapToLong(List::size).sum();
         long repeated = 0;
         for (List<ReceptionSnapshot> group : groups.values()) {
-            group.sort(Comparator.comparing(ReceptionSnapshot::receivedAt));
+            group.sort(Comparator.comparing(ReceptionSnapshot::requestedAt));
             for (int index = 1; index < group.size(); index++) {
-                long days = Duration.between(group.get(index - 1).receivedAt(), group.get(index).receivedAt()).toDays();
+                long days = Duration.between(
+                        group.get(index - 1).requestedAt(), group.get(index).requestedAt()).toDays();
                 if (days <= windowDays) repeated++;
             }
         }
         return rate(repeated, eligible);
     }
 
-    private <T> Set<String> ids(Collection<T> values, Function<T, String> mapper) {
-        return values.stream().map(mapper).filter(Objects::nonNull).filter(value -> !value.isBlank())
-                .collect(Collectors.toUnmodifiableSet());
-    }
-
-    private String join(String left, String right) {
-        return left == null || left.isBlank() || right == null || right.isBlank() ? null : left + "::" + right;
-    }
-
-    private long average(List<Long> values) {
-        return values.isEmpty() ? 0 : Math.round(values.stream().mapToLong(Long::longValue).average().orElse(0));
-    }
-
-    private long median(List<Long> sorted) {
-        if (sorted.isEmpty()) return 0;
-        int middle = sorted.size() / 2;
-        return sorted.size() % 2 == 1 ? sorted.get(middle) : Math.round((sorted.get(middle - 1) + sorted.get(middle)) / 2.0);
+    private <T> Set<Long> ids(Collection<T> values, Function<T, Long> mapper) {
+        return values.stream().map(mapper).filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet());
     }
 
     private double rate(long numerator, long denominator) {
         return denominator == 0 ? 0 : Math.round(numerator * 1000.0 / denominator) / 10.0;
     }
+
+    private record RepeatKey(long first, long second) {}
 }
