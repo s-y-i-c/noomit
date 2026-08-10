@@ -56,6 +56,7 @@ public class ServiceRequestQueryService {
 
         return new ServiceRequestDetail(
                 request.id(),
+                request.requestNumber(),
                 customer.name(),
                 customer.phoneNumber(),
                 customer.address(),
@@ -198,6 +199,7 @@ public class ServiceRequestQueryService {
 
         return new ServiceRequestListItem(
                 r.id(),
+                r.requestNumber(),
                 customer == null ? null : customer.name(),
                 customer == null ? null : customer.phoneNumber(),
                 product == null ? null : product.modelName(),
