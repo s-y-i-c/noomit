@@ -22,6 +22,7 @@ public interface ServiceRequestRepository {
     /** RECEIVED/ASSIGNED 상태에서만 성공. */
     int cancel(long id, String reason, Instant cancelledAt);
 
-    /** RECEIVED/ASSIGNED 상태에서만 성공. */
-    int update(long id, long customerId, long productId, String symptom, String remarks);
+    /** RECEIVED/ASSIGNED 상태 + version 일치할 때만 성공. */
+    int update(long id, long customerId, Long productId, Long selectedSubCategoryId,
+               String selectedModelName, String symptom, String remarks, long version);
 }

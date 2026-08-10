@@ -3,7 +3,10 @@ package com.noomit.backend.reception.application;
 public record UpdateServiceRequestCommand(
         long id,
         long customerId,
-        long productId,
+        Long productId,
+        Long selectedSubCategoryId,
+        String selectedModelName,
         String symptom,
-        String remarks) {
+        String remarks,
+        long version) {
 }

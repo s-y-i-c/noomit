@@ -27,7 +27,8 @@ class ServiceRequestJpaAdapter implements ServiceRequestRepository {
     public ServiceRequest create(ServiceRequest request) {
         String requestNumber = issueRequestNumber(request.requestedAt());
         ServiceRequestEntity entity = new ServiceRequestEntity(request.customerId(), request.productId(),
-                request.receptionistId(), requestNumber, request.symptom(), request.remarks(), request.baseFee(), request.requestedAt());
+                request.selectedSubCategoryId(), request.selectedModelName(), request.receptionistId(), requestNumber,
+                request.symptom(), request.remarks(), request.baseFee(), request.requestedAt());
         return requestJpaRepository.save(entity).toDomain();
     }
 
@@ -70,7 +71,9 @@ class ServiceRequestJpaAdapter implements ServiceRequestRepository {
     }
 
     @Override
-    public int update(long id, long customerId, long productId, String symptom, String remarks) {
-        return requestJpaRepository.update(id, customerId, productId, symptom, remarks);
+    public int update(long id, long customerId, Long productId, Long selectedSubCategoryId,
+                      String selectedModelName, String symptom, String remarks, long version) {
+        return requestJpaRepository.update(id, customerId, productId, selectedSubCategoryId, 
+                selectedModelName, symptom, remarks, version);
     }
 }

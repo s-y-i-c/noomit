@@ -38,16 +38,21 @@ class ServiceRequestController {
             @AuthenticationPrincipal(expression = "userId") long receptionistId,
             @RequestBody CreateRequest request) {
         ServiceRequest created = serviceRequestService.create(new CreateServiceRequestCommand(
-                parseId(request.customerId()), parseId(request.productId()), receptionistId,
+                parseId(request.customerId()), parseOptionalId(request.productId()),
+                parseOptionalId(request.selectedSubCategoryId()), request.selectedModelName(), receptionistId,
                 request.symptom(), request.remarks()));
         return ApiResponse.success("접수를 생성했습니다.", ServiceRequestResponse.from(created));
     }
 
     @PatchMapping("/{id}")
-    ApiResponse<ServiceRequestResponse> update(@PathVariable String id, @RequestBody CreateRequest request) {
+    ApiResponse<ServiceRequestResponse> update(@PathVariable String id, @RequestBody UpdateRequest request) {
+        if (request.version() == null) {
+            throw new BusinessException(ErrorCode.RECEPTION_INVALID_REQUEST, "version이 필요합니다.");
+        }
         ServiceRequest updated = serviceRequestService.update(new UpdateServiceRequestCommand(
-                parseId(id), parseId(request.customerId()), parseId(request.productId()),
-                request.symptom(), request.remarks()));
+                parseId(id), parseId(request.customerId()), parseOptionalId(request.productId()),
+                parseOptionalId(request.selectedSubCategoryId()), request.selectedModelName(),
+                request.symptom(), request.remarks(), request.version()));
         return ApiResponse.success("접수 정보를 수정했습니다.", ServiceRequestResponse.from(updated));
     }
 
@@ -85,7 +90,26 @@ class ServiceRequestController {
         }
     }
 
-    record CreateRequest(String customerId, String productId, String symptom, String remarks) {}
+    private Long parseOptionalId(String value) {
+        return (value == null || value.isBlank()) ? null : parseId(value);
+    }
+
+    record CreateRequest(
+            String customerId,
+            String productId,
+            String selectedSubCategoryId,
+            String selectedModelName,
+            String symptom,
+            String remarks) {}
+
+    record UpdateRequest(
+            String customerId,
+            String productId,
+            String selectedSubCategoryId,
+            String selectedModelName,
+            String symptom,
+            String remarks,
+            Long version) {}
 
     record ServiceRequestResponse(
             String id,
