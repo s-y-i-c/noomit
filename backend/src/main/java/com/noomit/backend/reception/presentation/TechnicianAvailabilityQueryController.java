@@ -27,6 +27,11 @@ class TechnicianAvailabilityQueryController {
         return ApiResponse.success(slots);
     }
 
+    @GetMapping("/dates")
+    ApiResponse<List<LocalDate>> getAvailableDates() {
+        return ApiResponse.success(technicianAvailabilityService.getAvailableDates());
+    }
+
     @GetMapping
     ApiResponse<List<AvailableTechnicianResponse>> getAvailableTechnicians(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,

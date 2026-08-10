@@ -1,5 +1,6 @@
 package com.noomit.backend.reception.application;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,9 +24,14 @@ public class TechnicianAvailabilityService {
     private final TechnicianAvailabilityQueryRepository availabilityQueryRepository;
     private final TechnicianAvailabilityRepository availabilityRepository;
     private final UserDirectory userDirectory;
+    private final Clock clock;
 
     public List<AvailabilityTimeSlot> getByDate(LocalDate date) {
         return availabilityQueryRepository.findByDate(date);
+    }
+    
+    public List<LocalDate> getAvailableDates() {
+        return availabilityQueryRepository.findAvailableDatesFrom(LocalDate.now(clock));
     }
 
     public List<AvailableTechnician> getAvailableTechnicians(LocalDate date, LocalTime startTime, LocalTime endTime) {

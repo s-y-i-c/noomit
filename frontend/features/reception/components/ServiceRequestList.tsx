@@ -1,14 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { Inbox, RefreshCw } from "lucide-react";
+import Link from "next/link";
+import { Inbox, Plus, RefreshCw } from "lucide-react";
 import { useGetServiceRequestsQuery } from "../api/serviceRequestApi";
 import type { ServiceRequestFilters, ServiceRequestStatus } from "../types/serviceRequest";
+import { Dropdown } from "./Dropdown";
 import { Pagination } from "./Pagination";
 import { ServiceRequestTable } from "./ServiceRequestTable";
 import styles from "./ServiceRequestList.module.css";
 
 const PAGE_SIZE = 15;
+
+const STATUS_OPTIONS: { value: ServiceRequestStatus | ""; label: string }[] = [
+  { value: "", label: "전체" },
+  { value: "RECEIVED", label: "접수중" },
+  { value: "ASSIGNED", label: "배정됨" },
+  { value: "CANCELLED", label: "취소" },
+];
+
+const SORT_OPTIONS: { value: ServiceRequestFilters["sort"]; label: string }[] = [
+  { value: "requestedAt,desc", label: "최신순" },
+  { value: "requestedAt,asc", label: "오래된순" },
+];
 
 function initialFilters(): ServiceRequestFilters {
   return { status: "", sort: "requestedAt,desc", page: 0, size: PAGE_SIZE };
@@ -48,29 +62,12 @@ export function ServiceRequestList() {
       </header>
 
       <div className={styles.filters}>
-        <label>
-          <span>상태</span>
-          <select
-            value={filters.status}
-            onChange={(e) => changeStatusFilter(e.target.value as ServiceRequestStatus | "")}
-          >
-            <option value="">전체</option>
-            <option value="RECEIVED">접수중</option>
-            <option value="ASSIGNED">배정됨</option>
-            <option value="CANCELLED">취소</option>
-          </select>
-        </label>
-        <label>
-          <span>정렬</span>
-          <select
-            value={filters.sort}
-            onChange={(e) => changeSort(e.target.value as ServiceRequestFilters["sort"])}
-          >
-            <option value="requestedAt,desc">최신순</option>
-            <option value="requestedAt,asc">오래된순</option>
-          </select>
-        </label>
+        <Dropdown label="상태" value={filters.status} options={STATUS_OPTIONS} onChange={changeStatusFilter} />
+        <Dropdown label="정렬" value={filters.sort} options={SORT_OPTIONS} onChange={changeSort} />
         {isFetching ? <RefreshCw className={styles.spinning} size={17} /> : null}
+        <Link href="/counselor/reception/new" className={styles.createButton}>
+          <Plus size={15} /> 접수 생성
+        </Link>
       </div>
 
       {errorMessage ? <div className={styles.error}>{errorMessage}</div> : null}

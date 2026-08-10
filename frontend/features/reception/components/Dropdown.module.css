@@ -1,0 +1,94 @@
+.dropdown {
+  position: relative;
+  display: grid;
+  gap: 7px;
+  flex: 0 0 160px;
+  min-width: 0;
+}
+
+.label {
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  outline: none;
+  background: var(--color-content-background);
+  color: var(--color-text-primary);
+  font-size: 12px;
+  text-align: left;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.trigger:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 40%, var(--color-border));
+}
+
+.trigger[aria-expanded="true"] {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+.chevron {
+  flex: 0 0 auto;
+  color: var(--color-text-secondary);
+  transition: transform 150ms ease;
+}
+
+.chevron[data-open="true"] {
+  transform: rotate(180deg);
+}
+
+.menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 6px);
+  left: 0;
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  min-width: 140px;
+  padding: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-card-background);
+  box-shadow: 0 12px 32px rgb(30 24 18 / 12%);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: var(--color-text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.option:hover {
+  background: var(--color-page-background);
+}
+
+.option[data-active="true"] {
+  color: var(--color-primary);
+  font-weight: 800;
+}
+
+.option svg {
+  flex: 0 0 auto;
+  color: var(--color-primary);
+}
