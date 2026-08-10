@@ -12,6 +12,7 @@ public record ServiceRequestListItem(
         String modelName,
         String symptom,
         ServiceRequestStatus status,
+        String receptionistName,
         String technicianName,
         LocalDate visitDate,
         LocalTime visitStartTime,

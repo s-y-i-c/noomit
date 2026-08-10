@@ -52,6 +52,7 @@ public class ServiceRequestQueryService {
         ProductInfo product = productDirectory.findById(request.productId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "제품 정보를 찾을 수 없습니다."));
         String technicianName = request.technicianId() == null ? null : findTechnician(request.technicianId()).name();
+        String receptionistName = findReceptionist(request.receptionistId()).name();
 
         return new ServiceRequestDetail(
                 request.id(),
@@ -62,6 +63,7 @@ public class ServiceRequestQueryService {
                 product.modelName(),
                 request.symptom(),
                 request.status(),
+                receptionistName,
                 technicianName,
                 request.visitDate(),
                 request.visitStartTime(),
@@ -139,7 +141,13 @@ public class ServiceRequestQueryService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "기사를 찾을 수 없습니다."));
     }
 
-    // 필요한 ID를 모아서 3개 Port를 배치 호출
+    private UserRef findReceptionist(long receptionistId) {
+        return userDirectory.findActiveByIds(List.of(receptionistId)).stream()
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "접수자를 찾을 수 없습니다."));
+    }
+
+    // 필요한 ID를 모아서 4개 Port를 배치 호출
     private RequestViewContext loadRequestViewContext(List<ServiceRequest> requests) {
         List<Long> customerIds = requests.stream()
                 .map(ServiceRequest::customerId).distinct().toList();
@@ -147,11 +155,14 @@ public class ServiceRequestQueryService {
                 .map(ServiceRequest::productId).distinct().toList();
         List<Long> technicianIds = requests.stream()
                 .map(ServiceRequest::technicianId).filter(Objects::nonNull).distinct().toList(); // null인 기사는 조회 X
+        List<Long> receptionistIds = requests.stream()
+                .map(ServiceRequest::receptionistId).distinct().toList();
 
         return new RequestViewContext(
                 getCustomers(customerIds),
                 getProducts(productIds),
-                getTechnicians(technicianIds)
+                getTechnicians(technicianIds),
+                getReceptionists(receptionistIds)
         );
     }
 
@@ -172,11 +183,18 @@ public class ServiceRequestQueryService {
                 .collect(Collectors.toMap(UserRef::id, ref -> ref));
     }
 
+    private Map<Long, UserRef> getReceptionists(List<Long> ids) {
+        if (ids.isEmpty()) { return Map.of(); }
+        return userDirectory.findActiveByIds(ids).stream()
+                .collect(Collectors.toMap(UserRef::id, ref -> ref));
+    }
+
     // row 하나 조립
     private ServiceRequestListItem toListItem(ServiceRequest r, RequestViewContext c) {
         CustomerInfo customer = c.customers().get(r.customerId());
         ProductInfo product = c.products().get(r.productId());
         UserRef technician = r.technicianId() == null ? null : c.technicians().get(r.technicianId());
+        UserRef receptionist = c.receptionists().get(r.receptionistId());
 
         return new ServiceRequestListItem(
                 r.id(),
@@ -185,6 +203,7 @@ public class ServiceRequestQueryService {
                 product == null ? null : product.modelName(),
                 r.symptom(),
                 r.status(),
+                receptionist == null ? null : receptionist.name(),
                 technician == null ? null : technician.name(),
                 r.visitDate(),
                 r.visitStartTime(),
@@ -192,10 +211,11 @@ public class ServiceRequestQueryService {
                 r.requestedAt());
     }
 
-    // 3개 Port 결과를 한 번에 들고 다니는 내부 전용 묶음
+    // 4개 Port 결과를 한 번에 들고 다니는 내부 전용 묶음
     private record RequestViewContext(
             Map<Long, CustomerInfo> customers,
             Map<Long, ProductInfo> products,
-            Map<Long, UserRef> technicians) {
+            Map<Long, UserRef> technicians,
+            Map<Long, UserRef> receptionists) {
     }
 }
