@@ -8,7 +8,7 @@ import { Pagination } from "./Pagination";
 import { ServiceRequestTable } from "./ServiceRequestTable";
 import styles from "./ServiceRequestList.module.css";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 15;
 
 function initialFilters(): ServiceRequestFilters {
   return { status: "", sort: "requestedAt,desc", page: 0, size: PAGE_SIZE };
