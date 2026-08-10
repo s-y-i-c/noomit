@@ -23,11 +23,7 @@ export function ThemeSync() {
 
   useEffect(() => {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    const initial = isThemeName(stored)
-      ? stored
-      : window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : DEFAULT_THEME;
+    const initial = isThemeName(stored) ? stored : DEFAULT_THEME;
     dispatch(initializeTheme(initial));
   }, [dispatch]);
 

@@ -73,7 +73,7 @@ class ServiceRequestEntity {
     @Column(name = "cancelled_at")
     private Instant cancelledAt;
 
-    @Column(name = "cancel_reason")
+    @Column(name = "cancel_reason", length = 300)
     private String cancelReason;
 
     @Version

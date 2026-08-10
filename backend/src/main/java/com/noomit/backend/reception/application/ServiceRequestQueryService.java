@@ -1,16 +1,19 @@
 package com.noomit.backend.reception.application;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.noomit.backend.reception.application.customer.CustomerInfo;
-import com.noomit.backend.reception.application.customer.CustomerQueryPort;
-import com.noomit.backend.reception.application.product.ProductInfo;
-import com.noomit.backend.reception.application.product.ProductQueryPort;
+import com.noomit.backend.customer.CustomerDirectory;
+import com.noomit.backend.customer.CustomerInfo;
+import com.noomit.backend.product.ProductDirectory;
+import com.noomit.backend.product.ProductInfo;
 import com.noomit.backend.reception.domain.ServiceRequest;
+import com.noomit.backend.shared.error.BusinessException;
+import com.noomit.backend.shared.error.ErrorCode;
 import com.noomit.backend.user.UserDirectory;
 import com.noomit.backend.user.UserRef;
 import lombok.RequiredArgsConstructor;
@@ -18,15 +21,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ServiceRequestQueryService {
     private final ServiceRequestQueryRepository requestQueryRepository;
     private final UserDirectory userDirectory;
-    private final CustomerQueryPort customerQueryPort;
-    private final ProductQueryPort productQueryPort;
+    private final CustomerDirectory customerDirectory;
+    private final ProductDirectory productDirectory;
 
-    @Transactional(readOnly = true)
-    public PageResult<ServiceRequestListItem> findList(ServiceRequestListQuery query) {
+    public PageResult<ServiceRequestListItem> getList(ServiceRequestListQuery query) {
         PageResult<ServiceRequest> page = requestQueryRepository.search(
                 query.status(), query.ascending(), query.page(), query.size());
 
@@ -38,6 +41,102 @@ public class ServiceRequestQueryService {
         }
 
         return new PageResult<>(items, page.page(), page.size(), page.totalElements());
+    }
+
+    public ServiceRequestDetail getDetail(long id) {
+        ServiceRequest request = requestQueryRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "접수를 찾을 수 없습니다."));
+
+        CustomerInfo customer = customerDirectory.findById(request.customerId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "고객 정보를 찾을 수 없습니다."));
+        ProductInfo product = productDirectory.findById(request.productId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "제품 정보를 찾을 수 없습니다."));
+        String technicianName = request.technicianId() == null ? null : findTechnician(request.technicianId()).name();
+
+        return new ServiceRequestDetail(
+                request.id(),
+                customer.name(),
+                customer.phoneNumber(),
+                customer.address(),
+                customer.detailAddress(),
+                product.modelName(),
+                request.symptom(),
+                request.status(),
+                technicianName,
+                request.visitDate(),
+                request.visitStartTime(),
+                request.visitEndTime(),
+                request.remarks(),
+                request.baseFee(),
+                request.requestedAt(),
+                request.assignedAt(),
+                request.cancelledAt(),
+                request.cancelReason());
+    }
+
+    public List<MyAssignedRequest> getMyAssignedRequests(long technicianId, LocalDate date) {
+        List<ServiceRequest> requests = requestQueryRepository.findAssignedByTechnicianAndDate(technicianId, date);
+        if (requests.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> customerIds = requests.stream()
+                .map(ServiceRequest::customerId)
+                .distinct()
+                .toList();
+
+        List<Long> productIds = requests.stream()
+                .map(ServiceRequest::productId)
+                .distinct()
+                .toList();
+
+        Map<Long, CustomerInfo> customers = getCustomers(customerIds);
+        Map<Long, ProductInfo> products = getProducts(productIds);
+
+        return requests.stream()
+                .map(r -> toMyAssignedRequest(r, customers, products))
+                .toList();
+    }
+
+    public MyAssignedRequestDetail getMyAssignedRequestDetail(long technicianId, long requestId) {
+        ServiceRequest request = requestQueryRepository.findAssignedByTechnicianAndId(technicianId, requestId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "접수를 찾을 수 없습니다."));
+
+        CustomerInfo customer = customerDirectory.findById(request.customerId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "고객 정보를 찾을 수 없습니다."));
+        ProductInfo product = productDirectory.findById(request.productId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "제품 정보를 찾을 수 없습니다."));
+
+        return new MyAssignedRequestDetail(
+                request.id(),
+                customer.name(),
+                customer.phoneNumber(),
+                customer.address(),
+                customer.detailAddress(),
+                product.modelName(),
+                request.symptom(),
+                request.remarks(),
+                request.visitDate(),
+                request.visitStartTime(),
+                request.visitEndTime());
+    }
+
+    private MyAssignedRequest toMyAssignedRequest(ServiceRequest r, Map<Long, CustomerInfo> customers, Map<Long, ProductInfo> products) {
+        CustomerInfo customer = customers.get(r.customerId());
+        ProductInfo product = products.get(r.productId());
+        return new MyAssignedRequest(
+                r.id(),
+                customer == null ? null : customer.name(),
+                customer == null ? null : customer.address(),
+                product == null ? null : product.modelName(),
+                r.visitStartTime(),
+                r.visitEndTime());
+    }
+
+    private UserRef findTechnician(long technicianId) {
+        return userDirectory.findActiveByIds(List.of(technicianId)).stream()
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "기사를 찾을 수 없습니다."));
     }
 
     // 필요한 ID를 모아서 3개 Port를 배치 호출
@@ -59,12 +158,12 @@ public class ServiceRequestQueryService {
     // 빈 리스트 방어 -> 불필요한 호출 X
     private Map<Long, CustomerInfo> getCustomers(List<Long> ids) {
         if (ids.isEmpty()) { return Map.of(); }
-        return customerQueryPort.getCustomers(ids);
+        return customerDirectory.findByIds(ids);
     }
 
     private Map<Long, ProductInfo> getProducts(List<Long> ids) {
         if (ids.isEmpty()) { return Map.of(); }
-        return productQueryPort.getProducts(ids);
+        return productDirectory.findByIds(ids);
     }
 
     private Map<Long, UserRef> getTechnicians(List<Long> ids) {

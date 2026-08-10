@@ -1,0 +1,15 @@
+# Prometheus 컨테이너가 읽는 설정. "뭘 긁어올지"를 정의한다.
+# 핵심: scrape 대상 = host.docker.internal:8080 (SSH 터널 너머 운영 backend)
+# 관계: 운영 서버 → 여기로 데이터가 들어온다.
+global:
+  # 15초 간격으로 긁는다.
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: noomit-backend
+    metrics_path: /actuator/prometheus
+    static_configs:
+      # SSH 터널이 열려 있어야 운영 backend 의 actuator 로 연결된다.
+      # 터널이 안 열려 있으면 scrape 가 실패하고 Grafana 대시보드가 비어 보인다.
+      - targets: ["host.docker.internal:8080"]

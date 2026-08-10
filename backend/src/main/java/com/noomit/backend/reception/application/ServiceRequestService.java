@@ -1,5 +1,6 @@
 package com.noomit.backend.reception.application;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import com.noomit.backend.reception.ServiceRequestAssigned;
@@ -20,11 +21,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class ServiceRequestService {
     /** MVP 고정 출장비. 책정 정책은 추후 도입. */
     private static final int DEFAULT_BASE_FEE = 20000;
+    private static final int MAX_CANCEL_REASON_LENGTH = 300;
 
     private final ServiceRequestRepository requestRepository;
     private final TechnicianAvailabilityRepository availabilityRepository;
     private final UserDirectory userDirectory;
     private final ApplicationEventPublisher eventPublisher;
+    private final Clock clock;
 
     @Transactional
     public ServiceRequest create(CreateServiceRequestCommand command) {
@@ -32,7 +35,7 @@ public class ServiceRequestService {
             throw new BusinessException(ErrorCode.RECEPTION_INVALID_REQUEST, "고장 증상 내용이 필요합니다.");
         }
         ServiceRequest request = ServiceRequest.create(command.customerId(), command.productId(),
-                command.symptom(), command.remarks(), DEFAULT_BASE_FEE, command.requestedAt());
+                command.symptom(), command.remarks(), DEFAULT_BASE_FEE, Instant.now(clock));
         return requestRepository.create(request);
     }
 
@@ -41,7 +44,7 @@ public class ServiceRequestService {
         long id = command.id();
         long technicianId = command.technicianId();
         long slotId = command.slotId();
-        Instant assignedAt = command.assignedAt();
+        Instant assignedAt = Instant.now(clock);
 
         ServiceRequest request = findRequest(id);
         if (!request.canAssign()) {
@@ -67,7 +70,7 @@ public class ServiceRequestService {
         long id = command.id();
         long technicianId = command.technicianId();
         long slotId = command.slotId();
-        Instant assignedAt = command.assignedAt();
+        Instant assignedAt = Instant.now(clock);
         long version = command.version();
 
         ServiceRequest request = findRequest(id);
@@ -99,6 +102,34 @@ public class ServiceRequestService {
 
         publishServiceRequestAssigned(request, technicianId, assignedAt);
         return AssignmentResult.of(id, ServiceRequestStatus.ASSIGNED, findTechnician(technicianId).name(), slot);
+    }
+
+    @Transactional
+    public CancellationResult cancel(CancelServiceRequestCommand command) {
+        long id = command.id();
+        String reason = command.cancelReason();
+        Instant cancelledAt = Instant.now(clock);
+
+        if (reason != null && reason.length() > MAX_CANCEL_REASON_LENGTH) {
+            throw new BusinessException(ErrorCode.RECEPTION_INVALID_REQUEST, "취소 사유는 300자 이하로 입력해주세요.");
+        }
+
+        ServiceRequest request = findRequest(id);
+        if (!request.canCancel()) {
+            throw new BusinessException(ErrorCode.RECEPTION_ALREADY_CANCELLED, "이미 취소되었거나 취소할 수 없는 접수입니다.");
+        }
+
+        int updated = requestRepository.cancel(id, reason, cancelledAt);
+        if (updated == 0) {
+            throw new BusinessException(ErrorCode.RECEPTION_ALREADY_CANCELLED, "이미 취소되었거나 취소할 수 없는 접수입니다.");
+        }
+
+        Long reservedSlotId = request.reservedSlotId();
+        if (reservedSlotId != null) {
+            availabilityRepository.releaseSlot(reservedSlotId);
+        }
+
+        return new CancellationResult(id, ServiceRequestStatus.CANCELLED, reason, cancelledAt);
     }
 
     private UserRef findTechnician(long technicianId) {

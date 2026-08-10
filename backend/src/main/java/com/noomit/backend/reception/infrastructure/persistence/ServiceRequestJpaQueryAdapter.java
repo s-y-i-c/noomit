@@ -1,6 +1,8 @@
 package com.noomit.backend.reception.infrastructure.persistence;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import com.noomit.backend.reception.application.PageResult;
 import com.noomit.backend.reception.application.ServiceRequestQueryRepository;
 import com.noomit.backend.reception.domain.ServiceRequest;
@@ -29,5 +31,23 @@ class ServiceRequestJpaQueryAdapter implements ServiceRequestQueryRepository {
                 .toList();
 
         return new PageResult<>(content, page, size, result.getTotalElements());
+    }
+
+    @Override
+    public Optional<ServiceRequest> findById(long id) {
+        return requestJpaRepository.findById(id).map(ServiceRequestEntity::toDomain);
+    }
+
+    @Override
+    public List<ServiceRequest> findAssignedByTechnicianAndDate(long technicianId, LocalDate date) {
+        return requestJpaRepository.findAssignedByTechnicianAndDate(technicianId, date).stream()
+                .map(ServiceRequestEntity::toDomain)
+                .toList();
+    }
+
+    @Override
+    public Optional<ServiceRequest> findAssignedByTechnicianAndId(long technicianId, long requestId) {
+        return requestJpaRepository.findAssignedByTechnicianAndId(technicianId, requestId)
+                .map(ServiceRequestEntity::toDomain);
     }
 }
