@@ -2,6 +2,7 @@ package com.noomit.backend.statistics.application;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public record StatisticsDashboard(
@@ -33,13 +34,27 @@ public record StatisticsDashboard(
     public record ProductRow(String productId, String productName, long requestCount,
             long completedCount, double repeatRate) {}
 
-    public record Integration(boolean connected, String message) {
-        public static Integration ready() {
-            return new Integration(true, "연결된 도메인의 최신 데이터를 조회했습니다.");
-        }
+    public record Integration(
+            boolean receptionConnected,
+            boolean repairConnected,
+            boolean customerConnected,
+            boolean productConnected,
+            String message) {
 
-        public static Integration waiting() {
-            return new Integration(false, "접수·수리·고객·제품 도메인 연동을 기다리고 있습니다.");
+        public static Integration of(boolean reception, boolean repair, boolean customer, boolean product) {
+            if (!reception) {
+                return new Integration(false, repair, customer, product,
+                        "기본 통계에 필요한 접수 도메인 연동을 기다리고 있습니다.");
+            }
+
+            List<String> waiting = new ArrayList<>();
+            if (!repair) waiting.add("수리");
+            if (!customer) waiting.add("고객");
+            if (!product) waiting.add("제품");
+            String message = waiting.isEmpty()
+                    ? "연결된 도메인의 최신 데이터를 조회했습니다."
+                    : String.join("·", waiting) + " 도메인은 연동 전이며, 연결된 데이터만 표시합니다.";
+            return new Integration(true, repair, customer, product, message);
         }
     }
 }

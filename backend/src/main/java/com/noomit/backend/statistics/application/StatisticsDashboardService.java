@@ -78,8 +78,11 @@ public class StatisticsDashboardService {
                                 ? null : new RepeatKey(item.technicianId(), item.productId()),
                         query.repeatWindowDays()));
 
-        boolean connected = receptionReader.connected() && repairReader.connected()
-                && customerReader.connected() && productReader.connected();
+        StatisticsDashboard.Integration integration = StatisticsDashboard.Integration.of(
+                receptionReader.connected(),
+                repairReader.connected(),
+                customerReader.connected(),
+                productReader.connected());
         return new StatisticsDashboard(
                 new StatisticsDashboard.Period(query.from(), query.to()),
                 summary,
@@ -88,7 +91,7 @@ public class StatisticsDashboardService {
                 technicianRows(receptions, repairs),
                 customerRows(receptions, repairs, customers, query.repeatWindowDays()),
                 productRows(receptions, repairs, products, query.repeatWindowDays()),
-                connected ? StatisticsDashboard.Integration.ready() : StatisticsDashboard.Integration.waiting());
+                integration);
     }
 
     private List<StatisticsDashboard.TrendPoint> trends(

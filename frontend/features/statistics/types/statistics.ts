@@ -49,5 +49,11 @@ export interface StatisticsDashboardData {
     completedCount: number;
     repeatRate: number;
   }>;
-  integration: { connected: boolean; message: string };
+  integration: {
+    receptionConnected: boolean;
+    repairConnected: boolean;
+    customerConnected: boolean;
+    productConnected: boolean;
+    message: string;
+  };
 }

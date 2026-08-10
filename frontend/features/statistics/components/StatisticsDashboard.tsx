@@ -75,11 +75,12 @@ export function StatisticsDashboard() {
       </form>
 
       {errorMessage ? <div className={styles.error}>{errorMessage}</div> : null}
-      {data && !data.integration.connected ? <div className={styles.integration}><Wrench size={18} /><div><strong>연동 준비 상태</strong><p>{data.integration.message} 현재 화면과 계산 구조는 정상 동작하며, 조회 어댑터 연결 후 실제 수치가 표시됩니다.</p></div></div> : null}
+      {data && !data.integration.receptionConnected ? <div className={styles.integration}><Wrench size={18} /><div><strong>접수 연동 준비 상태</strong><p>{data.integration.message} 접수 구현체가 연결되면 기본 통계가 표시됩니다.</p></div></div> : null}
+      {data?.integration.receptionConnected && (!data.integration.repairConnected || !data.integration.customerConnected || !data.integration.productConnected) ? <div className={styles.integration}><Wrench size={18} /><div><strong>일부 도메인 연동 대기</strong><p>{data.integration.message}</p></div></div> : null}
 
       {!data && !errorMessage ? <div className={styles.initialState}><Search size={24} /><strong>조회 조건을 확인해 주세요.</strong><p>통계 조회 버튼을 누르면 선택한 기간의 데이터를 그때 집계합니다.</p></div> : null}
 
-      {data?.integration.connected ? <DashboardContent data={data} maxTrend={maxTrend} /> : null}
+      {data?.integration.receptionConnected ? <DashboardContent data={data} maxTrend={maxTrend} /> : null}
     </section>
   );
 }
@@ -87,11 +88,13 @@ export function StatisticsDashboard() {
 function DashboardContent({ data, maxTrend }: { data: StatisticsDashboardData; maxTrend: number }) {
   const cards = [
     { label: "총 접수", value: data.summary.receivedCount.toLocaleString(), unit: "건", icon: <BarChart3 /> },
-    { label: "수리 완료", value: data.summary.completedCount.toLocaleString(), unit: "건", icon: <CheckCircle2 /> },
-    { label: "진행 중", value: data.summary.inProgressCount.toLocaleString(), unit: "건", icon: <Wrench /> },
     { label: "취소", value: data.summary.cancelledCount.toLocaleString(), unit: "건", icon: <XCircle /> },
-    { label: "완료율", value: data.summary.completionRate.toFixed(1), unit: "%", icon: <CheckCircle2 /> },
-    { label: "수리 금액 합계", value: won(data.summary.totalRepairAmount), unit: "", icon: <CircleDollarSign /> },
+    ...(data.integration.repairConnected ? [
+      { label: "수리 완료", value: data.summary.completedCount.toLocaleString(), unit: "건", icon: <CheckCircle2 /> },
+      { label: "수리 중", value: data.summary.inProgressCount.toLocaleString(), unit: "건", icon: <Wrench /> },
+      { label: "완료율", value: data.summary.completionRate.toFixed(1), unit: "%", icon: <CheckCircle2 /> },
+      { label: "수리 금액 합계", value: won(data.summary.totalRepairAmount), unit: "", icon: <CircleDollarSign /> },
+    ] : []),
   ];
   return <>
     <div className={styles.summaryGrid}>{cards.map((card) => <article className={styles.summaryCard} key={card.label}><div className={styles.cardTop}><span>{card.label}</span><i>{card.icon}</i></div><strong>{card.value}<small>{card.unit}</small></strong></article>)}</div>
@@ -113,7 +116,7 @@ function DashboardContent({ data, maxTrend }: { data: StatisticsDashboardData; m
 
     <article className={styles.panel}>
       <div className={styles.panelHeader}><div><p className={styles.kicker}>PERFORMANCE</p><h2>기사별 처리 현황</h2></div></div>
-      {data.technicians.length ? <div className={styles.tableWrap}><table><thead><tr><th>담당 기사</th><th>배정</th><th>완료</th><th>완료율</th><th>수리 금액</th></tr></thead><tbody>{data.technicians.map((row) => <tr key={row.technicianId}><td><strong>{row.technicianName}</strong><small>{row.technicianId}</small></td><td>{row.assignedCount}건</td><td>{row.completedCount}건</td><td><span className={styles.rateBadge}>{row.completionRate.toFixed(1)}%</span></td><td>{won(row.totalRepairAmount)}</td></tr>)}</tbody></table></div> : <EmptyRows label="기사별" />}
+      {data.technicians.length ? <div className={styles.tableWrap}><table><thead><tr><th>담당 기사</th><th>배정</th>{data.integration.repairConnected ? <><th>완료</th><th>완료율</th><th>수리 금액</th></> : null}</tr></thead><tbody>{data.technicians.map((row) => <tr key={row.technicianId}><td><strong>{row.technicianName}</strong><small>{row.technicianId}</small></td><td>{row.assignedCount}건</td>{data.integration.repairConnected ? <><td>{row.completedCount}건</td><td><span className={styles.rateBadge}>{row.completionRate.toFixed(1)}%</span></td><td>{won(row.totalRepairAmount)}</td></> : null}</tr>)}</tbody></table></div> : <EmptyRows label="기사별" />}
     </article>
 
     <div className={styles.twoColumns}>
