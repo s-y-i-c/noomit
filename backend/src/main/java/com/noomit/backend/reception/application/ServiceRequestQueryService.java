@@ -112,6 +112,7 @@ public class ServiceRequestQueryService {
 
         return new MyAssignedRequestDetail(
                 request.id(),
+                request.requestNumber(),
                 customer.name(),
                 customer.phoneNumber(),
                 customer.address(),
@@ -129,6 +130,7 @@ public class ServiceRequestQueryService {
         ProductInfo product = products.get(r.productId());
         return new MyAssignedRequest(
                 r.id(),
+                r.requestNumber(),
                 customer == null ? null : customer.name(),
                 customer == null ? null : customer.address(),
                 product == null ? null : product.modelName(),

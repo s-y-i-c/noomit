@@ -4,6 +4,7 @@ import java.time.LocalTime;
 
 public record MyAssignedRequest(
         long serviceRequestId,
+        String requestNumber,
         String customerName,
         String address,
         String modelName,
