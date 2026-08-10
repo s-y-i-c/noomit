@@ -16,9 +16,9 @@ export interface StatisticsDashboardData {
     receivedCount: number;
     completedCount: number;
     inProgressCount: number;
+    cancelledCount: number;
     completionRate: number;
-    averageProcessingMinutes: number;
-    medianProcessingMinutes: number;
+    totalRepairAmount: number;
   };
   repeatRepair: {
     windowDays: number;
@@ -26,14 +26,14 @@ export interface StatisticsDashboardData {
     sameProductRate: number;
     sameTechnicianSameProductRate: number;
   };
-  trends: Array<{ date: string; receivedCount: number; completedCount: number }>;
+  trends: Array<{ date: string; receivedCount: number }>;
   technicians: Array<{
     technicianId: string;
     technicianName: string;
     assignedCount: number;
     completedCount: number;
     completionRate: number;
-    averageProcessingMinutes: number;
+    totalRepairAmount: number;
   }>;
   customers: Array<{
     customerId: string;

@@ -2,36 +2,47 @@ package com.noomit.backend.statistics.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
-import com.noomit.backend.statistics.application.StatisticsQuery.RequestStatus;
 import com.noomit.backend.statistics.application.port.CustomerStatisticsReader;
 import com.noomit.backend.statistics.application.port.ProductStatisticsReader;
 import com.noomit.backend.statistics.application.port.ReceptionStatisticsReader;
+import com.noomit.backend.statistics.application.port.ReceptionStatisticsReader.ReceptionState;
 import com.noomit.backend.statistics.application.port.RepairStatisticsReader;
+import com.noomit.backend.statistics.application.port.RepairStatisticsReader.RepairState;
 import org.junit.jupiter.api.Test;
 
 class StatisticsDashboardServiceTest {
 
     @Test
     void aggregatesSnapshotsWithoutOwningAStatisticsDatabase() {
-        LocalDateTime first = LocalDateTime.of(2026, 8, 1, 9, 0);
-        LocalDateTime second = LocalDateTime.of(2026, 8, 10, 9, 0);
+        Instant first = Instant.parse("2026-08-01T00:00:00Z");
+        Instant second = Instant.parse("2026-08-10T00:00:00Z");
         ReceptionStatisticsReader receptions = query -> List.of(
                 new ReceptionStatisticsReader.ReceptionSnapshot(
-                        "r1", "c1", "cp1", "p1", "t1", "김기사", first, RequestStatus.COMPLETED),
+                        1L, 10L, 20L, 30L, "김기사", first, ReceptionState.ASSIGNED),
                 new ReceptionStatisticsReader.ReceptionSnapshot(
-                        "r2", "c1", "cp1", "p1", "t1", "김기사", second, RequestStatus.IN_PROGRESS));
+                        2L, 10L, 20L, 30L, "김기사", second, ReceptionState.ASSIGNED));
         RepairStatisticsReader repairs = requestIds -> List.of(
-                new RepairStatisticsReader.RepairSnapshot("r1", first.plusHours(2), 30_000));
+                new RepairStatisticsReader.RepairSnapshot(
+                        1L, RepairState.COMPLETED, new BigDecimal("30000")),
+                new RepairStatisticsReader.RepairSnapshot(
+                        2L, RepairState.IN_PROGRESS, new BigDecimal("10000")));
         CustomerStatisticsReader customers = customerIds -> List.of(
-                new CustomerStatisticsReader.CustomerSnapshot("c1", "홍길동"));
+                new CustomerStatisticsReader.CustomerSnapshot(10L, "홍길동"));
         ProductStatisticsReader products = productIds -> List.of(
-                new ProductStatisticsReader.ProductSnapshot("p1", "냉장고 A"));
+                new ProductStatisticsReader.ProductSnapshot(20L, "냉장고 A"));
 
         StatisticsDashboardService service = new StatisticsDashboardService(
-                receptions, repairs, customers, products);
+                receptions,
+                repairs,
+                customers,
+                products,
+                Clock.fixed(Instant.parse("2026-08-10T00:00:00Z"), ZoneId.of("Asia/Seoul")));
         StatisticsDashboard result = service.getDashboard(new StatisticsQuery(
                 LocalDate.of(2026, 8, 1),
                 LocalDate.of(2026, 8, 31),
@@ -39,9 +50,9 @@ class StatisticsDashboardServiceTest {
 
         assertThat(result.summary().receivedCount()).isEqualTo(2);
         assertThat(result.summary().completedCount()).isEqualTo(1);
+        assertThat(result.summary().inProgressCount()).isEqualTo(1);
         assertThat(result.summary().completionRate()).isEqualTo(50.0);
-        assertThat(result.summary().averageProcessingMinutes()).isEqualTo(120);
-        assertThat(result.summary().medianProcessingMinutes()).isEqualTo(120);
+        assertThat(result.summary().totalRepairAmount()).isEqualByComparingTo("40000");
         assertThat(result.repeatRepair().sameCustomerRate()).isEqualTo(50.0);
         assertThat(result.repeatRepair().sameProductRate()).isEqualTo(50.0);
         assertThat(result.technicians()).singleElement().satisfies(row -> {

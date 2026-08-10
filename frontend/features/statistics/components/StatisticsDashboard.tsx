@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { BarChart3, CalendarDays, CheckCircle2, Clock3, RefreshCw, Search, Wrench } from "lucide-react";
+import { BarChart3, CalendarDays, CheckCircle2, CircleDollarSign, RefreshCw, Search, Wrench, XCircle } from "lucide-react";
 import { useLazyGetStatisticsDashboardQuery } from "../api/statisticsApi";
 import type { StatisticsDashboardData, StatisticsFilters } from "../types/statistics";
 import styles from "./StatisticsDashboard.module.css";
@@ -26,11 +26,8 @@ function initialFilters(): StatisticsFilters {
   };
 }
 
-function minutes(value: number): string {
-  if (value < 60) return `${value}분`;
-  const hours = Math.floor(value / 60);
-  const rest = value % 60;
-  return rest ? `${hours}시간 ${rest}분` : `${hours}시간`;
+function won(value: number): string {
+  return `${value.toLocaleString()}원`;
 }
 
 function EmptyRows({ label }: { label: string }) {
@@ -41,7 +38,7 @@ export function StatisticsDashboard() {
   const [draft, setDraft] = useState<StatisticsFilters>(initialFilters);
   const [load, { data, isFetching, error }] = useLazyGetStatisticsDashboardQuery();
 
-  const maxTrend = useMemo(() => Math.max(1, ...(data?.trends.flatMap((item) => [item.receivedCount, item.completedCount]) ?? [1])), [data]);
+  const maxTrend = useMemo(() => Math.max(1, ...(data?.trends.map((item) => item.receivedCount) ?? [1])), [data]);
   const errorMessage = typeof error === "object" && error !== null && "message" in error
     ? String(error.message)
     : null;
@@ -82,7 +79,7 @@ export function StatisticsDashboard() {
 
       {!data && !errorMessage ? <div className={styles.initialState}><Search size={24} /><strong>조회 조건을 확인해 주세요.</strong><p>통계 조회 버튼을 누르면 선택한 기간의 데이터를 그때 집계합니다.</p></div> : null}
 
-      {data ? <DashboardContent data={data} maxTrend={maxTrend} /> : null}
+      {data?.integration.connected ? <DashboardContent data={data} maxTrend={maxTrend} /> : null}
     </section>
   );
 }
@@ -92,17 +89,17 @@ function DashboardContent({ data, maxTrend }: { data: StatisticsDashboardData; m
     { label: "총 접수", value: data.summary.receivedCount.toLocaleString(), unit: "건", icon: <BarChart3 /> },
     { label: "수리 완료", value: data.summary.completedCount.toLocaleString(), unit: "건", icon: <CheckCircle2 /> },
     { label: "진행 중", value: data.summary.inProgressCount.toLocaleString(), unit: "건", icon: <Wrench /> },
+    { label: "취소", value: data.summary.cancelledCount.toLocaleString(), unit: "건", icon: <XCircle /> },
     { label: "완료율", value: data.summary.completionRate.toFixed(1), unit: "%", icon: <CheckCircle2 /> },
-    { label: "평균 처리", value: minutes(data.summary.averageProcessingMinutes), unit: "", icon: <Clock3 /> },
-    { label: "중앙 처리", value: minutes(data.summary.medianProcessingMinutes), unit: "", icon: <Clock3 /> },
+    { label: "수리 금액 합계", value: won(data.summary.totalRepairAmount), unit: "", icon: <CircleDollarSign /> },
   ];
   return <>
     <div className={styles.summaryGrid}>{cards.map((card) => <article className={styles.summaryCard} key={card.label}><div className={styles.cardTop}><span>{card.label}</span><i>{card.icon}</i></div><strong>{card.value}<small>{card.unit}</small></strong></article>)}</div>
 
     <div className={styles.twoColumns}>
       <article className={styles.panel}>
-        <div className={styles.panelHeader}><div><p className={styles.kicker}>FLOW</p><h2>접수·완료 추이</h2></div><div className={styles.legend}><span data-tone="received" />접수 <span data-tone="completed" />완료</div></div>
-        {data.trends.length ? <div className={styles.chart}>{data.trends.map((point, index) => <div className={styles.chartColumn} key={point.date} title={`${point.date} · 접수 ${point.receivedCount} · 완료 ${point.completedCount}`}><div className={styles.bars}><i data-tone="received" style={{ height: `${Math.max(2, point.receivedCount / maxTrend * 100)}%` }} /><i data-tone="completed" style={{ height: `${Math.max(2, point.completedCount / maxTrend * 100)}%` }} /></div>{(index === 0 || index === data.trends.length - 1 || index % Math.max(1, Math.floor(data.trends.length / 5)) === 0) ? <span>{point.date.slice(5)}</span> : <span />}</div>)}</div> : <EmptyRows label="추이" />}
+        <div className={styles.panelHeader}><div><p className={styles.kicker}>FLOW</p><h2>접수 추이</h2></div><div className={styles.legend}><span data-tone="received" />접수</div></div>
+        {data.trends.length ? <div className={styles.chart}>{data.trends.map((point, index) => <div className={styles.chartColumn} key={point.date} title={`${point.date} · 접수 ${point.receivedCount}`}><div className={styles.bars}><i data-tone="received" style={{ height: `${Math.max(2, point.receivedCount / maxTrend * 100)}%` }} /></div>{(index === 0 || index === data.trends.length - 1 || index % Math.max(1, Math.floor(data.trends.length / 5)) === 0) ? <span>{point.date.slice(5)}</span> : <span />}</div>)}</div> : <EmptyRows label="추이" />}
       </article>
       <article className={styles.panel}>
         <div className={styles.panelHeader}><div><p className={styles.kicker}>REPEAT</p><h2>{data.repeatRepair.windowDays}일 이내 재접수율</h2></div></div>
@@ -116,7 +113,7 @@ function DashboardContent({ data, maxTrend }: { data: StatisticsDashboardData; m
 
     <article className={styles.panel}>
       <div className={styles.panelHeader}><div><p className={styles.kicker}>PERFORMANCE</p><h2>기사별 처리 현황</h2></div></div>
-      {data.technicians.length ? <div className={styles.tableWrap}><table><thead><tr><th>담당 기사</th><th>배정</th><th>완료</th><th>완료율</th><th>평균 처리시간</th></tr></thead><tbody>{data.technicians.map((row) => <tr key={row.technicianId}><td><strong>{row.technicianName}</strong><small>{row.technicianId}</small></td><td>{row.assignedCount}건</td><td>{row.completedCount}건</td><td><span className={styles.rateBadge}>{row.completionRate.toFixed(1)}%</span></td><td>{minutes(row.averageProcessingMinutes)}</td></tr>)}</tbody></table></div> : <EmptyRows label="기사별" />}
+      {data.technicians.length ? <div className={styles.tableWrap}><table><thead><tr><th>담당 기사</th><th>배정</th><th>완료</th><th>완료율</th><th>수리 금액</th></tr></thead><tbody>{data.technicians.map((row) => <tr key={row.technicianId}><td><strong>{row.technicianName}</strong><small>{row.technicianId}</small></td><td>{row.assignedCount}건</td><td>{row.completedCount}건</td><td><span className={styles.rateBadge}>{row.completionRate.toFixed(1)}%</span></td><td>{won(row.totalRepairAmount)}</td></tr>)}</tbody></table></div> : <EmptyRows label="기사별" />}
     </article>
 
     <div className={styles.twoColumns}>
