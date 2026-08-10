@@ -1,6 +1,6 @@
 "use client";
 
-import type { AvailabilityTimeSlot } from "../types/serviceRequest";
+import type { AvailabilityTimeSlot } from "../../types/serviceRequest";
 import styles from "./TechnicianAssignForm.module.css";
 
 function toMinutePrefix(time: string): string {

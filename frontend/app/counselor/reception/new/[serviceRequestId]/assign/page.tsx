@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { TechnicianAssignForm } from "@/features/reception/components/TechnicianAssignForm";
+import { TechnicianAssignForm } from "@/features/reception/components/TechnicianAssign/TechnicianAssignForm";
 
 export default async function TechnicianAssignPage({ params }: { params: Promise<{ serviceRequestId: string }> }) {
   const { serviceRequestId } = await params;

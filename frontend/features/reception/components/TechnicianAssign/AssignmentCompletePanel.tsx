@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckCircle2 } from "lucide-react";
-import type { AssignServiceRequestResponse } from "../types/serviceRequest";
+import type { AssignServiceRequestResponse } from "../../types/serviceRequest";
 import styles from "./TechnicianAssignForm.module.css";
 
 function toMinutePrefix(time: string): string {

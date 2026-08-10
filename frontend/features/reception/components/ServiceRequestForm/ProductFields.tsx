@@ -4,9 +4,9 @@ import { useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 import { useGetCategoriesQuery, useGetSubCategoriesQuery } from "@/features/products/api/productsApi";
 import type { Product } from "@/features/products/types/product";
-import { ProductSearchModal } from "../ProductSearchModal";
+import { ProductSearchModal } from "./ProductSearchModal";
 import { emptyProductFieldsValue, type ProductFieldsValue } from "./productFieldsUtils";
-import styles from "../ProductFields.module.css";
+import styles from "./ProductFields.module.css";
 
 export type { ProductFieldsValue };
 

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import type { ServiceRequestListItem } from "../../types/serviceRequest";
 import { statusLabel, statusBadgeData } from "../serviceRequestStatusUtils";
-import styles from "../ServiceRequestList.module.css";
+import styles from "./ServiceRequestList.module.css";
 
 function toMinute(time: string): string {
   return time.slice(0, 5);

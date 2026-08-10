@@ -7,7 +7,7 @@ import { queryErrorMessage } from "@/features/store/api/queryError";
 import { useCreateServiceRequestMutation, useGetBaseFeeQuery } from "../../api/serviceRequestApi";
 import { emptyProductFieldsValue, isProductFieldsValid, toProductSelection } from "../ServiceRequestForm/productFieldsUtils";
 import { ServiceRequestFormFields, type ServiceRequestFormValues } from "../ServiceRequestForm/ServiceRequestFormFields";
-import styles from "../ServiceRequestCreateForm.module.css";
+import styles from "./ServiceRequestCreateForm.module.css";
 
 function initialForm(): ServiceRequestFormValues {
   return { customerId: "", product: emptyProductFieldsValue(), symptom: "", remarks: "" };

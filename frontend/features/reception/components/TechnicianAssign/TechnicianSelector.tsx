@@ -1,6 +1,6 @@
 "use client";
 
-import type { AvailableTechnicianResponse } from "../types/serviceRequest";
+import type { AvailableTechnicianResponse } from "../../types/serviceRequest";
 import styles from "./TechnicianAssignForm.module.css";
 
 interface TechnicianSelectorProps {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import styles from "../SelectorPlaceholder.module.css";
+import styles from "./SelectorPlaceholder.module.css";
 
 interface CustomerSelectorPlaceholderProps {
   initialValue?: string;
