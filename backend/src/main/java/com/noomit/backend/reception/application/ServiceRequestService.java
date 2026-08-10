@@ -29,6 +29,10 @@ public class ServiceRequestService {
     private final ApplicationEventPublisher eventPublisher;
     private final Clock clock;
 
+    public int getBaseFeePolicy() {
+        return DEFAULT_BASE_FEE;
+    }
+
     @Transactional
     public ServiceRequest create(CreateServiceRequestCommand command) {
         if (command.symptom() == null || command.symptom().isBlank()) {

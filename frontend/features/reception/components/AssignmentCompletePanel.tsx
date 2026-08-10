@@ -11,11 +11,12 @@ function toMinutePrefix(time: string): string {
 interface AssignmentCompletePanelProps {
   result: AssignServiceRequestResponse;
   requestNumber: string | null;
+  baseFee: number | null;
   title?: string;
   onConfirm: () => void;
 }
 
-export function AssignmentCompletePanel({ result, requestNumber, title = "기사 배정이 완료됐습니다", onConfirm }: AssignmentCompletePanelProps) {
+export function AssignmentCompletePanel({ result, requestNumber, baseFee, title = "기사 배정이 완료됐습니다", onConfirm }: AssignmentCompletePanelProps) {
   return (
     <section className={styles.page}>
       <article className={styles.completePanel}>
@@ -38,6 +39,12 @@ export function AssignmentCompletePanel({ result, requestNumber, title = "기사
             <dt>방문 예정 일시</dt>
             <dd>{result.visitDate} {toMinutePrefix(result.visitStartTime)}~{toMinutePrefix(result.visitEndTime)}</dd>
           </div>
+          {baseFee !== null ? (
+            <div>
+              <dt>출장비</dt>
+              <dd>{baseFee.toLocaleString("ko-KR")}원</dd>
+            </div>
+          ) : null}
         </dl>
         <button type="button" className={styles.completeButton} onClick={onConfirm}>
           접수 목록으로
