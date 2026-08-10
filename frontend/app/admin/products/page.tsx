@@ -1,5 +1,5 @@
-import { ProductRegisterForm } from "@/features/products/components/ProductRegisterForm";
+import { ProductTable } from "@/features/products/components/ProductTable";
 
 export default function AdminProductsPage() {
-  return <ProductRegisterForm />;
+  return <ProductTable />;
 }
