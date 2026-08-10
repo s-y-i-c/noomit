@@ -10,6 +10,7 @@ import type {
   ServiceRequestDetail,
   ServiceRequestFilters,
   ServiceRequestPageData,
+  UpdateServiceRequestRequest,
 } from "../types/serviceRequest";
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
@@ -128,7 +129,7 @@ export const serviceRequestService = {
   },
 
   /** 접수 정보 수정. PATCH /api/counselor/reception/requests/{id} */
-  async updateServiceRequest(id: string, request: CreateServiceRequestRequest, signal?: AbortSignal): Promise<ServiceRequestCreateResponse> {
+  async updateServiceRequest(id: string, request: UpdateServiceRequestRequest, signal?: AbortSignal): Promise<ServiceRequestCreateResponse> {
     const csrf = await getCsrfToken(signal);
     const response = await fetch(`${API_BASE_URL}/api/counselor/reception/requests/${id}`, {
       method: "PATCH",

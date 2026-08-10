@@ -4,17 +4,19 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil } from "lucide-react";
 import { queryErrorMessage } from "@/features/store/api/queryError";
-import { useUpdateServiceRequestMutation } from "../api/serviceRequestApi";
-import { ServiceRequestFormFields, type ServiceRequestFormValues } from "./ServiceRequestFormFields";
-import styles from "./ServiceRequestCreateForm.module.css";
+import { useUpdateServiceRequestMutation } from "../../api/serviceRequestApi";
+import { isProductFieldsValid, toProductSelection } from "../ServiceRequestForm/productFieldsUtils";
+import { ServiceRequestFormFields, type ServiceRequestFormValues } from "../ServiceRequestForm/ServiceRequestFormFields";
+import styles from "../ServiceRequestCreateForm.module.css";
 
 interface ServiceRequestEditFormProps {
   serviceRequestId: string;
   initialValues: ServiceRequestFormValues;
   baseFee: number;
+  version: number;
 }
 
-export function ServiceRequestEditForm({ serviceRequestId, initialValues, baseFee }: ServiceRequestEditFormProps) {
+export function ServiceRequestEditForm({ serviceRequestId, initialValues, baseFee, version }: ServiceRequestEditFormProps) {
   const router = useRouter();
   const [form, setForm] = useState<ServiceRequestFormValues>(initialValues);
   const [updateServiceRequest, updateState] = useUpdateServiceRequestMutation();
@@ -23,7 +25,7 @@ export function ServiceRequestEditForm({ serviceRequestId, initialValues, baseFe
     ? queryErrorMessage(updateState.error, "접수 정보를 수정하지 못했습니다.")
     : null;
 
-  const canSubmit = form.customerId !== "" && form.productId !== "" && form.symptom.trim() !== "";
+  const canSubmit = form.customerId !== "" && isProductFieldsValid(form.product) && form.symptom.trim() !== "";
 
   const handleReset = () => setForm(initialValues);
 
@@ -36,9 +38,10 @@ export function ServiceRequestEditForm({ serviceRequestId, initialValues, baseFe
         id: serviceRequestId,
         request: {
           customerId: form.customerId,
-          productId: form.productId,
+          ...toProductSelection(form.product),
           symptom: form.symptom.trim(),
           remarks: form.remarks.trim(),
+          version,
         },
       }).unwrap();
       router.push(`/counselor/reception/${serviceRequestId}`);

@@ -34,9 +34,24 @@ public class ServiceRequestService {
         if (command.symptom() == null || command.symptom().isBlank()) {
             throw new BusinessException(ErrorCode.RECEPTION_INVALID_REQUEST, "고장 증상 내용이 필요합니다.");
         }
-        ServiceRequest request = ServiceRequest.create(command.customerId(), command.productId(), command.receptionistId(), 
+        validateProductSource(command.productId(), command.selectedSubCategoryId(), command.selectedModelName());
+        ServiceRequest request = ServiceRequest.create(command.customerId(), command.productId(),
+                command.selectedSubCategoryId(), command.selectedModelName(), command.receptionistId(),
                 command.symptom(), command.remarks(), DEFAULT_BASE_FEE, Instant.now(clock));
         return requestRepository.create(request);
+    }
+
+    // 모델 코드를 알면 productId만, 모르면 세부카테고리+모델명만 — 둘 다 있거나 둘 다 없으면 안 됨 (생성/수정 공통)
+    private void validateProductSource(Long productId, Long selectedSubCategoryId, String selectedModelName) {
+        boolean hasProduct = productId != null;
+        boolean hasSelectedInfo = selectedSubCategoryId != null
+                && selectedModelName != null
+                && !selectedModelName.isBlank();
+
+        if (hasProduct == hasSelectedInfo) {
+            throw new BusinessException(ErrorCode.RECEPTION_INVALID_REQUEST,
+                    "제품은 모델 코드 또는 서브카테고리+모델명 중 하나로만 입력해야 합니다.");
+        }
     }
 
     @Transactional
@@ -137,16 +152,22 @@ public class ServiceRequestService {
         if (command.symptom() == null || command.symptom().isBlank()) {
             throw new BusinessException(ErrorCode.RECEPTION_INVALID_REQUEST, "고장 증상 내용이 필요합니다.");
         }
+        validateProductSource(command.productId(), command.selectedSubCategoryId(), command.selectedModelName());
 
         ServiceRequest request = findRequest(command.id());
+        // 동시성 제어
+        if (request.version() != command.version()) {
+            throw new BusinessException(ErrorCode.RECEPTION_CONCURRENT_MODIFICATION, "이미 변경된 접수입니다. 새로고침 후 다시 시도해주세요.");
+        }
         if (!request.canEdit()) {
             throw new BusinessException(ErrorCode.RECEPTION_INVALID_STATUS, "취소된 접수는 수정할 수 없습니다.");
         }
 
         int updated = requestRepository.update(command.id(), command.customerId(), command.productId(),
-                command.symptom(), command.remarks());
+                command.selectedSubCategoryId(), command.selectedModelName(), command.symptom(), command.remarks(),
+                command.version());
         if (updated == 0) {
-            throw new BusinessException(ErrorCode.RECEPTION_INVALID_STATUS, "취소된 접수는 수정할 수 없습니다.");
+            throw new BusinessException(ErrorCode.RECEPTION_CONCURRENT_MODIFICATION, "이미 변경된 접수입니다. 새로고침 후 다시 시도해주세요.");
         }
 
         return findRequest(command.id());

@@ -8,7 +8,9 @@ public record ServiceRequest(
         Long id,
         String requestNumber,
         long customerId,
-        long productId,
+        Long productId,
+        Long selectedSubCategoryId,
+        String selectedModelName,
         long receptionistId,
         String symptom,
         String remarks,
@@ -27,10 +29,12 @@ public record ServiceRequest(
         Instant createdAt,
         Instant updatedAt) {
 
-    public static ServiceRequest create(long customerId, long productId, long receptionistId, String symptom,
+    public static ServiceRequest create(long customerId, Long productId, Long selectedSubCategoryId,
+                                         String selectedModelName, long receptionistId, String symptom,
                                          String remarks, int baseFee, Instant requestedAt) {
         return new ServiceRequest(
-                null, null, customerId, productId, receptionistId, symptom, remarks, baseFee,
+                null, null, customerId, productId, selectedSubCategoryId, selectedModelName,
+                receptionistId, symptom, remarks, baseFee,
                 null, null, null, null, null,
                 ServiceRequestStatus.RECEIVED,
                 requestedAt, null, null, null,

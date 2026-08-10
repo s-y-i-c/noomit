@@ -89,19 +89,26 @@ interface ServiceRequestJpaRepository extends JpaRepository<ServiceRequestEntity
             UPDATE ServiceRequestEntity e
             SET e.customerId = :customerId,
                 e.productId = :productId,
+                e.selectedSubCategoryId = :selectedSubCategoryId,
+                e.selectedModelName = :selectedModelName,
                 e.symptom = :symptom,
-                e.remarks = :remarks
+                e.remarks = :remarks,
+                e.version = e.version + 1
             WHERE e.id = :id
                 AND e.status IN (
                     com.noomit.backend.reception.domain.ServiceRequestStatus.RECEIVED,
                     com.noomit.backend.reception.domain.ServiceRequestStatus.ASSIGNED
                 )
+                AND e.version = :version
             """)
     int update(@Param("id") long id,
                @Param("customerId") long customerId,
-               @Param("productId") long productId,
+               @Param("productId") Long productId,
+               @Param("selectedSubCategoryId") Long selectedSubCategoryId,
+               @Param("selectedModelName") String selectedModelName,
                @Param("symptom") String symptom,
-               @Param("remarks") String remarks);
+               @Param("remarks") String remarks,
+               @Param("version") long version);
 
     @Query("""
             SELECT e FROM ServiceRequestEntity e

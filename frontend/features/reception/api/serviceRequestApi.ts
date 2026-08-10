@@ -12,6 +12,7 @@ import type {
   ServiceRequestDetail,
   ServiceRequestFilters,
   ServiceRequestPageData,
+  UpdateServiceRequestRequest,
 } from "../types/serviceRequest";
 
 const serviceRequestApi = baseApi.injectEndpoints({
@@ -55,7 +56,7 @@ const serviceRequestApi = baseApi.injectEndpoints({
         { type: "ServiceRequest", id: "LIST" },
       ],
     }),
-    updateServiceRequest: build.mutation<ServiceRequestCreateResponse, { id: string; request: CreateServiceRequestRequest }>({
+    updateServiceRequest: build.mutation<ServiceRequestCreateResponse, { id: string; request: UpdateServiceRequestRequest }>({
       queryFn: ({ id, request }, api) => queryResult(serviceRequestService.updateServiceRequest(id, request, api.signal)),
       invalidatesTags: (_result, _error, { id }) => [
         { type: "ServiceRequest", id },

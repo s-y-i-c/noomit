@@ -119,8 +119,14 @@ export function ServiceRequestDetail({ id }: ServiceRequestDetailProps) {
             <p className={styles.sectionTitle}>제품 정보</p>
             <div className={styles.field}>
               <div className={styles.fieldLabel}>제품</div>
-              <div className={styles.fieldValue}>{data.modelName}</div>
+              <div className={styles.fieldValue}>{data.modelName ?? "-"}</div>
             </div>
+            {data.subCategoryName ? (
+              <div className={styles.field}>
+                <div className={styles.fieldLabel}>서브카테고리</div>
+                <div className={styles.fieldValue}>{data.subCategoryName}</div>
+              </div>
+            ) : null}
             <div className={styles.field}>
               <div className={styles.fieldLabel}>특이사항</div>
               <div className={styles.fieldValue}>{data.remarks || "-"}</div>

@@ -1,4 +1,4 @@
-import { ServiceRequestCreateForm } from "@/features/reception/components/ServiceRequestCreateForm";
+import { ServiceRequestCreateForm } from "@/features/reception/components/ServiceRequestCreate/ServiceRequestCreateForm";
 
 export default function ServiceRequestCreatePage() {
   return <ServiceRequestCreateForm />;
