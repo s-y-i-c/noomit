@@ -53,16 +53,19 @@ public class ServiceRequestQueryService {
 
         String modelName;
         String subCategoryName;
+        Long selectedCategoryId;
         // 모델 코드 입력 vs 서브카테고리 + 모델명 입력 처리 구분
         if (request.productId() != null) {
             ProductInfo product = productDirectory.findById(request.productId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "제품 정보를 찾을 수 없습니다."));
             modelName = product.modelName();
             subCategoryName = null;
+            selectedCategoryId = null;
         } else {
             SubCategoryInfo subCategory = findSubCategory(request.selectedSubCategoryId());
             modelName = request.selectedModelName();
             subCategoryName = subCategory.name();
+            selectedCategoryId = subCategory.categoryId();
         }
         String technicianName = request.technicianId() == null ? null : findTechnician(request.technicianId()).name();
         String receptionistName = findReceptionist(request.receptionistId()).name();
@@ -77,6 +80,7 @@ public class ServiceRequestQueryService {
                 customer.detailAddress(),
                 request.productId(),
                 request.selectedSubCategoryId(),
+                selectedCategoryId,
                 modelName,
                 subCategoryName,
                 request.symptom(),

@@ -1,6 +1,5 @@
 "use client";
 
-import { useGetSubCategoriesQuery } from "@/features/products/api/productsApi";
 import { useGetServiceRequestDetailQuery } from "../../api/serviceRequestApi";
 import type { ProductFieldsValue } from "../ServiceRequestForm/productFieldsUtils";
 import { ServiceRequestEditForm } from "./ServiceRequestEditForm";
@@ -12,10 +11,8 @@ interface ServiceRequestEditPageProps {
 
 export function ServiceRequestEditPage({ id }: ServiceRequestEditPageProps) {
   const { data, isFetching, error } = useGetServiceRequestDetailQuery(id);
-  // TODO: selectedSubCategoryId로 부모 categoryId를 찾기 위해 필요 - 추후 교체
-  const { data: subCategories, isFetching: isSubCategoriesFetching } = useGetSubCategoriesQuery();
 
-  if ((isFetching && !data) || (isSubCategoriesFetching && !subCategories)) {
+  if (isFetching && !data) {
     return <div className={styles.stateMessage}>불러오는 중...</div>;
   }
   if (error || !data) {
@@ -31,7 +28,7 @@ export function ServiceRequestEditPage({ id }: ServiceRequestEditPageProps) {
         matchedProductId: data.productId,
       }
     : {
-        categoryId: subCategories?.find((sub) => sub.id === data.selectedSubCategoryId)?.categoryId ?? "",
+        categoryId: data.selectedCategoryId ?? "",
         subCategoryId: data.selectedSubCategoryId ?? "",
         modelName: data.modelName ?? "",
         modelCode: "",
