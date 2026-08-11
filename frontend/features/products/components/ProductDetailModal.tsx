@@ -1,6 +1,8 @@
 "use client";
 
-import { RefreshCw, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { MoreVertical, Pencil, RefreshCw, X } from "lucide-react";
 import {
   useChangeProductStatusMutation,
   useGetCategoriesQuery,
@@ -17,11 +19,42 @@ interface ProductDetailModalProps {
 }
 
 export function ProductDetailModal({ productId, onClose, readOnly = false }: ProductDetailModalProps) {
+  const router = useRouter();
   const { data: product, isFetching, error } = useGetProductByIdQuery(productId);
   const { data: categories } = useGetCategoriesQuery();
   const { data: subCategories } = useGetSubCategoriesQuery();
   const [changeStatus, { isLoading: isChangingStatus, error: changeStatusError }] =
     useChangeProductStatusMutation();
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isMenuOpen) return;
+
+    function handlePointerDown(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setIsMenuOpen(false);
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isMenuOpen]);
+
+  const goToEdit = () => {
+    setIsMenuOpen(false);
+    onClose();
+    router.push(`/admin/products/${productId}/edit`);
+  };
 
   const errorMessage = typeof error === "object" && error !== null && "message" in error
     ? String(error.message)
@@ -45,9 +78,34 @@ export function ProductDetailModal({ productId, onClose, readOnly = false }: Pro
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h2>제품 상세 정보</h2>
-          <button type="button" onClick={onClose} aria-label="닫기" className={styles.closeButton}>
-            <X size={18} />
-          </button>
+          <div className={styles.headerActions}>
+            {readOnly ? null : (
+              <div className={styles.menuWrap} ref={menuRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsMenuOpen((current) => !current)}
+                  aria-label="더보기"
+                  aria-haspopup="menu"
+                  aria-expanded={isMenuOpen}
+                  className={styles.closeButton}
+                >
+                  <MoreVertical size={18} />
+                </button>
+                {isMenuOpen ? (
+                  <ul className={styles.menu} role="menu">
+                    <li>
+                      <button type="button" role="menuitem" onClick={goToEdit}>
+                        <Pencil size={14} /> 수정
+                      </button>
+                    </li>
+                  </ul>
+                ) : null}
+              </div>
+            )}
+            <button type="button" onClick={onClose} aria-label="닫기" className={styles.closeButton}>
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {isFetching ? <div className={styles.state}>불러오는 중...</div> : null}

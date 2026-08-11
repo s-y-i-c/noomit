@@ -186,4 +186,31 @@ export const productService = {
     }
     return body.data;
   },
+
+  /** 관리자 전용 제품 수정. PUT /api/admin/products/{id} — CSRF 보호 대상. */
+  async modifyProduct(id: string, request: RegisterProductRequest, signal?: AbortSignal): Promise<Product> {
+    const csrf = await getCsrfToken(signal);
+    const response = await fetch(`${API_BASE_URL}/api/admin/products/${id}`, {
+      method: "PUT",
+      credentials: "include",
+      cache: "no-store",
+      signal,
+      headers: {
+        "Content-Type": "application/json",
+        [csrf.headerName]: csrf.token,
+      },
+      body: JSON.stringify(request),
+    });
+    const body: unknown = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message = isEnvelope<Product>(body) && body.message
+        ? body.message
+        : `제품을 수정하지 못했습니다. (${response.status})`;
+      throw new Error(message);
+    }
+    if (!isEnvelope<Product>(body) || !body.success || !body.data) {
+      throw new Error("제품 수정 응답 형식이 올바르지 않습니다.");
+    }
+    return body.data;
+  },
 };
