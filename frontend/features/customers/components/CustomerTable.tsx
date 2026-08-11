@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Contact, RefreshCw, Search } from "lucide-react";
+import { Contact, RefreshCw, RotateCcw, Search } from "lucide-react";
 import { useGetCustomersQuery } from "../api/customersApi";
 import type { CustomerFilters, CustomerStatus } from "../types/customer";
 import { CustomerDetailModal } from "./CustomerDetailModal";
@@ -34,6 +34,11 @@ export function CustomerTable() {
 
   const changeStatusFilter = (status: CustomerStatus | "") => {
     setFilters((current) => ({ ...current, status, page: 0 }));
+  };
+
+  const resetFilters = () => {
+    setKeywordDraft("");
+    setFilters(initialFilters());
   };
 
   const totalPages = data?.totalPages ?? 0;
@@ -72,6 +77,9 @@ export function CustomerTable() {
         <button className={styles.searchButton} type="submit" disabled={isFetching}>
           {isFetching ? <RefreshCw className={styles.spinning} size={17} /> : <Search size={17} />}
           {isFetching ? "조회 중" : "검색"}
+        </button>
+        <button className={styles.resetButton} type="button" onClick={resetFilters} disabled={isFetching}>
+          <RotateCcw size={17} /> 초기화
         </button>
       </form>
 

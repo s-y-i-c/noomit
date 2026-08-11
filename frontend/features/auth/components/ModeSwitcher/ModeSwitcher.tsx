@@ -26,7 +26,9 @@ export function ModeSwitcher({ roles, compact = false }: ModeSwitcherProps) {
     .filter((entry): entry is { role: string; destination: { label: string; href: string } } =>
       Boolean(entry.destination));
 
-  if (buttons.length < 2) {
+  // role이 1개뿐이어도 버튼은 보여준다 — 홈 화면 등 role 전용 화면 밖에서는
+  // 이 버튼이 자기 업무 화면으로 갈 수 있는 유일한 진입점이라 숨기면 안 된다.
+  if (buttons.length < 1) {
     return null;
   }
 

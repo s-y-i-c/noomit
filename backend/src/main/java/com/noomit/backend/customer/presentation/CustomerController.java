@@ -10,6 +10,7 @@ import com.noomit.backend.shared.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/customers")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'ENGINEER', 'COUNSELOR')")
 class CustomerController {
     private final CustomerService customerService;
 

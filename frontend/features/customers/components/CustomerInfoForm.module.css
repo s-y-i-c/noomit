@@ -38,6 +38,16 @@
   resize: vertical;
 }
 
+.form input[readonly] {
+  background: var(--color-page-background);
+  color: var(--color-text-secondary);
+  cursor: default;
+}
+
+.form input[readonly]:focus {
+  box-shadow: none;
+}
+
 .twoColRow {
   display: grid;
   grid-template-columns: 1fr 1fr;

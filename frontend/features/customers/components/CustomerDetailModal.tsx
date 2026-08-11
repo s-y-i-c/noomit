@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { RefreshCw, X } from "lucide-react";
 import { useChangeCustomerStatusMutation, useGetCustomerByIdQuery } from "../api/customersApi";
+import type { CustomerStatus } from "../types/customer";
 import styles from "./CustomerDetailModal.module.css";
 
 interface CustomerDetailModalProps {
@@ -13,6 +15,7 @@ export function CustomerDetailModal({ customerId, onClose }: CustomerDetailModal
   const { data: customer, isFetching, error } = useGetCustomerByIdQuery(customerId);
   const [changeStatus, { isLoading: isChangingStatus, error: changeStatusError }] =
     useChangeCustomerStatusMutation();
+  const [pendingStatus, setPendingStatus] = useState<CustomerStatus | null>(null);
 
   const errorMessage = typeof error === "object" && error !== null && "message" in error
     ? String(error.message)
@@ -22,10 +25,16 @@ export function CustomerDetailModal({ customerId, onClose }: CustomerDetailModal
       ? String(changeStatusError.message)
       : null;
 
-  const toggleStatus = () => {
+  const requestStatusChange = () => {
     if (!customer) return;
-    const nextStatus = customer.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
-    void changeStatus({ id: customer.id, status: nextStatus });
+    setPendingStatus(customer.status === "ACTIVE" ? "INACTIVE" : "ACTIVE");
+  };
+
+  const confirmStatusChange = async () => {
+    if (!customer || !pendingStatus) return;
+    const result = await changeStatus({ id: customer.id, status: pendingStatus });
+    // 실패했으면 에러 메시지를 보여줘야 하니 확인창을 그대로 열어둔다.
+    if (!("error" in result)) setPendingStatus(null);
   };
 
   return (
@@ -59,7 +68,7 @@ export function CustomerDetailModal({ customerId, onClose }: CustomerDetailModal
                     type="button"
                     className={styles.statusButton}
                     data-status={customer.status}
-                    onClick={toggleStatus}
+                    onClick={requestStatusChange}
                     disabled={isChangingStatus}
                   >
                     {isChangingStatus ? (
@@ -90,10 +99,51 @@ export function CustomerDetailModal({ customerId, onClose }: CustomerDetailModal
                 <dd>{customer.id}</dd>
               </div>
             </dl>
-            {changeStatusErrorMessage ? <div className={styles.state}>{changeStatusErrorMessage}</div> : null}
           </>
         ) : null}
       </div>
+
+      {pendingStatus ? (
+        <div
+          className={styles.confirmBackdrop}
+          onClick={(e) => {
+            e.stopPropagation();
+            setPendingStatus(null);
+          }}
+        >
+          <div className={styles.confirmModal} onClick={(e) => e.stopPropagation()}>
+            <h3>
+              {customer?.name}님을 {pendingStatus === "ACTIVE" ? "활성" : "비활성"} 상태로
+              전환할까요?
+            </h3>
+            {pendingStatus === "INACTIVE" ? (
+              <p className={styles.confirmHint}>
+                비활성화해도, 같은 전화번호로 새 접수가 들어오면 자동으로 다시 활성화됩니다.
+              </p>
+            ) : null}
+            {changeStatusErrorMessage ? <p className={styles.confirmError}>{changeStatusErrorMessage}</p> : null}
+            <div className={styles.confirmActions}>
+              <button
+                type="button"
+                className={styles.outlineButton}
+                onClick={() => setPendingStatus(null)}
+                disabled={isChangingStatus}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                className={pendingStatus === "INACTIVE" ? styles.dangerButton : styles.primaryButton}
+                onClick={confirmStatusChange}
+                disabled={isChangingStatus}
+              >
+                {isChangingStatus ? <RefreshCw className={styles.spinning} size={14} /> : null}
+                {pendingStatus === "ACTIVE" ? "활성화" : "비활성화"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

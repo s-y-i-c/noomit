@@ -140,7 +140,12 @@ export function CustomerInfoForm({ initialCustomer, onChange }: CustomerInfoForm
       <div className={styles.phoneRow}>
         <label className={styles.phoneLabel}>
           <span>우편번호</span>
-          <input value={value.zipCode} onChange={(e) => update("zipCode", e.target.value)} required />
+          <input
+            value={value.zipCode}
+            readOnly
+            placeholder="주소 검색으로 자동 입력됩니다"
+            required
+          />
         </label>
         <button
           type="button"
