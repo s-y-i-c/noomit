@@ -53,12 +53,13 @@ class StatisticsDashboardServiceTest {
         assertThat(result.summary().completedCount()).isEqualTo(1);
         assertThat(result.summary().inProgressCount()).isEqualTo(1);
         assertThat(result.summary().completionRate()).isEqualTo(50.0);
-        assertThat(result.summary().totalRepairAmount()).isEqualByComparingTo("40000");
+        assertThat(result.summary().totalRepairAmount()).isEqualByComparingTo("30000");
         assertThat(result.repeatRepair().sameCustomerRate()).isEqualTo(50.0);
         assertThat(result.repeatRepair().sameProductRate()).isEqualTo(50.0);
         assertThat(result.technicians()).singleElement().satisfies(row -> {
             assertThat(row.technicianName()).isEqualTo("김기사");
             assertThat(row.assignedCount()).isEqualTo(2);
+            assertThat(row.totalRepairAmount()).isEqualByComparingTo("30000");
         });
         assertThat(result.customers()).singleElement().satisfies(row ->
                 assertThat(row.customerName()).isEqualTo("홍길동"));

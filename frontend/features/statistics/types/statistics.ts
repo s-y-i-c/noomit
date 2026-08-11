@@ -1,4 +1,4 @@
-export type RequestStatus = "RECEIVED" | "ASSIGNED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+export type RequestStatus = "RECEIVED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
 
 export interface StatisticsFilters {
   from: string;

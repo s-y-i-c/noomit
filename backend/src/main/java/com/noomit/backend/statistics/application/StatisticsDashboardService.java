@@ -181,6 +181,7 @@ public class StatisticsDashboardService {
     private BigDecimal totalRepairAmount(
             Collection<ReceptionSnapshot> receptions, Map<Long, RepairSnapshot> repairs) {
         return receptions.stream()
+                .filter(item -> currentStatus(item, repairs.get(item.serviceRequestId())) == RequestStatus.COMPLETED)
                 .map(item -> repairs.get(item.serviceRequestId()))
                 .filter(Objects::nonNull)
                 .map(RepairSnapshot::totalAmount)
