@@ -28,6 +28,13 @@ public class ProductAdminController {
         return ApiResponse.success("상태가 변경되었습니다.", null);
     }
 
+    @PutMapping("/{id}")
+    ApiResponse<ProductResponse> modifyProduct(@PathVariable String id, @RequestBody ProductRequest request) {
+        Product result = productService.modifyProduct(parseId(id), new RegisterProductCommand(
+                request.subCategoryId(), request.modelName(), request.modelCode(), request.memo()));
+        return ApiResponse.success("제품을 수정했습니다.", ProductResponse.from(result));
+    }
+
     private Product.Status parseStatus(String value) {
         try {
             return Product.Status.from(value);

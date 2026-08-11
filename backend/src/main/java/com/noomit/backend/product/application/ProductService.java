@@ -48,4 +48,9 @@ public class ProductService {
     public Product changeStatus(long id, Product.Status status) {
         return productRepository.changeStatus(id, status);
     }
+
+    @Transactional
+    public Product modifyProduct(long id, RegisterProductCommand command) {
+        return productRepository.modifyProduct(id, command);
+    }
 }

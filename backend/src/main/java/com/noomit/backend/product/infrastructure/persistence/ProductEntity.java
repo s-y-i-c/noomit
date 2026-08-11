@@ -68,6 +68,14 @@ public class ProductEntity {
         this.category = subCategory.getCategory();
     }
 
+    // 관리자가 서브카테고리·모델명·모델코드·메모를 통째로 고칠 때 쓴다.
+    public void modify(SubCategoryEntity subCategory, String modelName, String modelCode, String memo) {
+        changeSubCategory(subCategory);
+        this.modelName = modelName;
+        this.modelCode = modelCode;
+        this.memo = memo;
+    }
+
     // 관리자가 판매중/단종 상태만 바꿀 때 쓴다.
     public void changeStatus(Product.Status status) {
         this.status = status;

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import com.noomit.backend.product.application.ProductPage;
 import com.noomit.backend.product.application.ProductRepository;
+import com.noomit.backend.product.application.RegisterProductCommand;
 import com.noomit.backend.product.domain.Product;
 import com.noomit.backend.shared.error.BusinessException;
 import com.noomit.backend.shared.error.ErrorCode;
@@ -53,5 +54,23 @@ class JpaProductRepository implements ProductRepository {
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND, "제품을 찾을 수 없습니다."));
         entity.changeStatus(status);
         return entity.toDomain();
+    }
+
+    @Override
+    public Product modifyProduct(long id, RegisterProductCommand command) {
+        ProductEntity entity = products.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND, "제품을 찾을 수 없습니다."));
+        SubCategoryEntity subCategory = subCategories.findById(command.subCategoryId())
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.PRODUCT_SUB_CATEGORY_NOT_FOUND, "서브카테고리를 찾을 수 없습니다."));
+        entity.modify(subCategory, command.modelName(), command.modelCode(), command.memo());
+        try {
+            // saveAndFlush로 즉시 flush해야 unique 제약 위반이 여기서 바로 잡힌다.
+            // (그냥 필드만 바꾸면 트랜잭션 커밋 시점에야 UPDATE가 나가서 여기서 못 잡음)
+            return products.saveAndFlush(entity).toDomain();
+        } catch (DataIntegrityViolationException exception) {
+            throw new BusinessException(
+                    ErrorCode.PRODUCT_MODEL_CODE_ALREADY_EXISTS, "이미 등록된 모델코드입니다.");
+        }
     }
 }
