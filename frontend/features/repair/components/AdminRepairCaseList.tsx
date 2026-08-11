@@ -1,15 +1,12 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import { ClipboardList, RefreshCw } from "lucide-react";
-import {
-  useGetAllRepairCasesQuery,
-  useApproveRepairCaseMutation,
-  useRejectRepairCaseMutation,
-} from "../api/repairApi";
+import { useState } from "react";
+import { ClipboardList } from "lucide-react";
+import { useGetAllRepairCasesQuery } from "../api/repairApi";
 import type { RepairStatus } from "../types/repair";
 import { statusLabel, statusBadgeData } from "./repairStatusUtils";
 import { queryErrorMessage } from "@/features/store/api/queryError";
+import { AdminRepairCaseDetail } from "./AdminRepairCaseDetail";
 import styles from "./AdminRepairCaseList.module.css";
 
 const STATUS_TABS: Array<{ value: RepairStatus | undefined; label: string }> = [
@@ -21,30 +18,13 @@ const STATUS_TABS: Array<{ value: RepairStatus | undefined; label: string }> = [
 
 export function AdminRepairCaseList() {
   const [statusFilter, setStatusFilter] = useState<RepairStatus | undefined>(undefined);
-  const [rejectTargetId, setRejectTargetId] = useState<string | null>(null);
-  const [rejectReason, setRejectReason] = useState("");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const { data: cases, isFetching, error } = useGetAllRepairCasesQuery(statusFilter, {
     pollingInterval: 10000,
   });
-  const [approve, { isLoading: isApproving }] = useApproveRepairCaseMutation();
-  const [reject, { isLoading: isRejecting, error: rejectError }] = useRejectRepairCaseMutation();
 
   const errorMessage = queryErrorMessage(error, "");
-
-  const handleApprove = (id: string) => {
-    void approve(id);
-  };
-
-  const handleRejectSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!rejectTargetId || !rejectReason.trim()) return;
-    const result = await reject({ id: rejectTargetId, reason: rejectReason.trim() });
-    if (!("error" in result)) {
-      setRejectTargetId(null);
-      setRejectReason("");
-    }
-  };
 
   return (
     <section className={styles.page}>
@@ -87,12 +67,11 @@ export function AdminRepairCaseList() {
                   <th>총 금액</th>
                   <th>수리 내역</th>
                   <th>수정일</th>
-                  <th>작업</th>
                 </tr>
               </thead>
               <tbody>
                 {cases.map((c) => (
-                  <tr key={c.id}>
+                  <tr key={c.id} className={styles.row} onClick={() => setSelectedId(c.id)}>
                     <td><strong>#{c.id}</strong></td>
                     <td>{c.technicianId}</td>
                     <td>
@@ -103,30 +82,6 @@ export function AdminRepairCaseList() {
                     <td>{Number(c.totalAmount).toLocaleString()}원</td>
                     <td>{c.details.length}건</td>
                     <td><small>{new Date(c.updatedAt).toLocaleDateString("ko-KR")}</small></td>
-                    <td>
-                      {c.status === "SUBMITTED" ? (
-                        <div className={styles.actions}>
-                          <button
-                            type="button"
-                            className={styles.approveButton}
-                            onClick={() => handleApprove(c.id)}
-                            disabled={isApproving}
-                          >
-                            {isApproving ? <RefreshCw size={12} className={styles.spinning} /> : null}
-                            승인
-                          </button>
-                          <button
-                            type="button"
-                            className={styles.rejectButton}
-                            onClick={() => { setRejectTargetId(c.id); setRejectReason(""); }}
-                          >
-                            반려
-                          </button>
-                        </div>
-                      ) : (
-                        <span className={styles.noAction}>-</span>
-                      )}
-                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -137,33 +92,8 @@ export function AdminRepairCaseList() {
         )}
       </article>
 
-      {rejectTargetId ? (
-        <div className={styles.backdrop} onClick={() => setRejectTargetId(null)}>
-          <form className={styles.rejectModal} onClick={(e) => e.stopPropagation()} onSubmit={handleRejectSubmit}>
-            <h3>반려 사유 입력</h3>
-            <p>케이스 #{rejectTargetId}</p>
-            <textarea
-              className={styles.textarea}
-              placeholder="반려 사유를 입력하세요"
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-              rows={4}
-              required
-            />
-            {rejectError ? (
-              <p className={styles.formError}>{queryErrorMessage(rejectError, "반려에 실패했습니다.")}</p>
-            ) : null}
-            <div className={styles.rejectActions}>
-              <button type="button" className={styles.cancelButton} onClick={() => setRejectTargetId(null)}>
-                취소
-              </button>
-              <button type="submit" className={styles.confirmRejectButton} disabled={isRejecting}>
-                {isRejecting ? <RefreshCw size={13} className={styles.spinning} /> : null}
-                반려 확정
-              </button>
-            </div>
-          </form>
-        </div>
+      {selectedId ? (
+        <AdminRepairCaseDetail caseId={selectedId} onClose={() => setSelectedId(null)} />
       ) : null}
     </section>
   );
