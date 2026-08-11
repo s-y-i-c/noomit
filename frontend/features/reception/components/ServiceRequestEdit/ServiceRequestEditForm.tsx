@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Pencil } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 import { queryErrorMessage } from "@/features/store/api/queryError";
 import { CustomerInfoForm } from "@/features/customers/components/CustomerInfoForm";
 import type { Customer, CustomerInfoFormValue } from "@/features/customers/types/customer";
@@ -82,6 +82,10 @@ export function ServiceRequestEditForm({ serviceRequestId, initialCustomer, init
 
   return (
     <section className={styles.page}>
+      <button type="button" className={styles.backButton} onClick={() => router.back()}>
+        <ArrowLeft size={16} /> 뒤로가기
+      </button>
+
       <header className={styles.hero}>
         <div>
           <p className={styles.eyebrow}><Pencil size={15} /> Reception</p>
