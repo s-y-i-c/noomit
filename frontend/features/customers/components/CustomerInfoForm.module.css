@@ -38,6 +38,12 @@
   resize: vertical;
 }
 
+.twoColRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
 .phoneRow {
   display: flex;
   align-items: end;
@@ -100,4 +106,10 @@
 
 .hint[data-tone="error"] {
   color: var(--color-danger);
+}
+
+@media (max-width: 520px) {
+  .twoColRow {
+    grid-template-columns: 1fr;
+  }
 }

@@ -59,12 +59,6 @@
 
 .sectionTitle { font-size: 15px; font-weight: 800; }
 
-.selectedHint { 
-    color: var(--color-text-secondary); 
-    font-size: 12px; 
-    font-weight: 600; 
-}
-
 .hint { 
     color: var(--color-text-secondary); 
     font-size: 13px; 

@@ -100,26 +100,33 @@ export function CustomerInfoForm({ initialCustomer, onChange }: CustomerInfoForm
 
   return (
     <div className={styles.form}>
-      <div className={styles.phoneRow}>
-        <label className={styles.phoneLabel}>
-          <span>전화번호</span>
-          <input
-            value={value.phoneNumber}
-            onChange={(e) => update("phoneNumber", e.target.value.replace(/\D/g, "").slice(0, 11))}
-            inputMode="numeric"
-            maxLength={11}
-            placeholder="01000000000"
-          />
+      <div className={styles.twoColRow}>
+        <div className={styles.phoneRow}>
+          <label className={styles.phoneLabel}>
+            <span>전화번호</span>
+            <input
+              value={value.phoneNumber}
+              onChange={(e) => update("phoneNumber", e.target.value.replace(/\D/g, "").slice(0, 11))}
+              inputMode="numeric"
+              maxLength={11}
+              placeholder="01000000000"
+            />
+          </label>
+          <button
+            type="button"
+            className={styles.lookupButton}
+            onClick={handleLookup}
+            disabled={isFetching || !value.phoneNumber.trim()}
+          >
+            {isFetching ? <RefreshCw className={styles.spinning} size={16} /> : <Search size={16} />}
+            조회
+          </button>
+        </div>
+
+        <label>
+          <span>이름</span>
+          <input value={value.name} onChange={(e) => update("name", e.target.value)} required />
         </label>
-        <button
-          type="button"
-          className={styles.lookupButton}
-          onClick={handleLookup}
-          disabled={isFetching || !value.phoneNumber.trim()}
-        >
-          {isFetching ? <RefreshCw className={styles.spinning} size={16} /> : <Search size={16} />}
-          조회
-        </button>
       </div>
 
       {lookupError ? <p className={styles.hint} data-tone="error">{lookupError}</p> : null}
@@ -130,10 +137,6 @@ export function CustomerInfoForm({ initialCustomer, onChange }: CustomerInfoForm
         <p className={styles.hint} data-tone="new">신규 고객입니다. 정보를 입력해주세요.</p>
       ) : null}
 
-      <label>
-        <span>이름</span>
-        <input value={value.name} onChange={(e) => update("name", e.target.value)} required />
-      </label>
       <div className={styles.phoneRow}>
         <label className={styles.phoneLabel}>
           <span>우편번호</span>

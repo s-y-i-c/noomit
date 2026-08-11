@@ -1,13 +1,11 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { CustomerSelectorPlaceholder } from "./CustomerSelectorPlaceholder";
 import { ProductFields } from "./ProductFields";
 import type { ProductFieldsValue } from "./productFieldsUtils";
 import styles from "../ServiceRequestCreate/ServiceRequestCreateForm.module.css";
 
 export interface ServiceRequestFormValues {
-  customerId: string;
   product: ProductFieldsValue;
   symptom: string;
   remarks: string;
@@ -16,20 +14,19 @@ export interface ServiceRequestFormValues {
 interface ServiceRequestFormFieldsProps {
   form: ServiceRequestFormValues;
   onChange: (patch: Partial<ServiceRequestFormValues>) => void;
+  customerContent: ReactNode;
   baseFeeContent: ReactNode;
+  /** ProductFields는 내부 state를 직접 들고 있음. 초기화 시 이 값을 바꿔 강제로 리마운트. */
+  resetKey: number;
 }
 
 // 고객/제품 정보 · 접수 상세 · 출장비 섹션 — 생성/수정 폼이 공유
-export function ServiceRequestFormFields({ form, onChange, baseFeeContent }: ServiceRequestFormFieldsProps) {
+export function ServiceRequestFormFields({ form, onChange, customerContent, baseFeeContent, resetKey }: ServiceRequestFormFieldsProps) {
   return (
     <>
       <article className={styles.panel}>
         <h2 className={styles.sectionTitle}>고객 정보</h2>
-        <CustomerSelectorPlaceholder
-          initialValue={form.customerId}
-          onSelect={(customer) => onChange({ customerId: customer.customerId })}
-        />
-        {form.customerId ? <p className={styles.selectedHint}>선택된 고객 ID: {form.customerId}</p> : null}
+        {customerContent}
       </article>
 
       <div className={styles.splitRow}>
@@ -37,6 +34,7 @@ export function ServiceRequestFormFields({ form, onChange, baseFeeContent }: Ser
           <article className={styles.panel}>
             <h2 className={styles.sectionTitle}>제품 정보</h2>
             <ProductFields
+              key={resetKey}
               initialValue={form.product}
               onChange={(product) => onChange({ product })}
             />
