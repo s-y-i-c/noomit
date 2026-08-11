@@ -2,12 +2,7 @@ package com.noomit.backend.reception.application;
 
 public record UpdateServiceRequestCommand(
         long id,
-        String customerName,
-        String customerPhoneNumber,
-        String customerZipCode,
-        String customerAddress,
-        String customerDetailAddress,
-        String customerMemo,
+        long customerId,
         Long productId,
         Long selectedSubCategoryId,
         String selectedModelName,

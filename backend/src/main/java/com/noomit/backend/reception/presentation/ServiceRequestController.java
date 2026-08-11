@@ -44,10 +44,9 @@ class ServiceRequestController {
             @AuthenticationPrincipal(expression = "userId") long receptionistId,
             @RequestBody CreateRequest request) {
         ServiceRequest created = serviceRequestService.create(new CreateServiceRequestCommand(
-                request.customerName(), request.customerPhoneNumber(), request.customerZipCode(),
-                request.customerAddress(), request.customerDetailAddress(), request.customerMemo(),
-                parseOptionalId(request.productId()), parseOptionalId(request.selectedSubCategoryId()),
-                request.selectedModelName(), receptionistId, request.symptom(), request.remarks()));
+                parseId(request.customerId()), parseOptionalId(request.productId()),
+                parseOptionalId(request.selectedSubCategoryId()), request.selectedModelName(), receptionistId,
+                request.symptom(), request.remarks()));
         return ApiResponse.success("접수를 생성했습니다.", ServiceRequestResponse.from(created));
     }
 
@@ -57,10 +56,9 @@ class ServiceRequestController {
             throw new BusinessException(ErrorCode.RECEPTION_INVALID_REQUEST, "version이 필요합니다.");
         }
         ServiceRequest updated = serviceRequestService.update(new UpdateServiceRequestCommand(
-                parseId(id), request.customerName(), request.customerPhoneNumber(), request.customerZipCode(),
-                request.customerAddress(), request.customerDetailAddress(), request.customerMemo(),
-                parseOptionalId(request.productId()), parseOptionalId(request.selectedSubCategoryId()),
-                request.selectedModelName(), request.symptom(), request.remarks(), request.version()));
+                parseId(id), parseId(request.customerId()), parseOptionalId(request.productId()),
+                parseOptionalId(request.selectedSubCategoryId()), request.selectedModelName(),
+                request.symptom(), request.remarks(), request.version()));
         return ApiResponse.success("접수 정보를 수정했습니다.", ServiceRequestResponse.from(updated));
     }
 
@@ -105,12 +103,7 @@ class ServiceRequestController {
     record BaseFeeResponse(int baseFee) {}
 
     record CreateRequest(
-            String customerName,
-            String customerPhoneNumber,
-            String customerZipCode,
-            String customerAddress,
-            String customerDetailAddress,
-            String customerMemo,
+            String customerId,
             String productId,
             String selectedSubCategoryId,
             String selectedModelName,
@@ -118,12 +111,7 @@ class ServiceRequestController {
             String remarks) {}
 
     record UpdateRequest(
-            String customerName,
-            String customerPhoneNumber,
-            String customerZipCode,
-            String customerAddress,
-            String customerDetailAddress,
-            String customerMemo,
+            String customerId,
             String productId,
             String selectedSubCategoryId,
             String selectedModelName,
