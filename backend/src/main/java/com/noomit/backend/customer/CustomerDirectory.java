@@ -16,4 +16,11 @@ public interface CustomerDirectory {
 
     /** 배치 조회. 목록 화면에서 N+1 없이 한 번에 가져오라고 Map으로 돌려준다. 없는 id는 그냥 빠진다. */
     Map<Long, CustomerInfo> findByIds(Collection<Long> customerIds);
+
+    /**
+     * 전화번호로 기존 고객을 찾아 갱신하거나, 없으면 새로 만든다.
+     * 호출하는 쪽의 트랜잭션에 그대로 참여한다 — 접수 생성처럼 "고객 upsert + 다른 쓰기"를
+     * 하나의 트랜잭션으로 묶어야 하는 경우에 쓴다.
+     */
+    CustomerInfo upsert(UpsertCustomerCommand command);
 }
