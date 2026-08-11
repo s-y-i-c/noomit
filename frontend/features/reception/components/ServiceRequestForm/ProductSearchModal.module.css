@@ -108,6 +108,20 @@
 .resultList span { color: var(--color-text-secondary); font-size: 12px; }
 .resultList small { color: var(--color-text-secondary); font-size: 11px; }
 
+.titleRow { display: flex; align-items: center; gap: 7px; }
+/* .resultList span 규칙(class+type)보다 명시도를 높여야 배지 색이 안 먹힌다 */
+.resultList .inactiveBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+  color: var(--color-danger);
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 @media (max-width: 520px) {
   .searchRow { flex-direction: column; }
 }
