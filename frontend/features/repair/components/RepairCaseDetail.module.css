@@ -11,6 +11,12 @@
 .statusBadge[data-status="submitted"] { background: color-mix(in srgb, #f59e0b 12%, transparent); color: #d97706; }
 .statusBadge[data-status="completed"] { background: color-mix(in srgb, var(--color-success) 12%, transparent); color: var(--color-success); }
 
+.srSection { display: grid; gap: 8px; }
+.srSection h3 { font-size: 13px; font-weight: 800; color: var(--color-text-secondary); }
+.srGrid { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; padding: 12px 14px; border-radius: 12px; background: var(--color-page-background); border: 1px solid var(--color-border); }
+.srGrid dt { font-size: 12px; font-weight: 700; color: var(--color-text-secondary); white-space: nowrap; }
+.srGrid dd { font-size: 12px; color: var(--color-text-primary); }
+
 .state { color: var(--color-text-secondary); font-size: 13px; text-align: center; padding: 12px 0; }
 .stateError { color: var(--color-danger); font-size: 13px; font-weight: 700; }
 

@@ -70,6 +70,7 @@ export function RepairCaseList() {
               <thead>
                 <tr>
                   <th>케이스 ID</th>
+                  <th>접수번호</th>
                   <th>상태</th>
                   <th>총 금액</th>
                   <th>수리 내역</th>
@@ -81,6 +82,7 @@ export function RepairCaseList() {
                 {filtered.map((c) => (
                   <tr key={c.id} className={styles.row} onClick={() => setSelectedId(c.id)}>
                     <td><strong>#{c.id}</strong></td>
+                    <td><small>#{c.serviceRequestId}</small></td>
                     <td>
                       <span className={styles.statusBadge} data-status={statusBadgeData(c.status)}>
                         {statusLabel(c.status)}

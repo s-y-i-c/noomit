@@ -1,5 +1,5 @@
 import { getCsrfToken } from "@/features/shared/api/csrf";
-import type { RepairCase, RepairStatus } from "../types/repair";
+import type { RepairCase, RepairStatus, ServiceRequestSummary } from "../types/repair";
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
 
@@ -85,6 +85,15 @@ export const repairService = {
       headers: { [csrf.headerName]: csrf.token },
     });
     return extractData<RepairCase>(response, "제출하지 못했습니다.");
+  },
+
+  async getServiceRequestSummary(serviceRequestId: string, signal?: AbortSignal): Promise<ServiceRequestSummary> {
+    const response = await fetch(`${API_BASE_URL}/api/engineer/service-requests/${serviceRequestId}`, {
+      credentials: "include",
+      cache: "no-store",
+      signal,
+    });
+    return extractData<ServiceRequestSummary>(response, "접수 정보를 불러오지 못했습니다.");
   },
 
   // ── 관리자용 ─────────────────────────────────────────────────────────────

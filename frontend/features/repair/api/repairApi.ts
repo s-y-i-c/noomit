@@ -1,7 +1,7 @@
 import { baseApi } from "@/features/store/api/baseApi";
 import { queryResult } from "@/features/store/api/queryError";
 import { repairService } from "../services/repairService";
-import type { RepairCase, RepairStatus } from "../types/repair";
+import type { RepairCase, RepairStatus, ServiceRequestSummary } from "../types/repair";
 
 const repairApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
@@ -35,6 +35,10 @@ const repairApi = baseApi.injectEndpoints({
         { type: "RepairCase", id: "MY_LIST" },
       ],
     }),
+    getServiceRequestSummary: build.query<ServiceRequestSummary, string>({
+      queryFn: (serviceRequestId, api) =>
+        queryResult(repairService.getServiceRequestSummary(serviceRequestId, api.signal)),
+    }),
     getAllRepairCases: build.query<RepairCase[], RepairStatus | undefined>({
       queryFn: (status, api) => queryResult(repairService.getAllRepairCases(status, api.signal)),
       providesTags: [{ type: "RepairCase", id: "ADMIN_LIST" }],
@@ -53,6 +57,7 @@ const repairApi = baseApi.injectEndpoints({
 export const {
   useGetMyRepairCasesQuery,
   useGetRepairCaseQuery,
+  useGetServiceRequestSummaryQuery,
   useAddRepairDetailMutation,
   useDeleteRepairDetailMutation,
   useSubmitRepairCaseMutation,
