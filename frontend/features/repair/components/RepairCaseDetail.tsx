@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { Trash2, X, Plus, RefreshCw } from "lucide-react";
 import {
   useGetRepairCaseQuery,
+  useGetServiceRequestSummaryQuery,
   useAddRepairDetailMutation,
   useDeleteRepairDetailMutation,
   useSubmitRepairCaseMutation,
@@ -19,6 +20,10 @@ interface RepairCaseDetailProps {
 
 export function RepairCaseDetail({ caseId, onClose }: RepairCaseDetailProps) {
   const { data: repairCase, isFetching, error } = useGetRepairCaseQuery(caseId);
+  const { data: srSummary } = useGetServiceRequestSummaryQuery(
+    repairCase?.serviceRequestId ?? "",
+    { skip: !repairCase?.serviceRequestId }
+  );
   const [addDetail, { isLoading: isAdding, error: addError }] = useAddRepairDetailMutation();
   const [deleteDetail, { isLoading: isDeleting }] = useDeleteRepairDetailMutation();
   const [submit, { isLoading: isSubmitting, error: submitError }] = useSubmitRepairCaseMutation();
@@ -70,6 +75,35 @@ export function RepairCaseDetail({ caseId, onClose }: RepairCaseDetailProps) {
 
         {repairCase ? (
           <>
+            {srSummary ? (
+              <section className={styles.srSection}>
+                <h3>접수 정보</h3>
+                <dl className={styles.srGrid}>
+                  <dt>접수번호</dt><dd>{srSummary.requestNumber}</dd>
+                  <dt>고객</dt><dd>{srSummary.customerName}</dd>
+                  <dt>제품</dt><dd>{[srSummary.subCategoryName, srSummary.modelName].filter(Boolean).join(" / ") || "-"}</dd>
+                  <dt>증상</dt><dd>{srSummary.symptom}</dd>
+                  {srSummary.visitDate ? (
+                    <>
+                      <dt>방문일</dt>
+                      <dd>{srSummary.visitDate} {srSummary.visitStartTime ?? ""} ~ {srSummary.visitEndTime ?? ""}</dd>
+                    </>
+                  ) : null}
+                  {srSummary.address ? (
+                    <>
+                      <dt>주소</dt>
+                      <dd>{srSummary.address} {srSummary.detailAddress ?? ""}</dd>
+                    </>
+                  ) : null}
+                  {srSummary.remarks ? (
+                    <>
+                      <dt>비고</dt><dd>{srSummary.remarks}</dd>
+                    </>
+                  ) : null}
+                </dl>
+              </section>
+            ) : null}
+
             {repairCase.rejectReason ? (
               <div className={styles.rejectReason}>
                 <strong>반려 사유:</strong> {repairCase.rejectReason}
