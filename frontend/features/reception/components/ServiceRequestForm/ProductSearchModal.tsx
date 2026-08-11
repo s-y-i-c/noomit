@@ -85,7 +85,12 @@ export function ProductSearchModal({ initialKeyword, onSelect, onClose }: Produc
             {results.map((product) => (
               <li key={product.id}>
                 <button type="button" onClick={() => onSelect(product)}>
-                  <strong>{product.modelCode}</strong>
+                  <span className={styles.titleRow}>
+                    <strong>{product.modelCode}</strong>
+                    {product.status === "INACTIVE" ? (
+                      <span className={styles.inactiveBadge}>단종 상품입니다</span>
+                    ) : null}
+                  </span>
                   <span>{product.modelName}</span>
                   <small>{categoryName(product.categoryId)} · {subCategoryName(product.subCategoryId)}</small>
                 </button>
