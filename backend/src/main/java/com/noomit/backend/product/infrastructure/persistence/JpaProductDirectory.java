@@ -39,7 +39,7 @@ class JpaProductDirectory implements ProductDirectory {
         List<Long> distinctIds = subCategoryIds.stream().distinct().toList();
         return subCategories.findAllById(distinctIds).stream()
                 .map(JpaProductDirectory::toSubCategoryInfo)
-                .collect(Collectors.toMap(SubCategoryInfo::id, Function.identity()));
+                .collect(Collectors.toMap(SubCategoryInfo::subCategoryId, Function.identity()));
     }
 
     private static ProductInfo toProductInfo(ProductEntity entity) {
@@ -47,6 +47,6 @@ class JpaProductDirectory implements ProductDirectory {
     }
 
     private static SubCategoryInfo toSubCategoryInfo(SubCategoryEntity entity) {
-        return new SubCategoryInfo(entity.getId(), entity.getName());
+        return new SubCategoryInfo(entity.getCategory().getId(), entity.getId(), entity.getName());
     }
 }
