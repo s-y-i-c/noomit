@@ -15,7 +15,7 @@ public interface ReceptionStatisticsReader {
     record ReceptionSnapshot(
             long serviceRequestId,
             long customerId,
-            long productId,
+            Long productId,
             Long technicianId,
             String technicianName,
             Instant requestedAt,

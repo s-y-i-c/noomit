@@ -72,9 +72,11 @@ public class StatisticsDashboardService {
                 query.repeatWindowDays(),
                 repeatRate(receptions, ReceptionSnapshot::customerId, query.repeatWindowDays()),
                 repeatRate(receptions,
-                        item -> new RepeatKey(item.customerId(), item.productId()), query.repeatWindowDays()),
+                        item -> item.productId() == null
+                                ? null : new RepeatKey(item.customerId(), item.productId()),
+                        query.repeatWindowDays()),
                 repeatRate(receptions,
-                        item -> item.technicianId() == null
+                        item -> item.technicianId() == null || item.productId() == null
                                 ? null : new RepeatKey(item.technicianId(), item.productId()),
                         query.repeatWindowDays()));
 
