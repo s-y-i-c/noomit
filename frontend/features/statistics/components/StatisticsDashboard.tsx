@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { BarChart3, CalendarDays, CheckCircle2, CircleDollarSign, RefreshCw, Search, Wrench, XCircle } from "lucide-react";
+import { BarChart3, CalendarDays, CheckCircle2, ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, CircleDollarSign, RefreshCw, Search, Wrench, XCircle } from "lucide-react";
 import { useLazyGetStatisticsDashboardQuery } from "../api/statisticsApi";
 import type { StatisticsDashboardData, StatisticsFilters } from "../types/statistics";
 import styles from "./StatisticsDashboard.module.css";
@@ -141,6 +141,18 @@ export function StatisticsDashboard() {
 }
 
 function DashboardContent({ data, maxTrend }: { data: StatisticsDashboardData; maxTrend: number }) {
+  const customerRankingRows = useMemo(() => data.customers.map((row) => ({
+    id: row.customerId,
+    name: row.customerName,
+    count: row.requestCount,
+    rate: row.repeatRate,
+  })), [data.customers]);
+  const productRankingRows = useMemo(() => data.products.map((row) => ({
+    id: row.productId,
+    name: row.productName,
+    count: row.requestCount,
+    rate: row.repeatRate,
+  })), [data.products]);
   const cards = [
     { label: "총 접수", value: data.summary.receivedCount.toLocaleString(), unit: "건", icon: <BarChart3 /> },
     { label: "취소", value: data.summary.cancelledCount.toLocaleString(), unit: "건", icon: <XCircle /> },
@@ -175,12 +187,37 @@ function DashboardContent({ data, maxTrend }: { data: StatisticsDashboardData; m
     </article>
 
     <div className={styles.twoColumns}>
-      <Ranking title="고객별 접수" rows={data.customers.map((row) => ({ id: row.customerId, name: row.customerName, count: row.requestCount, rate: row.repeatRate }))} />
-      <Ranking title="제품별 접수" rows={data.products.map((row) => ({ id: row.productId, name: row.productName, count: row.requestCount, rate: row.repeatRate }))} />
+      <Ranking title="고객별 접수" rows={customerRankingRows} />
+      <Ranking title="제품별 접수" rows={productRankingRows} />
     </div>
   </>;
 }
 
+const RANKING_PAGE_SIZE = 10;
+
 function Ranking({ title, rows }: { title: string; rows: Array<{ id: string; name: string; count: number; rate: number }> }) {
-  return <article className={styles.panel}><div className={styles.panelHeader}><div><p className={styles.kicker}>RANKING</p><h2>{title}</h2></div></div>{rows.length ? <div className={styles.ranking}>{rows.map((row, index) => <div className={styles.rankRow} key={row.id}><b>{String(index + 1).padStart(2, "0")}</b><div><strong>{row.name}</strong><small>{row.id}</small></div><span>{row.count}건</span><em>재접수 {row.rate.toFixed(1)}%</em></div>)}</div> : <EmptyRows label={title} />}</article>;
+  const datasetKey = JSON.stringify(rows);
+  const [pagination, setPagination] = useState({ datasetKey, page: 1 });
+  const page = pagination.datasetKey === datasetKey ? pagination.page : 1;
+  const totalPages = Math.max(1, Math.ceil(rows.length / RANKING_PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const offset = (currentPage - 1) * RANKING_PAGE_SIZE;
+  const pageRows = rows.slice(offset, offset + RANKING_PAGE_SIZE);
+  const moveTo = (nextPage: number) => setPagination({ datasetKey, page: nextPage });
+
+  return <article className={styles.panel}>
+    <div className={styles.panelHeader}><div><p className={styles.kicker}>RANKING</p><h2>{title}</h2></div></div>
+    {rows.length ? <>
+      <div className={styles.ranking}>{pageRows.map((row, index) => <div className={styles.rankRow} key={row.id}><b>{String(offset + index + 1).padStart(2, "0")}</b><div><strong>{row.name}</strong><small>{row.id}</small></div><span>{row.count}건</span><em>재접수 {row.rate.toFixed(1)}%</em></div>)}</div>
+      <div className={styles.pagination}>
+        <span>총 {rows.length.toLocaleString()}개 · {currentPage}/{totalPages} 페이지</span>
+        <div>
+          <button type="button" aria-label={`${title} 첫 페이지`} onClick={() => moveTo(1)} disabled={currentPage === 1}><ChevronFirst /></button>
+          <button type="button" aria-label={`${title} 이전 페이지`} onClick={() => moveTo(currentPage - 1)} disabled={currentPage === 1}><ChevronLeft /></button>
+          <button type="button" aria-label={`${title} 다음 페이지`} onClick={() => moveTo(currentPage + 1)} disabled={currentPage === totalPages}><ChevronRight /></button>
+          <button type="button" aria-label={`${title} 마지막 페이지`} onClick={() => moveTo(totalPages)} disabled={currentPage === totalPages}><ChevronLast /></button>
+        </div>
+      </div>
+    </> : <EmptyRows label={title} />}
+  </article>;
 }
