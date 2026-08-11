@@ -126,4 +126,19 @@ interface ServiceRequestJpaRepository extends JpaRepository<ServiceRequestEntity
                 AND e.status = com.noomit.backend.reception.domain.ServiceRequestStatus.ASSIGNED
             """)
     Optional<ServiceRequestEntity> findAssignedByTechnicianAndId(@Param("technicianId") long technicianId, @Param("requestId") long requestId);
+
+    @Query("""
+            SELECT e FROM ServiceRequestEntity e
+            WHERE e.requestedAt >= :fromInclusive 
+                AND e.requestedAt < :toExclusive
+                AND (:technicianId IS NULL OR e.technicianId = :technicianId)
+                AND (:customerId IS NULL OR e.customerId = :customerId)
+                AND (:productId IS NULL OR e.productId = :productId)
+            """)
+    List<ServiceRequestEntity> findForStatistics(
+            @Param("fromInclusive") Instant fromInclusive,
+            @Param("toExclusive") Instant toExclusive,
+            @Param("technicianId") Long technicianId,
+            @Param("customerId") Long customerId,
+            @Param("productId") Long productId);
 }
