@@ -9,6 +9,8 @@ interface UseAssignmentSubmitResult {
   requestNumber: string | null;
   isReassign: boolean;
   actionLabel: string;
+  /** 상세조회에서 배정/재배정 버튼을 눌러 들어온 경우 */
+  cameFromDetail: boolean;
   isSubmitting: boolean;
   errorMessage: string | null;
   submit: (technicianId: string, slotId: string) => Promise<AssignServiceRequestResponse>;
@@ -18,7 +20,9 @@ interface UseAssignmentSubmitResult {
 export function useAssignmentSubmit(serviceRequestId: string): UseAssignmentSubmitResult {
   const searchParams = useSearchParams();
   const requestNumber = searchParams.get("requestNumber");
-  const isReassign = searchParams.get("mode") === "reassign";
+  const mode = searchParams.get("mode");
+  const isReassign = mode === "reassign";
+  const cameFromDetail = mode !== null;
   const version = searchParams.get("version");
   const actionLabel = isReassign ? "재배정" : "배정";
 
@@ -46,6 +50,7 @@ export function useAssignmentSubmit(serviceRequestId: string): UseAssignmentSubm
     requestNumber,
     isReassign,
     actionLabel,
+    cameFromDetail,
     isSubmitting: submitState.isLoading,
     errorMessage,
     submit,

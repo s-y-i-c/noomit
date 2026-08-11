@@ -100,6 +100,7 @@ export interface ServiceRequestDetail {
   customerPhone: string;
   productId: string | null;
   selectedSubCategoryId: string | null;
+  selectedCategoryId: string | null;
   modelName: string | null;
   subCategoryName: string | null;
   symptom: string;
