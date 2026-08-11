@@ -28,11 +28,9 @@ export function ProductFields({ initialValue, onChange }: ProductFieldsProps) {
   );
 
   const update = (patch: Partial<ProductFieldsValue>) => {
-    setValue((current) => {
-      const next = { ...current, ...patch };
-      onChange(next);
-      return next;
-    });
+    const next = { ...value, ...patch };
+    setValue(next);
+    onChange(next);
   };
 
   // 카테고리/서브카테고리/모델명을 직접 고치면 화면에 있는 제품이 더 이상 검색으로 찾은 그 제품과
