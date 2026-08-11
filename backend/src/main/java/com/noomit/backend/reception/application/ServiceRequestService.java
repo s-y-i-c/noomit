@@ -3,6 +3,9 @@ package com.noomit.backend.reception.application;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import com.noomit.backend.customer.CustomerDirectory;
+import com.noomit.backend.customer.CustomerInfo;
+import com.noomit.backend.customer.UpsertCustomerCommand;
 import com.noomit.backend.reception.ServiceRequestAssigned;
 import com.noomit.backend.reception.domain.ServiceRequest;
 import com.noomit.backend.reception.domain.ServiceRequestStatus;
@@ -26,6 +29,7 @@ public class ServiceRequestService {
     private final ServiceRequestRepository requestRepository;
     private final TechnicianAvailabilityRepository availabilityRepository;
     private final UserDirectory userDirectory;
+    private final CustomerDirectory customerDirectory;
     private final ApplicationEventPublisher eventPublisher;
     private final Clock clock;
 
@@ -39,7 +43,11 @@ public class ServiceRequestService {
             throw new BusinessException(ErrorCode.RECEPTION_INVALID_REQUEST, "고장 증상 내용이 필요합니다.");
         }
         validateProductSource(command.productId(), command.selectedSubCategoryId(), command.selectedModelName());
-        ServiceRequest request = ServiceRequest.create(command.customerId(), command.productId(),
+        // 고객 upsert와 접수 생성을 같은 트랜잭션 안에서 처리한다 — 둘 중 하나만 반영되는 상태가 안 생기게.
+        CustomerInfo customer = customerDirectory.upsert(new UpsertCustomerCommand(
+                command.customerName(), command.customerPhoneNumber(), command.customerZipCode(),
+                command.customerAddress(), command.customerDetailAddress(), command.customerMemo()));
+        ServiceRequest request = ServiceRequest.create(customer.id(), command.productId(),
                 command.selectedSubCategoryId(), command.selectedModelName(), command.receptionistId(),
                 command.symptom(), command.remarks(), DEFAULT_BASE_FEE, Instant.now(clock));
         return requestRepository.create(request);
@@ -167,7 +175,11 @@ public class ServiceRequestService {
             throw new BusinessException(ErrorCode.RECEPTION_INVALID_STATUS, "취소된 접수는 수정할 수 없습니다.");
         }
 
-        int updated = requestRepository.update(command.id(), command.customerId(), command.productId(),
+        CustomerInfo customer = customerDirectory.upsert(new UpsertCustomerCommand(
+                command.customerName(), command.customerPhoneNumber(), command.customerZipCode(),
+                command.customerAddress(), command.customerDetailAddress(), command.customerMemo()));
+
+        int updated = requestRepository.update(command.id(), customer.id(), command.productId(),
                 command.selectedSubCategoryId(), command.selectedModelName(), command.symptom(), command.remarks(),
                 command.version());
         if (updated == 0) {
