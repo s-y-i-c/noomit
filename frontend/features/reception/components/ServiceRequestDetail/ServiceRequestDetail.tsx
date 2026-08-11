@@ -44,7 +44,7 @@ export function ServiceRequestDetail({ id }: ServiceRequestDetailProps) {
   const isCancelled = data.status === "CANCELLED";
 
   const handleAssign = () => {
-    const params = new URLSearchParams({ requestNumber: data.requestNumber });
+    const params = new URLSearchParams({ requestNumber: data.requestNumber, mode: "assign" });
     router.push(`/counselor/reception/new/${id}/assign?${params}`);
   };
 
