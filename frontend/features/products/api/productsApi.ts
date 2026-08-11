@@ -40,6 +40,13 @@ const productsApi = baseApi.injectEndpoints({
       queryFn: (request, api) => queryResult(productService.registerProduct(request, api.signal)),
       invalidatesTags: [{ type: "Product", id: "LIST" }],
     }),
+    modifyProduct: build.mutation<Product, { id: string; request: RegisterProductRequest }>({
+      queryFn: ({ id, request }, api) => queryResult(productService.modifyProduct(id, request, api.signal)),
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: "Product", id },
+        { type: "Product", id: "LIST" },
+      ],
+    }),
     changeProductStatus: build.mutation<void, { id: string; status: ProductStatus }>({
       queryFn: ({ id, status }, api) => queryResult(productService.changeStatus(id, status, api.signal)),
       invalidatesTags: (_result, _error, { id }) => [
@@ -57,5 +64,6 @@ export const {
   useGetProductsQuery,
   useGetProductByIdQuery,
   useRegisterProductMutation,
+  useModifyProductMutation,
   useChangeProductStatusMutation,
 } = productsApi;

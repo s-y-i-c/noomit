@@ -33,6 +33,12 @@
   color: var(--color-text-primary);
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .closeButton {
   display: grid;
   place-items: center;
@@ -43,6 +49,41 @@
 }
 
 .closeButton:hover {
+  background: var(--color-page-background);
+}
+
+.menuWrap {
+  position: relative;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 10;
+  min-width: 120px;
+  padding: 4px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-card-background);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.14);
+}
+
+.menu button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.menu button:hover {
   background: var(--color-page-background);
 }
 
