@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type KeyboardEvent } from "react";
 import { Search, X } from "lucide-react";
 import {
   useGetCategoriesQuery,
@@ -45,7 +45,8 @@ export function ProductSearchModal({ initialKeyword, onSelect, onClose }: Produc
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== "Enter") return;
     event.preventDefault();
     runSearch(keyword);
   };
@@ -60,17 +61,18 @@ export function ProductSearchModal({ initialKeyword, onSelect, onClose }: Produc
           </button>
         </div>
 
-        <form className={styles.searchRow} onSubmit={handleSubmit}>
+        <div className={styles.searchRow}>
           <input
             autoFocus
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="모델코드 일부만 입력해도 검색됩니다 (예: 2024)"
           />
-          <button type="submit" disabled={isFetching || !keyword.trim()}>
+          <button type="button" onClick={() => runSearch(keyword)} disabled={isFetching || !keyword.trim()}>
             <Search size={15} /> {isFetching ? "검색 중..." : "검색"}
           </button>
-        </form>
+        </div>
 
         {isError ? <div className={styles.state}>검색 중 문제가 발생했습니다. 다시 시도해주세요.</div> : null}
 
