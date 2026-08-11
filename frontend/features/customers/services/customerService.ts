@@ -84,10 +84,10 @@ export const customerService = {
     return body.data ?? null;
   },
 
-  /** 관리자 전용 상태 변경. PUT /api/v1/admin/customers/{id}/status — CSRF 보호 대상. */
+  /** 관리자 전용 상태 변경. PUT /api/admin/customers/{id}/status — CSRF 보호 대상. */
   async changeStatus(id: string, status: CustomerStatus, signal?: AbortSignal): Promise<void> {
     const csrf = await getCsrfToken(signal);
-    const response = await fetch(`${API_BASE_URL}/api/v1/admin/customers/${id}/status`, {
+    const response = await fetch(`${API_BASE_URL}/api/admin/customers/${id}/status`, {
       method: "PUT",
       credentials: "include",
       cache: "no-store",

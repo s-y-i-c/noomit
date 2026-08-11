@@ -14,6 +14,9 @@
 .searchButton { display: inline-flex; height: 40px; align-items: center; justify-content: center; gap: 7px; padding: 0 15px; border-radius: 9px; background: var(--color-primary); color: white; font-size: 12px; font-weight: 800; white-space: nowrap; }
 .searchButton:hover { background: var(--color-primary-hover); }
 .searchButton:disabled { cursor: wait; opacity: .7; }
+.resetButton { display: inline-flex; height: 40px; align-items: center; justify-content: center; gap: 7px; padding: 0 15px; border: 1px solid var(--color-border); border-radius: 9px; background: var(--color-content-background); color: var(--color-text-secondary); font-size: 12px; font-weight: 800; white-space: nowrap; }
+.resetButton:hover { background: var(--color-page-background); }
+.resetButton:disabled { cursor: not-allowed; opacity: .6; }
 .spinning { animation: spin 900ms linear infinite; }
 
 .error { border-radius: 14px; padding: 14px 16px; border: 1px solid color-mix(in srgb, var(--color-danger) 28%, transparent); background: color-mix(in srgb, var(--color-danger) 8%, transparent); color: var(--color-danger); font-size: 13px; font-weight: 700; }
@@ -47,5 +50,5 @@
   .page { gap: 15px; }
   .hero { align-items: flex-start; flex-direction: column; }
   .filters { flex-direction: column; align-items: stretch; }
-  .searchButton { width: 100%; }
+  .searchButton, .resetButton { width: 100%; }
 }

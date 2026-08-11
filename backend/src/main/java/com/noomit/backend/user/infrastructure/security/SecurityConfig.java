@@ -75,9 +75,6 @@ class SecurityConfig {
                         // actuator 헬스체크/지표 엔드포인트. 운영에선 127.0.0.1 바인딩 + SSH 터널로만
                         // 닿으므로(monitoring/README.md 참고) 인증 없이 허용해도 인터넷엔 노출되지 않는다.
                         .requestMatchers("/actuator/**").permitAll()
-                        // /api/v1/admin/** 는 도메인 이관 전 기존 경로 — 컨트롤러 경로 변경은
-                        // 각 도메인 담당자 몫이라 SecurityConfig 쪽만 당장 방어선으로 남겨둔다.
-                        .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN", "DEVELOPER")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/developer/**").hasRole("DEVELOPER")
                         .requestMatchers("/api/counselor/**").hasAnyRole("COUNSELOR", "ADMIN")

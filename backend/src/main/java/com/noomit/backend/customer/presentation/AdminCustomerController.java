@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 관리자 전용 고객 관리 API.
  *
- * <p>경로가 {@code /api/v1/admin/**} 라 SecurityConfig에서 ROLE_ADMIN/ROLE_DEVELOPER만 접근 가능하다.</p>
+ * <p>경로가 {@code /api/admin/**} 라 SecurityConfig에서 ROLE_ADMIN만 접근 가능하다.</p>
  */
 @RestController
-@RequestMapping("/api/v1/admin/customers")
+@RequestMapping("/api/admin/customers")
 @RequiredArgsConstructor
 class AdminCustomerController {
     private final CustomerService customerService;
