@@ -47,7 +47,7 @@ public interface ReceptionStatisticsSource {
     record ReceptionRecord(
             long serviceRequestId,
             long customerId,
-            long productId,
+            Long productId,
             Long technicianId,
             Instant requestedAt,
             ReceptionState status) {}

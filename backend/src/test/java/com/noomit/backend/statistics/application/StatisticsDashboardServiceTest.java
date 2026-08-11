@@ -129,6 +129,43 @@ class StatisticsDashboardServiceTest {
     }
 
     @Test
+    void includesReceptionsWithoutAProductInBaseStatisticsButNotProductStatistics() {
+        ReceptionStatisticsReader receptions = _ -> List.of(
+                new ReceptionStatisticsReader.ReceptionSnapshot(
+                        1L, 10L, null, 30L, "김기사",
+                        Instant.parse("2026-08-01T00:00:00Z"), ReceptionState.ASSIGNED),
+                new ReceptionStatisticsReader.ReceptionSnapshot(
+                        2L, 10L, 20L, 30L, "김기사",
+                        Instant.parse("2026-08-10T00:00:00Z"), ReceptionState.ASSIGNED));
+        RepairStatisticsReader repairs = _ -> List.of();
+        CustomerStatisticsReader customers = _ -> List.of(
+                new CustomerStatisticsReader.CustomerSnapshot(10L, "홍길동"));
+        ProductStatisticsReader products = productIds -> {
+            assertThat(productIds).containsExactly(20L);
+            return List.of(new ProductStatisticsReader.ProductSnapshot(20L, "냉장고 A"));
+        };
+
+        StatisticsDashboardService service = new StatisticsDashboardService(
+                receptions, repairs, customers, products,
+                Clock.fixed(Instant.parse("2026-08-10T00:00:00Z"), ZoneId.of("Asia/Seoul")));
+        StatisticsDashboard result = service.getDashboard(new StatisticsQuery(
+                LocalDate.of(2026, 8, 1), LocalDate.of(2026, 8, 31),
+                null, null, null, null, 30));
+
+        assertThat(result.summary().receivedCount()).isEqualTo(2);
+        assertThat(result.customers()).singleElement().satisfies(row ->
+                assertThat(row.requestCount()).isEqualTo(2));
+        assertThat(result.technicians()).singleElement().satisfies(row ->
+                assertThat(row.assignedCount()).isEqualTo(2));
+        assertThat(result.products()).singleElement().satisfies(row -> {
+            assertThat(row.productId()).isEqualTo("20");
+            assertThat(row.requestCount()).isEqualTo(1);
+        });
+        assertThat(result.repeatRepair().sameProductRate()).isZero();
+        assertThat(result.repeatRepair().sameTechnicianSameProductRate()).isZero();
+    }
+
+    @Test
     void rejectsPeriodsLongerThanOneYear() {
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () ->
                 new StatisticsQuery(
