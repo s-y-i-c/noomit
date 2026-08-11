@@ -18,7 +18,7 @@ interface AssignmentCompletePanelProps {
 
 export function AssignmentCompletePanel({ result, requestNumber, baseFee, title = "기사 배정이 완료됐습니다", onConfirm }: AssignmentCompletePanelProps) {
   return (
-    <section className={styles.page}>
+    <section className={styles.completeStage}>
       <article className={styles.completePanel}>
         <div className={styles.completeIcon}>
           <CheckCircle2 size={28} />
