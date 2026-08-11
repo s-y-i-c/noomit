@@ -14,8 +14,8 @@ const PAGE_SIZE = 15;
 
 const STATUS_OPTIONS: { value: ServiceRequestStatus | ""; label: string }[] = [
   { value: "", label: "전체" },
-  { value: "RECEIVED", label: "접수중" },
-  { value: "ASSIGNED", label: "배정됨" },
+  { value: "RECEIVED", label: "접수" },
+  { value: "ASSIGNED", label: "배정" },
   { value: "CANCELLED", label: "취소" },
 ];
 

@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { FilePlus2 } from "lucide-react";
+import { ArrowLeft, FilePlus2 } from "lucide-react";
 import { queryErrorMessage } from "@/features/store/api/queryError";
 import { useCreateServiceRequestMutation, useGetBaseFeeQuery } from "../../api/serviceRequestApi";
 import { emptyProductFieldsValue, isProductFieldsValid, toProductSelection } from "../ServiceRequestForm/productFieldsUtils";
@@ -46,11 +46,14 @@ export function ServiceRequestCreateForm() {
 
   return (
     <section className={styles.page}>
+      <button type="button" className={styles.backButton} onClick={() => router.back()}>
+        <ArrowLeft size={16} /> 뒤로가기
+      </button>
+
       <header className={styles.hero}>
         <div>
           <p className={styles.eyebrow}><FilePlus2 size={15} /> Reception</p>
           <h1>접수 생성</h1>
-          <p>고객·제품 정보와 접수 상세 내용을 입력합니다.</p>
         </div>
       </header>
 
