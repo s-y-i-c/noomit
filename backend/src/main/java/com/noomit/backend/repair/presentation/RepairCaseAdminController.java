@@ -4,6 +4,8 @@ import com.noomit.backend.repair.application.RepairCaseService;
 import com.noomit.backend.repair.domain.RepairCase;
 import com.noomit.backend.repair.domain.RepairStatus;
 import com.noomit.backend.shared.ApiResponse;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/repair-cases")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
+@PreAuthorize("hasRole('ADMIN')")
 class RepairCaseAdminController {
 
     private final RepairCaseService repairCaseService;
@@ -40,10 +42,10 @@ class RepairCaseAdminController {
     @PutMapping("/{id}/reject")
     ApiResponse<RepairCaseResponse> reject(
             @PathVariable Long id,
-            @RequestBody RejectRequest request) {
+            @RequestBody @Valid RejectRequest request) {
         RepairCase repairCase = repairCaseService.reject(id, request.reason());
         return ApiResponse.success("반려했습니다.", RepairCaseResponse.from(repairCase));
     }
 
-    record RejectRequest(String reason) {}
+    record RejectRequest(@NotBlank String reason) {}
 }

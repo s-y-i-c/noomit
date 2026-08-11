@@ -4,6 +4,9 @@ import com.noomit.backend.repair.application.RepairCaseService;
 import com.noomit.backend.repair.domain.RepairCase;
 import com.noomit.backend.shared.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -45,7 +48,7 @@ class RepairCaseController {
     @PostMapping("/{id}/details")
     ApiResponse<RepairCaseResponse> addDetail(
             @PathVariable Long id,
-            @RequestBody AddRepairDetailRequest request,
+            @RequestBody @Valid AddRepairDetailRequest request,
             @AuthenticationPrincipal(expression = "userId") long userId) {
         RepairCase repairCase = repairCaseService.addDetail(id, userId, request.description(), request.amount());
         return ApiResponse.success("수리내역을 추가했습니다.", RepairCaseResponse.from(repairCase));
@@ -68,5 +71,8 @@ class RepairCaseController {
         return ApiResponse.success("완료 제출했습니다.", RepairCaseResponse.from(repairCase));
     }
 
-    record AddRepairDetailRequest(String description, BigDecimal amount) {}
+    record AddRepairDetailRequest(
+            @NotBlank String description,
+            @Positive BigDecimal amount
+    ) {}
 }
