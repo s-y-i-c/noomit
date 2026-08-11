@@ -30,26 +30,81 @@ function won(value: number): string {
   return `${value.toLocaleString()}원`;
 }
 
+const MAX_PERIOD_DAYS = 366;
+const MAX_LONG_ID = "9223372036854775807";
+
+function isPositiveLong(value: string): boolean {
+  if (!/^\d+$/.test(value)) return false;
+  const normalized = value.replace(/^0+/, "");
+  if (!normalized) return false;
+  return normalized.length < MAX_LONG_ID.length
+    || (normalized.length === MAX_LONG_ID.length && normalized <= MAX_LONG_ID);
+}
+
+function validateFilters(filters: StatisticsFilters): string | null {
+  if (!filters.from || !filters.to) {
+    return "조회 시작일과 종료일을 입력해 주세요.";
+  }
+  if (filters.from > filters.to) {
+    return "조회 시작일은 종료일보다 늦을 수 없습니다.";
+  }
+
+  const fromTime = Date.parse(`${filters.from}T00:00:00Z`);
+  const toTime = Date.parse(`${filters.to}T00:00:00Z`);
+  const periodDays = Math.floor((toTime - fromTime) / 86_400_000) + 1;
+  if (periodDays > MAX_PERIOD_DAYS) {
+    return "조회 기간은 최대 366일입니다.";
+  }
+
+  const identifiers: Array<[string, string]> = [
+    [filters.technicianId.trim(), "기사 ID"],
+    [filters.customerId.trim(), "고객 ID"],
+    [filters.productId.trim(), "제품 ID"],
+  ];
+  for (const [value, label] of identifiers) {
+    if (!value) continue;
+    if (!isPositiveLong(value)) {
+      return `${label}는 1 이상의 올바른 숫자여야 합니다.`;
+    }
+  }
+  return null;
+}
+
 function EmptyRows({ label }: { label: string }) {
   return <div className={styles.emptyRows}>{label} 데이터가 없습니다.</div>;
 }
 
 export function StatisticsDashboard() {
   const [draft, setDraft] = useState<StatisticsFilters>(initialFilters);
+  const [clientError, setClientError] = useState<string | null>(null);
   const [load, { data, isFetching, error }] = useLazyGetStatisticsDashboardQuery();
 
   const maxTrend = useMemo(() => Math.max(1, ...(data?.trends.map((item) => item.receivedCount) ?? [1])), [data]);
-  const errorMessage = typeof error === "object" && error !== null && "message" in error
+  const requestError = typeof error === "object" && error !== null && "message" in error
     ? String(error.message)
     : null;
+  const errorMessage = clientError ?? requestError;
 
   const update = <K extends keyof StatisticsFilters>(key: K, value: StatisticsFilters[K]) => {
+    setClientError(null);
     setDraft((current) => ({ ...current, [key]: value }));
   };
 
   const submit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    void load(draft);
+    const submitted = {
+      ...draft,
+      technicianId: draft.technicianId.trim(),
+      customerId: draft.customerId.trim(),
+      productId: draft.productId.trim(),
+    };
+    const validationError = validateFilters(submitted);
+    if (validationError) {
+      setClientError(validationError);
+      return;
+    }
+    setClientError(null);
+    void load(submitted);
   };
 
   return (
@@ -66,10 +121,10 @@ export function StatisticsDashboard() {
       <form className={styles.filters} onSubmit={submit}>
         <label><span>시작일</span><input type="date" value={draft.from} onChange={(e) => update("from", e.target.value)} required /></label>
         <label><span>종료일</span><input type="date" value={draft.to} onChange={(e) => update("to", e.target.value)} required /></label>
-        <label><span>담당 기사</span><input value={draft.technicianId} onChange={(e) => update("technicianId", e.target.value)} placeholder="기사 ID" /></label>
-        <label><span>고객</span><input value={draft.customerId} onChange={(e) => update("customerId", e.target.value)} placeholder="고객 ID" /></label>
-        <label><span>제품</span><input value={draft.productId} onChange={(e) => update("productId", e.target.value)} placeholder="제품 ID" /></label>
-        <label><span>상태</span><select value={draft.status} onChange={(e) => update("status", e.target.value as StatisticsFilters["status"])}><option value="">전체</option><option value="RECEIVED">접수</option><option value="ASSIGNED">배정</option><option value="IN_PROGRESS">수리 중</option><option value="COMPLETED">완료</option><option value="CANCELLED">취소</option></select></label>
+        <label><span>담당 기사</span><input inputMode="numeric" value={draft.technicianId} onChange={(e) => update("technicianId", e.target.value)} placeholder="기사 ID" /></label>
+        <label><span>고객</span><input inputMode="numeric" value={draft.customerId} onChange={(e) => update("customerId", e.target.value)} placeholder="고객 ID" /></label>
+        <label><span>제품</span><input inputMode="numeric" value={draft.productId} onChange={(e) => update("productId", e.target.value)} placeholder="제품 ID" /></label>
+        <label><span>상태</span><select value={draft.status} onChange={(e) => update("status", e.target.value as StatisticsFilters["status"])}><option value="">전체</option><option value="RECEIVED">접수</option><option value="IN_PROGRESS">수리 중(승인 대기 포함)</option><option value="COMPLETED">완료</option><option value="CANCELLED">취소</option></select></label>
         <label><span>재수리 기준</span><select value={draft.repeatWindowDays} onChange={(e) => update("repeatWindowDays", Number(e.target.value))}><option value={7}>7일</option><option value={30}>30일</option><option value={90}>90일</option></select></label>
         <button className={styles.searchButton} type="submit" disabled={isFetching}>{isFetching ? <RefreshCw className={styles.spinning} size={17} /> : <Search size={17} />}{isFetching ? "집계 중" : "통계 조회"}</button>
       </form>
