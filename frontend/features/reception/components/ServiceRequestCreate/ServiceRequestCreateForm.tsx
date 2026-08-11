@@ -28,6 +28,7 @@ export function ServiceRequestCreateForm() {
   const router = useRouter();
   const [form, setForm] = useState(initialForm);
   const [customerInfo, setCustomerInfo] = useState(emptyCustomerInfo);
+  const [resetKey, setResetKey] = useState(0);
   const [createServiceRequest, createState] = useCreateServiceRequestMutation();
   const { data: baseFee } = useGetBaseFeeQuery();
 
@@ -40,6 +41,7 @@ export function ServiceRequestCreateForm() {
   const handleReset = () => {
     setForm(initialForm());
     setCustomerInfo(emptyCustomerInfo());
+    setResetKey((key) => key + 1);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -81,8 +83,9 @@ export function ServiceRequestCreateForm() {
         <ServiceRequestFormFields
           form={form}
           onChange={(patch) => setForm((current) => ({ ...current, ...patch }))}
-          customerContent={<CustomerInfoForm onChange={setCustomerInfo} />}
+          customerContent={<CustomerInfoForm key={resetKey} onChange={setCustomerInfo} />}
           baseFeeContent={<p className={styles.hint}>{baseFee ? `${baseFee.baseFee.toLocaleString("ko-KR")}원` : "-"}</p>}
+          resetKey={resetKey}
         />
 
         {submitErrorMessage ? <p className={styles.error}>{submitErrorMessage}</p> : null}

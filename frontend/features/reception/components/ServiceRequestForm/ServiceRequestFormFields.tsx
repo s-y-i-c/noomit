@@ -16,10 +16,12 @@ interface ServiceRequestFormFieldsProps {
   onChange: (patch: Partial<ServiceRequestFormValues>) => void;
   customerContent: ReactNode;
   baseFeeContent: ReactNode;
+  /** ProductFields는 내부 state를 직접 들고 있음. 초기화 시 이 값을 바꿔 강제로 리마운트. */
+  resetKey: number;
 }
 
 // 고객/제품 정보 · 접수 상세 · 출장비 섹션 — 생성/수정 폼이 공유
-export function ServiceRequestFormFields({ form, onChange, customerContent, baseFeeContent }: ServiceRequestFormFieldsProps) {
+export function ServiceRequestFormFields({ form, onChange, customerContent, baseFeeContent, resetKey }: ServiceRequestFormFieldsProps) {
   return (
     <>
       <article className={styles.panel}>
@@ -32,6 +34,7 @@ export function ServiceRequestFormFields({ form, onChange, customerContent, base
           <article className={styles.panel}>
             <h2 className={styles.sectionTitle}>제품 정보</h2>
             <ProductFields
+              key={resetKey}
               initialValue={form.product}
               onChange={(product) => onChange({ product })}
             />

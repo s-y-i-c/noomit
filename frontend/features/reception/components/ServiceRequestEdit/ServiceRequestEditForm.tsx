@@ -39,6 +39,7 @@ export function ServiceRequestEditForm({ serviceRequestId, initialCustomer, init
   const router = useRouter();
   const [form, setForm] = useState<ServiceRequestFormValues>(initialValues);
   const [customerInfo, setCustomerInfo] = useState(() => toCustomerInfoValue(initialCustomer));
+  const [resetKey, setResetKey] = useState(0);
   const [updateServiceRequest, updateState] = useUpdateServiceRequestMutation();
 
   const submitErrorMessage = updateState.isError
@@ -50,6 +51,7 @@ export function ServiceRequestEditForm({ serviceRequestId, initialCustomer, init
   const handleReset = () => {
     setForm(initialValues);
     setCustomerInfo(toCustomerInfoValue(initialCustomer));
+    setResetKey((key) => key + 1);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -92,8 +94,9 @@ export function ServiceRequestEditForm({ serviceRequestId, initialCustomer, init
         <ServiceRequestFormFields
           form={form}
           onChange={(patch) => setForm((current) => ({ ...current, ...patch }))}
-          customerContent={<CustomerInfoForm initialCustomer={initialCustomer} onChange={setCustomerInfo} />}
+          customerContent={<CustomerInfoForm key={resetKey} initialCustomer={initialCustomer} onChange={setCustomerInfo} />}
           baseFeeContent={<p className={styles.hint}>{baseFee.toLocaleString("ko-KR")}원</p>}
+          resetKey={resetKey}
         />
 
         {submitErrorMessage ? <p className={styles.error}>{submitErrorMessage}</p> : null}
