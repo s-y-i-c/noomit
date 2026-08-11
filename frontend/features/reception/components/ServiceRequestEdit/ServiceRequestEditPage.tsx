@@ -1,5 +1,6 @@
 "use client";
 
+import { useGetCustomerByIdQuery } from "@/features/customers/api/customersApi";
 import { useGetServiceRequestDetailQuery } from "../../api/serviceRequestApi";
 import type { ProductFieldsValue } from "../ServiceRequestForm/productFieldsUtils";
 import { ServiceRequestEditForm } from "./ServiceRequestEditForm";
@@ -11,8 +12,11 @@ interface ServiceRequestEditPageProps {
 
 export function ServiceRequestEditPage({ id }: ServiceRequestEditPageProps) {
   const { data, isFetching, error } = useGetServiceRequestDetailQuery(id);
+  const { data: customer, isFetching: isCustomerFetching } = useGetCustomerByIdQuery(
+    data?.customerId ?? "", { skip: !data?.customerId },
+  );
 
-  if (isFetching && !data) {
+  if ((isFetching && !data) || (isCustomerFetching && !customer)) {
     return <div className={styles.stateMessage}>불러오는 중...</div>;
   }
   if (error || !data) {
@@ -38,8 +42,8 @@ export function ServiceRequestEditPage({ id }: ServiceRequestEditPageProps) {
   return (
     <ServiceRequestEditForm
       serviceRequestId={id}
+      initialCustomer={customer ?? null}
       initialValues={{
-        customerId: data.customerId,
         product,
         symptom: data.symptom,
         remarks: data.remarks,

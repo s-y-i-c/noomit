@@ -31,7 +31,12 @@ export interface ServiceRequestPageData {
 }
 
 export interface CreateServiceRequestRequest {
-  customerId: string;
+  customerName: string;
+  customerPhoneNumber: string;
+  customerZipCode: string;
+  customerAddress: string;
+  customerDetailAddress: string;
+  customerMemo: string;
   productId: string | null;
   selectedSubCategoryId: string | null;
   selectedModelName: string | null;
