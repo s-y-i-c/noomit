@@ -24,7 +24,9 @@ export function AdminRepairCaseList() {
   const [rejectTargetId, setRejectTargetId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
 
-  const { data: cases, isFetching, error } = useGetAllRepairCasesQuery(statusFilter);
+  const { data: cases, isFetching, error } = useGetAllRepairCasesQuery(statusFilter, {
+    pollingInterval: 10000,
+  });
   const [approve, { isLoading: isApproving }] = useApproveRepairCaseMutation();
   const [reject, { isLoading: isRejecting, error: rejectError }] = useRejectRepairCaseMutation();
 
