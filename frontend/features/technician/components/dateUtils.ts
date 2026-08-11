@@ -1,3 +1,6 @@
+/** 기사 슬롯이 미리 생성돼 있는 기간(오늘 포함 N일) */
+export const SLOT_GENERATION_DAYS = 30;
+
 const WEEKDAY_SHORT = ["일", "월", "화", "수", "목", "금", "토"];
 const WEEKDAY_FULL = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
 
