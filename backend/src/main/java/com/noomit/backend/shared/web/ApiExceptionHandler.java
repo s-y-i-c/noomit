@@ -5,6 +5,7 @@ import com.noomit.backend.shared.error.ErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -19,7 +20,8 @@ class ApiExceptionHandler {
             case ADMIN_MEMBER_NOT_FOUND, REPAIR_CASE_NOT_FOUND, REPAIR_DETAIL_NOT_FOUND,
                  CUSTOMER_NOT_FOUND, RECEPTION_NOT_FOUND, PRODUCT_NOT_FOUND,
                  PRODUCT_SUB_CATEGORY_NOT_FOUND -> HttpStatus.NOT_FOUND;
-            case INVALID_REQUEST, ADMIN_ROLE_INVALID, RECEPTION_INVALID_REQUEST, REPAIR_DETAIL_NOT_IN_CASE -> HttpStatus.BAD_REQUEST;
+            case INVALID_REQUEST, ADMIN_ROLE_INVALID, RECEPTION_INVALID_REQUEST,
+                 REPAIR_DETAIL_NOT_IN_CASE, REPAIR_CASE_EMPTY_DETAILS -> HttpStatus.BAD_REQUEST;
             case AUTH_EMAIL_ALREADY_EXISTS, ADMIN_SELF_DEMOTION, CUSTOMER_PHONE_ALREADY_EXISTS,
                  RECEPTION_ALREADY_CANCELLED, RECEPTION_CONCURRENT_MODIFICATION, RECEPTION_INVALID_STATUS,
                  RECEPTION_SLOT_ALREADY_BOOKED, REPAIR_CASE_INVALID_STATUS, PRODUCT_MODEL_CODE_ALREADY_EXISTS
@@ -29,6 +31,16 @@ class ApiExceptionHandler {
         };
         return ResponseEntity.status(status).body(
                 new ErrorResponse(false, exception.errorCode().name(), exception.getMessage()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException exception) {
+        String message = exception.getBindingResult().getFieldErrors().stream()
+                .map(e -> e.getField() + ": " + e.getDefaultMessage())
+                .findFirst()
+                .orElse("입력값이 올바르지 않습니다.");
+        return ResponseEntity.badRequest().body(
+                new ErrorResponse(false, ErrorCode.INVALID_REQUEST.name(), message));
     }
 
     @ExceptionHandler(BadCredentialsException.class)

@@ -80,6 +80,9 @@ public class RepairCaseService {
         RepairCase repairCase = findRepairCase(caseId);
         validateOwnership(repairCase, technicianId);
         validateStatus(repairCase, RepairStatus.IN_PROGRESS, "진행 중 상태에서만 제출할 수 있습니다.");
+        if (repairDetailRepository.findByRepairCaseId(caseId).isEmpty()) {
+            throw new BusinessException(ErrorCode.REPAIR_CASE_EMPTY_DETAILS, "수리 내역이 없으면 제출할 수 없습니다.");
+        }
         return repairCaseRepository.updateStatus(caseId, RepairStatus.SUBMITTED);
     }
 

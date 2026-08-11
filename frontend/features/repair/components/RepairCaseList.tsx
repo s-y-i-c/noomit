@@ -18,7 +18,9 @@ const STATUS_TABS: Array<{ value: RepairStatus | "ALL"; label: string }> = [
 export function RepairCaseList() {
   const [tab, setTab] = useState<RepairStatus | "ALL">("ALL");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const { data: cases, isFetching, error } = useGetMyRepairCasesQuery();
+  const { data: cases, isFetching, error } = useGetMyRepairCasesQuery(undefined, {
+    pollingInterval: 10000,
+  });
 
   const errorMessage =
     typeof error === "object" && error !== null && "message" in error ? String(error.message) : null;

@@ -241,6 +241,7 @@ class RepairCaseServiceTest {
             RepairCase repairCase = caseWith(1L, 10L, RepairStatus.IN_PROGRESS);
             RepairCase submitted = caseWith(1L, 10L, RepairStatus.SUBMITTED);
             when(repairCaseRepository.findById(1L)).thenReturn(Optional.of(repairCase));
+            when(repairDetailRepository.findByRepairCaseId(1L)).thenReturn(List.of(detail(1L, 1L)));
             when(repairCaseRepository.updateStatus(1L, RepairStatus.SUBMITTED)).thenReturn(submitted);
 
             // Act
@@ -248,6 +249,21 @@ class RepairCaseServiceTest {
 
             // Assert
             assertThat(result.status()).isEqualTo(RepairStatus.SUBMITTED);
+        }
+
+        @Test
+        @DisplayName("수리 내역이 없으면 제출 시 REPAIR_CASE_EMPTY_DETAILS 예외")
+        void 내역_없으면_제출시_예외() {
+            // Arrange
+            RepairCase repairCase = caseWith(1L, 10L, RepairStatus.IN_PROGRESS);
+            when(repairCaseRepository.findById(1L)).thenReturn(Optional.of(repairCase));
+            when(repairDetailRepository.findByRepairCaseId(1L)).thenReturn(List.of());
+
+            // Act & Assert
+            assertThatThrownBy(() -> service.submit(1L, 10L))
+                    .isInstanceOf(BusinessException.class)
+                    .extracting(e -> ((BusinessException) e).errorCode())
+                    .isEqualTo(ErrorCode.REPAIR_CASE_EMPTY_DETAILS);
         }
 
         @Test
