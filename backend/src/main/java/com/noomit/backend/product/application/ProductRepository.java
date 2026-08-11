@@ -13,4 +13,6 @@ public interface ProductRepository {
     Product insert(long subCategoryId, String modelName, String modelCode, String memo);
 
     Product changeStatus(long id, Product.Status status);
+
+    Product modifyProduct(long id, RegisterProductCommand command);
 }
