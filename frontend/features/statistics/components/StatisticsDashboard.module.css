@@ -64,6 +64,13 @@
 .rankRow small { color: var(--color-text-secondary); font-size: 9px; }
 .rankRow > span { font-size: 12px; font-weight: 800; }
 .rankRow em { color: var(--color-text-secondary); font-size: 10px; font-style: normal; }
+.pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; padding-top: 14px; border-top: 1px solid var(--color-border); }
+.pagination > span { color: var(--color-text-secondary); font-size: 10px; font-weight: 700; }
+.pagination > div { display: flex; gap: 5px; }
+.pagination button { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-content-background); color: var(--color-text-primary); transition: border-color 150ms ease, background 150ms ease; }
+.pagination button:hover:not(:disabled) { border-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 8%, var(--color-content-background)); color: var(--color-primary); }
+.pagination button:disabled { cursor: not-allowed; opacity: .35; }
+.pagination button svg { width: 14px; height: 14px; }
 .emptyRows { display: grid; min-height: 120px; place-items: center; border: 1px dashed var(--color-border); border-radius: 12px; color: var(--color-text-secondary); font-size: 12px; }
 .initialState { display: grid; min-height: 260px; place-items: center; align-content: center; gap: 8px; border: 1px dashed var(--color-border); border-radius: 16px; background: color-mix(in srgb, var(--color-card-background) 70%, transparent); color: var(--color-text-secondary); text-align: center; }
 .initialState svg { color: var(--color-primary); }
@@ -85,6 +92,7 @@
   .panel { padding: 16px; }
   .rankRow { grid-template-columns: 26px minmax(0, 1fr) auto; }
   .rankRow em { display: none; }
+  .pagination { align-items: flex-start; flex-direction: column; }
 }
 @media (max-width: 430px) {
   .filters { grid-template-columns: 1fr; }
