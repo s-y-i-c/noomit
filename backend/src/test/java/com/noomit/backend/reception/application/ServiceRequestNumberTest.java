@@ -69,12 +69,15 @@ class ServiceRequestNumberTest {
     CustomerDirectory customerDirectory;
 
     @Autowired
+    ServiceRequestNumberService requestNumberService;
+
+    @Autowired
     ApplicationEventPublisher eventPublisher;
 
     private ServiceRequest createAt(Instant instant, String phoneNumber) {
         ServiceRequestService service = new ServiceRequestService(
                 requestRepository, availabilityRepository, userDirectory, customerDirectory,
-                eventPublisher, Clock.fixed(instant, KST));
+                requestNumberService, eventPublisher, Clock.fixed(instant, KST));
 
         CreateServiceRequestCommand command = new CreateServiceRequestCommand(
                 "테스트고객", phoneNumber, "12345", "서울시 어딘가", "101동", null,
