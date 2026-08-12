@@ -2,7 +2,6 @@ package com.noomit.backend.reception.application;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -21,10 +20,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -72,25 +69,12 @@ class ServiceRequestNumberTest {
     CustomerDirectory customerDirectory;
 
     @Autowired
-    ServiceRequestNumberService requestNumberService;
-
-    @Autowired
     ApplicationEventPublisher eventPublisher;
-
-    @Autowired
-    JdbcTemplate jdbcTemplate;
-    
-    @BeforeTransaction
-    void resetRequestNumberCounter() {
-        jdbcTemplate.update(
-                "DELETE FROM service_request_number_counter WHERE request_date IN (?, ?, ?)",
-                LocalDate.of(2026, 8, 11), LocalDate.of(2026, 8, 12), LocalDate.of(2026, 8, 15));
-    }
 
     private ServiceRequest createAt(Instant instant, String phoneNumber) {
         ServiceRequestService service = new ServiceRequestService(
                 requestRepository, availabilityRepository, userDirectory, customerDirectory,
-                requestNumberService, eventPublisher, Clock.fixed(instant, KST));
+                eventPublisher, Clock.fixed(instant, KST));
 
         CreateServiceRequestCommand command = new CreateServiceRequestCommand(
                 "테스트고객", phoneNumber, "12345", "서울시 어딘가", "101동", null,

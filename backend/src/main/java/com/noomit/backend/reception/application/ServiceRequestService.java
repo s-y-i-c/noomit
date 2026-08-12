@@ -28,7 +28,6 @@ public class ServiceRequestService {
     private final TechnicianAvailabilityRepository availabilityRepository;
     private final UserDirectory userDirectory;
     private final CustomerDirectory customerDirectory;
-    private final ServiceRequestNumberService requestNumberService;
     private final ApplicationEventPublisher eventPublisher;
     private final Clock clock;
 
@@ -43,11 +42,9 @@ public class ServiceRequestService {
         }
         validateProductSource(command.productId(), command.selectedSubCategoryId(), command.selectedModelName());
         CustomerInfo customer = customerDirectory.upsert(command.toUpsertCustomerCommand());
-        Instant requestedAt = Instant.now(clock);
-        String requestNumber = requestNumberService.issue(requestedAt);
-        ServiceRequest request = ServiceRequest.create(requestNumber, customer.id(), command.productId(),
+        ServiceRequest request = ServiceRequest.create(customer.id(), command.productId(),
                 command.selectedSubCategoryId(), command.selectedModelName(), command.receptionistId(),
-                command.symptom(), command.remarks(), DEFAULT_BASE_FEE, requestedAt);
+                command.symptom(), command.remarks(), DEFAULT_BASE_FEE, Instant.now(clock));
         return requestRepository.create(request);
     }
 
