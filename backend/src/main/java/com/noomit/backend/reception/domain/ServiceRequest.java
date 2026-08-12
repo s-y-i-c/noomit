@@ -29,11 +29,11 @@ public record ServiceRequest(
         Instant createdAt,
         Instant updatedAt) {
 
-    public static ServiceRequest create(long customerId, Long productId, Long selectedSubCategoryId,
-                                         String selectedModelName, long receptionistId, String symptom,
-                                         String remarks, int baseFee, Instant requestedAt) {
+    public static ServiceRequest create(String requestNumber, long customerId, Long productId,
+                                         Long selectedSubCategoryId, String selectedModelName, long receptionistId,
+                                         String symptom, String remarks, int baseFee, Instant requestedAt) {
         return new ServiceRequest(
-                null, null, customerId, productId, selectedSubCategoryId, selectedModelName,
+                null, requestNumber, customerId, productId, selectedSubCategoryId, selectedModelName,
                 receptionistId, symptom, remarks, baseFee,
                 null, null, null, null, null,
                 ServiceRequestStatus.RECEIVED,
