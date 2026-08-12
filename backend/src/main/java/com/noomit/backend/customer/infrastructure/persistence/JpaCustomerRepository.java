@@ -46,8 +46,10 @@ class JpaCustomerRepository implements CustomerRepository {
         // (조회 때마다 REPLACE()로 비교하면 UNIQUE 인덱스를 못 타고, 하이픈 유무만 다른
         // 같은 번호가 두 번 저장될 수도 있어서 저장 시점에 정규화하는 쪽으로 통일한다.)
         String normalizedPhoneNumber = normalizePhone(phoneNumber);
+        // 이름도 같은 이유로 저장 시점에 공백을 지운다 (조회 때마다 REPLACE()로 비교하면 인덱스를 못 탐).
+        String normalizedName = normalizeName(name);
         CustomerEntity entity = CustomerEntity.builder()
-                .name(name)
+                .name(normalizedName)
                 .phoneNumber(normalizedPhoneNumber)
                 .zipCode(zipCode)
                 .address(address)
@@ -83,12 +85,17 @@ class JpaCustomerRepository implements CustomerRepository {
 
     private Customer reactivate(CustomerEntity entity, String name, String zipCode, String address,
             String detailAddress, String memo) {
-        entity.reactivateWith(name, zipCode, address, detailAddress, memo);
+        entity.reactivateWith(normalizeName(name), zipCode, address, detailAddress, memo);
         return entity.toDomain();
     }
 
     // DB엔 "010-1234-5678"처럼 하이픈 포함해 저장돼 있어도, 조회는 하이픈 유무 상관없이 되게 한다.
     private static String normalizePhone(String phoneNumber) {
         return phoneNumber == null ? "" : phoneNumber.replace("-", "");
+    }
+
+    // "강 건"처럼 공백이 낀 채로 들어와도 저장 시점에 지워서, DB엔 항상 공백 없는 형태로 남긴다.
+    private static String normalizeName(String name) {
+        return name == null ? "" : name.replace(" ", "");
     }
 }
