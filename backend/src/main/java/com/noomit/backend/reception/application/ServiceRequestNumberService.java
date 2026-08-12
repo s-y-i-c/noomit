@@ -19,7 +19,7 @@ class ServiceRequestNumberService {
 
     private final ServiceRequestNumberRepository requestNumberRepository;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(transactionManager = "requestNumberTransactionManager", propagation = Propagation.REQUIRES_NEW)
     String issue(Instant requestedAt) {
         LocalDate requestDate = requestedAt.atZone(REQUEST_NUMBER_ZONE).toLocalDate();
         int seq = requestNumberRepository.issueSequence(requestDate);
