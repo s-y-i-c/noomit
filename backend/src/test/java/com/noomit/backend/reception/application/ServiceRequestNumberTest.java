@@ -2,6 +2,7 @@ package com.noomit.backend.reception.application;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -20,8 +21,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -73,6 +76,16 @@ class ServiceRequestNumberTest {
 
     @Autowired
     ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+    
+    @BeforeTransaction
+    void resetRequestNumberCounter() {
+        jdbcTemplate.update(
+                "DELETE FROM service_request_number_counter WHERE request_date IN (?, ?, ?)",
+                LocalDate.of(2026, 8, 11), LocalDate.of(2026, 8, 12), LocalDate.of(2026, 8, 15));
+    }
 
     private ServiceRequest createAt(Instant instant, String phoneNumber) {
         ServiceRequestService service = new ServiceRequestService(
