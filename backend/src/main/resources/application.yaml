@@ -39,9 +39,9 @@ management:
   endpoints:
     web:
       exposure:
-        # health(헬스체크) 와 prometheus(지표 스크레이프)만 노출한다.
+        # health(헬스체크), prometheus(지표 스크레이프), threaddump(CPU 병목 진단용)만 노출한다.
         # env, beans 처럼 민감할 수 있는 엔드포인트는 열지 않는다.
-        include: health, prometheus
+        include: health, prometheus, threaddump
   metrics:
     tags:
       # Grafana/PromQL 에서 앱을 구분하는 공통 라벨.
