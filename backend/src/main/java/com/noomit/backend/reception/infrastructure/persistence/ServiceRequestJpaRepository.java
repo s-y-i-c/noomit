@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.noomit.backend.reception.application.ServiceRequestListRow;
 import com.noomit.backend.reception.domain.ServiceRequestStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,10 +18,14 @@ import org.springframework.data.repository.query.Param;
 interface ServiceRequestJpaRepository extends JpaRepository<ServiceRequestEntity, Long> {
 
     @Query("""
-            SELECT e FROM ServiceRequestEntity e
+            SELECT new com.noomit.backend.reception.application.ServiceRequestListRow(
+                e.id, e.requestNumber, e.customerId, e.productId, e.selectedSubCategoryId,
+                e.selectedModelName, e.receptionistId, e.technicianId, e.symptom, e.status,
+                e.visitDate, e.visitStartTime, e.visitEndTime, e.requestedAt)
+            FROM ServiceRequestEntity e
             WHERE (:status IS NULL OR e.status = :status)
             """)
-    Page<ServiceRequestEntity> search(@Param("status") ServiceRequestStatus status, Pageable pageable);
+    Page<ServiceRequestListRow> search(@Param("status") ServiceRequestStatus status, Pageable pageable);
 
     @Modifying(clearAutomatically = true)
     @Query("""

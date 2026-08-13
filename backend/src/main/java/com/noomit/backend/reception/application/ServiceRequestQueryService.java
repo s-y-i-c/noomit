@@ -31,13 +31,13 @@ public class ServiceRequestQueryService {
     private final ProductDirectory productDirectory;
 
     public PageResult<ServiceRequestListItem> getList(ServiceRequestListQuery query) {
-        PageResult<ServiceRequest> page = requestQueryRepository.search(
+        PageResult<ServiceRequestListRow> page = requestQueryRepository.search(
                 query.status(), query.ascending(), query.page(), query.size());
 
         RequestViewContext context = loadRequestViewContext(page.content());
 
         List<ServiceRequestListItem> items = new ArrayList<>();
-        for (ServiceRequest request : page.content()) {
+        for (ServiceRequestListRow request : page.content()) {
             items.add(toListItem(request, context));
         }
 
@@ -185,17 +185,17 @@ public class ServiceRequestQueryService {
     }
 
     // 필요한 ID를 모아서 5개 Port를 배치 호출
-    private RequestViewContext loadRequestViewContext(List<ServiceRequest> requests) {
+    private RequestViewContext loadRequestViewContext(List<ServiceRequestListRow> requests) {
         List<Long> customerIds = requests.stream()
-                .map(ServiceRequest::customerId).distinct().toList();
+                .map(ServiceRequestListRow::customerId).distinct().toList();
         List<Long> productIds = requests.stream()
-                .map(ServiceRequest::productId).filter(Objects::nonNull).distinct().toList();
+                .map(ServiceRequestListRow::productId).filter(Objects::nonNull).distinct().toList();
         List<Long> subCategoryIds = requests.stream()
-                .map(ServiceRequest::selectedSubCategoryId).filter(Objects::nonNull).distinct().toList();
+                .map(ServiceRequestListRow::selectedSubCategoryId).filter(Objects::nonNull).distinct().toList();
         List<Long> technicianIds = requests.stream()
-                .map(ServiceRequest::technicianId).filter(Objects::nonNull).distinct().toList(); // null인 기사는 조회 X
+                .map(ServiceRequestListRow::technicianId).filter(Objects::nonNull).distinct().toList(); // null인 기사는 조회 X
         List<Long> receptionistIds = requests.stream()
-                .map(ServiceRequest::receptionistId).distinct().toList();
+                .map(ServiceRequestListRow::receptionistId).distinct().toList();
 
         return new RequestViewContext(
                 getCustomers(customerIds),
@@ -243,8 +243,17 @@ public class ServiceRequestQueryService {
         return r.selectedModelName();
     }
 
+    // 위와 동일 로직, 목록 조회 전용 프로젝션(ServiceRequestListRow) 버전
+    private String resolveModelName(ServiceRequestListRow r, Map<Long, ProductInfo> products) {
+        if (r.productId() != null) {
+            ProductInfo product = products.get(r.productId());
+            return product == null ? null : product.modelName();
+        }
+        return r.selectedModelName();
+    }
+
     // 제품이 확정된 경우 서브카테고리는 표시 X
-    private String resolveSubCategoryName(ServiceRequest r, Map<Long, SubCategoryInfo> subCategories) {
+    private String resolveSubCategoryName(ServiceRequestListRow r, Map<Long, SubCategoryInfo> subCategories) {
         if (r.productId() != null) {
             return null;
         }
@@ -253,7 +262,7 @@ public class ServiceRequestQueryService {
     }
 
     // row 하나 조립
-    private ServiceRequestListItem toListItem(ServiceRequest r, RequestViewContext c) {
+    private ServiceRequestListItem toListItem(ServiceRequestListRow r, RequestViewContext c) {
         CustomerInfo customer = c.customers().get(r.customerId());
         UserRef technician = r.technicianId() == null ? null : c.technicians().get(r.technicianId());
         UserRef receptionist = c.receptionists().get(r.receptionistId());
