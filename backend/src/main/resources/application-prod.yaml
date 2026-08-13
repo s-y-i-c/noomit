@@ -10,7 +10,7 @@ spring:
     password: ${DB_PASSWORD}
     driver-class-name: ${DB_DRIVER_CLASS_NAME}
     hikari:
-      maximum-pool-size: 15
+      maximum-pool-size: 10
 
 logging:
   structured:
