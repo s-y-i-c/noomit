@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import com.noomit.backend.reception.application.PageResult;
+import com.noomit.backend.reception.application.ServiceRequestListRow;
 import com.noomit.backend.reception.application.ServiceRequestQueryRepository;
 import com.noomit.backend.reception.domain.ServiceRequest;
 import com.noomit.backend.reception.domain.ServiceRequestStatus;
@@ -19,18 +20,13 @@ class ServiceRequestJpaQueryAdapter implements ServiceRequestQueryRepository {
     private final ServiceRequestJpaRepository requestJpaRepository;
 
     @Override
-    public PageResult<ServiceRequest> search(ServiceRequestStatus status, boolean ascending, int page, int size) {
+    public PageResult<ServiceRequestListRow> search(ServiceRequestStatus status, boolean ascending, int page, int size) {
         Sort sort = Sort.by(
                 ascending ? Sort.Direction.ASC : Sort.Direction.DESC,
                 "requestedAt"
         );
-        Page<ServiceRequestEntity> result = requestJpaRepository.search(status, PageRequest.of(page, size, sort));
-        List<ServiceRequest> content = result.getContent()
-                .stream()
-                .map(ServiceRequestEntity::toDomain)
-                .toList();
-
-        return new PageResult<>(content, page, size, result.getTotalElements());
+        Page<ServiceRequestListRow> result = requestJpaRepository.search(status, PageRequest.of(page, size, sort));
+        return new PageResult<>(result.getContent(), page, size, result.getTotalElements());
     }
 
     @Override

@@ -7,7 +7,7 @@ import com.noomit.backend.reception.domain.ServiceRequest;
 import com.noomit.backend.reception.domain.ServiceRequestStatus;
 
 public interface ServiceRequestQueryRepository {
-    PageResult<ServiceRequest> search(ServiceRequestStatus status, boolean ascending, int page, int size);
+    PageResult<ServiceRequestListRow> search(ServiceRequestStatus status, boolean ascending, int page, int size);
 
     Optional<ServiceRequest> findById(long id);
     
