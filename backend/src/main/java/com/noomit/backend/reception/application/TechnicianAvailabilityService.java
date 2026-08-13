@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class TechnicianAvailabilityService {
     private final TechnicianAvailabilityQueryRepository availabilityQueryRepository;
     private final TechnicianAvailabilityRepository availabilityRepository;
+    private final TechnicianAvailabilityGenerator availabilityGenerator;
     private final UserDirectory userDirectory;
     private final Clock clock;
 
@@ -76,7 +77,12 @@ public class TechnicianAvailabilityService {
 
         return new MyAvailabilitySlot(slotId, slot.startTime(), slot.endTime(), status, false);
     }
-
+    
+    @Transactional
+    public void generateSlotsForTechnician(long technicianId, LocalDate from, LocalDate toExclusive) {
+        List<AvailabilitySlot> slots = availabilityGenerator.generate(technicianId, from, toExclusive);
+        availabilityRepository.insertAllIfAbsent(slots);
+    }
 
     private Map<Long, UserRef> loadActiveTechnicians(List<TechnicianAvailability> slots) {
 
