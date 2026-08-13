@@ -18,7 +18,7 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 class TechnicianAvailabilityJpaAdapter implements TechnicianAvailabilityRepository {
     // Slot INSERT문 JDBC 배치로 나눠서 실행
-    private static final int INSERT_BATCH_SIZE = 500;
+    private static final int INSERT_BATCH_SIZE = 300;
     private static final String INSERT_SLOT_SQL = """
             INSERT INTO technician_availability
                 (technician_id, available_date, start_time, end_time, status, created_at, updated_at)
@@ -73,5 +73,10 @@ class TechnicianAvailabilityJpaAdapter implements TechnicianAvailabilityReposito
             ps.setObject(3, slot.startTime());
             ps.setObject(4, slot.endTime());
         });
+    }
+
+    @Override
+    public int deleteUnassignedFutureSlots(long technicianId, LocalDate from) {
+        return availabilityJpaRepository.deleteUnassignedFutureSlots(technicianId, from);
     }
 }
