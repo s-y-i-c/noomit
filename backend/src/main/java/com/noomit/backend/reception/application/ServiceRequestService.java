@@ -11,8 +11,10 @@ import com.noomit.backend.reception.domain.ServiceRequestStatus;
 import com.noomit.backend.reception.domain.TechnicianAvailability;
 import com.noomit.backend.shared.error.BusinessException;
 import com.noomit.backend.shared.error.ErrorCode;
+import com.noomit.backend.user.UserAccess;
 import com.noomit.backend.user.UserDirectory;
 import com.noomit.backend.user.UserRef;
+import com.noomit.backend.user.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -72,6 +74,9 @@ public class ServiceRequestService {
         if (!request.canAssign()) {
             throw new BusinessException(ErrorCode.RECEPTION_INVALID_STATUS, "접수 대기 상태에서만 배정할 수 있습니다.");
         }
+
+        validateEngineer(technicianId);
+
         TechnicianAvailability slot = findSlot(slotId);
         if (!slot.isOwnedBy(technicianId)) {
             throw new BusinessException(ErrorCode.RECEPTION_SLOT_NOT_OWNED, "슬롯이 해당 기사의 것이 아닙니다.");
@@ -104,6 +109,9 @@ public class ServiceRequestService {
         if (!request.canReassign()) {
             throw new BusinessException(ErrorCode.RECEPTION_INVALID_STATUS, "배정된 접수만 재배정할 수 있습니다.");
         }
+
+        validateEngineer(technicianId);
+
         TechnicianAvailability slot = findSlot(slotId);
         if (!slot.isOwnedBy(technicianId)) {
             throw new BusinessException(ErrorCode.RECEPTION_SLOT_NOT_OWNED, "슬롯이 해당 기사의 것이 아닙니다.");
@@ -180,6 +188,14 @@ public class ServiceRequestService {
         }
 
         return findRequest(command.id());
+    }
+
+    private void validateEngineer(long technicianId) {
+        UserAccess access = userDirectory.findActiveAccessById(technicianId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RECEPTION_NOT_FOUND, "활성화된 기사를 찾을 수 없습니다."));
+        if (!access.roles().contains(UserRole.ENGINEER)) {
+            throw new BusinessException(ErrorCode.RECEPTION_TECHNICIAN_NOT_ENGINEER, "해당 사용자는 기사(ENGINEER) 권한이 없습니다.");
+        }
     }
 
     private UserRef findTechnician(long technicianId) {

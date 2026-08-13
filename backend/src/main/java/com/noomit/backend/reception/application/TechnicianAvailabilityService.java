@@ -76,8 +76,7 @@ public class TechnicianAvailabilityService {
 
         return new MyAvailabilitySlot(slotId, slot.startTime(), slot.endTime(), status, false);
     }
-
-
+    
     private Map<Long, UserRef> loadActiveTechnicians(List<TechnicianAvailability> slots) {
 
         List<Long> technicianIds = slots.stream()

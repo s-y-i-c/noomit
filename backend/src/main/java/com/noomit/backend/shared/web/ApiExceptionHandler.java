@@ -27,7 +27,8 @@ class ApiExceptionHandler {
                  RECEPTION_SLOT_ALREADY_BOOKED, REPAIR_CASE_INVALID_STATUS, PRODUCT_MODEL_CODE_ALREADY_EXISTS
                     -> HttpStatus.CONFLICT;
             case AUTH_INVALID_CREDENTIALS -> HttpStatus.UNAUTHORIZED;
-            case RECEPTION_SLOT_NOT_OWNED, REPAIR_CASE_ACCESS_DENIED -> HttpStatus.FORBIDDEN;
+            case RECEPTION_SLOT_NOT_OWNED, RECEPTION_TECHNICIAN_NOT_ENGINEER, REPAIR_CASE_ACCESS_DENIED
+                    -> HttpStatus.FORBIDDEN;
         };
         return ResponseEntity.status(status).body(
                 new ErrorResponse(false, exception.errorCode().name(), exception.getMessage()));

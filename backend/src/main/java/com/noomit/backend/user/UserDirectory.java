@@ -21,4 +21,7 @@ public interface UserDirectory {
 
     /** 관리자용 사용자 선택 목록. 이름 또는 이메일 일부로 검색한다. */
     List<UserRef> searchActive(String query, int limit);
+
+    /** 활성 기사(ENGINEER 역할) ID 전체를 조회한다. */
+    List<Long> findActiveTechnicianIds();
 }

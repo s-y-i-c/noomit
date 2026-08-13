@@ -3,6 +3,7 @@ package com.noomit.backend.user.infrastructure.persistence;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import com.noomit.backend.user.UserRole;
 import com.noomit.backend.user.domain.UserAccount;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -64,4 +65,14 @@ interface SpringDataUserAccountRepository extends JpaRepository<UserAccountEntit
                OR LOWER(u.email) LIKE CONCAT('%', :term, '%')
             """)
     Page<UserAccountEntity> searchAll(@Param("term") String term, Pageable pageable);
+
+    @Query("""
+            SELECT DISTINCT u.id FROM UserAccountEntity u
+            JOIN u.roles r
+            WHERE u.status = :status AND r.code = :role
+            ORDER BY u.id
+            """)
+    List<Long> findIdsByStatusAndRole(
+            @Param("status") UserAccount.Status status,
+            @Param("role") UserRole role);
 }

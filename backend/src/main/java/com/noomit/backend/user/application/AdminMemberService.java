@@ -3,9 +3,12 @@ package com.noomit.backend.user.application;
 import java.util.Collection;
 import com.noomit.backend.shared.error.BusinessException;
 import com.noomit.backend.shared.error.ErrorCode;
+import com.noomit.backend.user.EngineerRoleGranted;
+import com.noomit.backend.user.EngineerRoleRevoked;
 import com.noomit.backend.user.UserRole;
 import com.noomit.backend.user.domain.UserRoles;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminMemberService {
     private final AdminMemberQueryRepository queryRepository;
     private final UserRoleRepository userRoleRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public AdminMemberPage list(String query, int page, int size) {
         return queryRepository.findMembers(query, page, size);
@@ -37,7 +41,17 @@ public class AdminMemberService {
                     "본인의 ADMIN 권한은 해제할 수 없습니다.");
         }
 
+        boolean hadEngineer = target.roles().contains(UserRole.ENGINEER);
+        boolean hasEngineer = roles.has(UserRole.ENGINEER);
+
         userRoleRepository.replaceRoles(targetUserId, roles.codes());
+
+        if (!hadEngineer && hasEngineer) {
+            eventPublisher.publishEvent(new EngineerRoleGranted(targetUserId));
+        } else if (hadEngineer && !hasEngineer) {
+            eventPublisher.publishEvent(new EngineerRoleRevoked(targetUserId));
+        }
+
         return new AdminMember(target.id(), target.email(), target.name(), target.status(), roles.codes());
     }
 }

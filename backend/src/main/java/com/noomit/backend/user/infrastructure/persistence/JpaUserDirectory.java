@@ -52,6 +52,11 @@ class JpaUserDirectory implements UserDirectory {
                 .toList();
     }
 
+    @Override
+    public List<Long> findActiveTechnicianIds() {
+        return userAccounts.findIdsByStatusAndRole(UserAccount.Status.ACTIVE, UserRole.ENGINEER);
+    }
+
     private static UserRef toRef(UserAccountEntity user) {
         return new UserRef(user.getId(), user.getEmail(), user.getName());
     }

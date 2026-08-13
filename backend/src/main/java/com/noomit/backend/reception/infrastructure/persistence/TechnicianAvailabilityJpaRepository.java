@@ -81,4 +81,16 @@ interface TechnicianAvailabilityJpaRepository extends JpaRepository<TechnicianAv
             """)
     int updateAvailabilityStatus(@Param("id") long id, @Param("technicianId") long technicianId,
                             @Param("status") TechnicianAvailabilityStatus status);
+
+    @Modifying(clearAutomatically = true)
+    @Query("""
+            DELETE FROM TechnicianAvailabilityEntity e
+            WHERE e.technicianId = :technicianId
+                AND e.availableDate >= :from
+                AND NOT EXISTS (
+                    SELECT 1 FROM ServiceRequestEntity sr
+                    WHERE sr.reservedSlotId = e.id
+                )
+            """)
+    int deleteUnassignedFutureSlots(@Param("technicianId") long technicianId, @Param("from") LocalDate from);
 }
