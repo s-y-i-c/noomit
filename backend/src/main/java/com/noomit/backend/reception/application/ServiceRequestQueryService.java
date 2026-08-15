@@ -2,9 +2,12 @@ package com.noomit.backend.reception.application;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.noomit.backend.customer.CustomerDirectory;
@@ -184,7 +187,7 @@ public class ServiceRequestQueryService {
         return subCategory;
     }
 
-    // 필요한 ID를 모아서 5개 Port를 배치 호출
+    // 필요한 ID를 모아서 Port를 배치 호출
     private RequestViewContext loadRequestViewContext(List<ServiceRequestListRow> requests) {
         List<Long> customerIds = requests.stream()
                 .map(ServiceRequestListRow::customerId).distinct().toList();
@@ -192,18 +195,18 @@ public class ServiceRequestQueryService {
                 .map(ServiceRequestListRow::productId).filter(Objects::nonNull).distinct().toList();
         List<Long> subCategoryIds = requests.stream()
                 .map(ServiceRequestListRow::selectedSubCategoryId).filter(Objects::nonNull).distinct().toList();
-        List<Long> technicianIds = requests.stream()
-                .map(ServiceRequestListRow::technicianId).filter(Objects::nonNull).distinct().toList(); // null인 기사는 조회 X
-        List<Long> receptionistIds = requests.stream()
-                .map(ServiceRequestListRow::receptionistId).distinct().toList();
+        Set<Long> userIds = new LinkedHashSet<>();
+        requests.stream()
+                .map(ServiceRequestListRow::technicianId).filter(Objects::nonNull).forEach(userIds::add); // null인 기사는 조회 X
+        requests.stream()
+                .map(ServiceRequestListRow::receptionistId).forEach(userIds::add);
 
-        return new RequestViewContext(
-                getCustomers(customerIds),
-                getProducts(productIds),
-                getSubCategories(subCategoryIds),
-                getTechnicians(technicianIds),
-                getReceptionists(receptionistIds)
-        );
+        Map<Long, CustomerInfo> customers = getCustomers(customerIds);
+        Map<Long, ProductInfo> products = getProducts(productIds);
+        Map<Long, SubCategoryInfo> subCategories = getSubCategories(subCategoryIds);
+        Map<Long, UserRef> users = getUsers(userIds.stream().toList());
+
+        return new RequestViewContext(customers, products, subCategories, users);
     }
 
     // 빈 리스트 방어 -> 불필요한 호출 X
@@ -222,13 +225,7 @@ public class ServiceRequestQueryService {
         return productDirectory.findSubCategoriesByIds(ids);
     }
 
-    private Map<Long, UserRef> getTechnicians(List<Long> ids) {
-        if (ids.isEmpty()) { return Map.of(); }
-        return userDirectory.findActiveByIds(ids).stream()
-                .collect(Collectors.toMap(UserRef::id, ref -> ref));
-    }
-
-    private Map<Long, UserRef> getReceptionists(List<Long> ids) {
+    private Map<Long, UserRef> getUsers(List<Long> ids) {
         if (ids.isEmpty()) { return Map.of(); }
         return userDirectory.findActiveByIds(ids).stream()
                 .collect(Collectors.toMap(UserRef::id, ref -> ref));
@@ -264,8 +261,8 @@ public class ServiceRequestQueryService {
     // row 하나 조립
     private ServiceRequestListItem toListItem(ServiceRequestListRow r, RequestViewContext c) {
         CustomerInfo customer = c.customers().get(r.customerId());
-        UserRef technician = r.technicianId() == null ? null : c.technicians().get(r.technicianId());
-        UserRef receptionist = c.receptionists().get(r.receptionistId());
+        UserRef technician = r.technicianId() == null ? null : c.users().get(r.technicianId());
+        UserRef receptionist = c.users().get(r.receptionistId());
 
         return new ServiceRequestListItem(
                 r.id(),
@@ -284,12 +281,11 @@ public class ServiceRequestQueryService {
                 r.requestedAt());
     }
 
-    // 5개 Port 결과를 한 번에 들고 다니는 내부 전용 묶음
+    // Port 결과를 한 번에 들고 다니는 내부 전용 묶음
     private record RequestViewContext(
             Map<Long, CustomerInfo> customers,
             Map<Long, ProductInfo> products,
             Map<Long, SubCategoryInfo> subCategories,
-            Map<Long, UserRef> technicians,
-            Map<Long, UserRef> receptionists) {
+            Map<Long, UserRef> users) {
     }
 }
