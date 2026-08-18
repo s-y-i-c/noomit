@@ -11,12 +11,7 @@ const NAV_ITEMS: SidebarNavItem[] = [
 
 export default function CounselorLayout({ children }: { children: ReactNode }) {
   return (
-    <RoleLayout
-      requiredRoles={["COUNSELOR"]}
-      brandSub="상담원"
-      navItems={NAV_ITEMS}
-      storageKey="noomit-counselor-sidebar-collapsed"
-    >
+    <RoleLayout requiredRoles={["COUNSELOR"]} navItems={NAV_ITEMS}>
       {children}
     </RoleLayout>
   );

@@ -11,12 +11,7 @@ const NAV_ITEMS: SidebarNavItem[] = [
 
 export default function DeveloperLayout({ children }: { children: ReactNode }) {
   return (
-    <RoleLayout
-      requiredRoles={["DEVELOPER"]}
-      brandSub="개발자"
-      navItems={NAV_ITEMS}
-      storageKey="noomit-developer-sidebar-collapsed"
-    >
+    <RoleLayout requiredRoles={["DEVELOPER"]} navItems={NAV_ITEMS}>
       {children}
     </RoleLayout>
   );

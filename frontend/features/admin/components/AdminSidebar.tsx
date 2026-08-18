@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut, PanelLeftClose, PanelLeftOpen, type LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import styles from "./AdminSidebar.module.css";
 
 export interface SidebarNavItem {
@@ -14,23 +14,10 @@ export interface SidebarNavItem {
 interface AdminSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  isCollapsed: boolean;
-  onToggleCollapse: () => void;
-  onLogout: () => void;
-  /** 사이드바 로고 아래 서브 라벨. 역할별 화면 이름 (예: "Admin", "상담원"). */
-  brandSub: string;
   navItems: SidebarNavItem[];
 }
 
-export function AdminSidebar({
-  isOpen,
-  onClose,
-  isCollapsed,
-  onToggleCollapse,
-  onLogout,
-  brandSub,
-  navItems,
-}: AdminSidebarProps) {
+export function AdminSidebar({ isOpen, onClose, navItems }: AdminSidebarProps) {
   const pathname = usePathname();
   // href가 서로 다른 nav 항목의 prefix인 경우(예: /technicians, /technicians/products)
   // 가장 구체적인(긴) 항목 하나만 활성화한다.
@@ -43,27 +30,13 @@ export function AdminSidebar({
   return (
     <>
       {isOpen ? <div onClick={onClose} className={styles.backdrop} /> : null}
-      <aside
-        className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : styles.sidebarClosed}`}
-        data-collapsed={isCollapsed}
-      >
+      <aside className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : styles.sidebarClosed}`}>
         <div className={styles.top}>
           <div className={styles.logoArea}>
             <div className={styles.logoGroup}>
-              <div className={styles.logoBadge}>N</div>
-              <span className={styles.collapsible}>
-                <span className={styles.logoBrand}>Noomit</span>
-                <span className={styles.logoSub}>{brandSub}</span>
-              </span>
+              <img src="/logo.svg" alt="Noomit" className={styles.logoBadge} />
+              <span className={styles.logoBrand}>Noomit</span>
             </div>
-            <button
-              type="button"
-              onClick={onToggleCollapse}
-              aria-label={isCollapsed ? "사이드바 펼치기" : "사이드바 접기"}
-              className={styles.toggleButton}
-            >
-              {isCollapsed ? <PanelLeftOpen className={styles.toggleIcon} /> : <PanelLeftClose className={styles.toggleIcon} />}
-            </button>
           </div>
           <nav className={styles.nav}>
             {navItems.map(({ href, label, icon: Icon }) => (
@@ -75,16 +48,10 @@ export function AdminSidebar({
                 onClick={onClose}
               >
                 <Icon className={styles.icon} />
-                <span className={styles.collapsible}>{label}</span>
+                <span>{label}</span>
               </Link>
             ))}
           </nav>
-        </div>
-        <div className={styles.bottom}>
-          <button onClick={onLogout} className={styles.logoutButton}>
-            <LogOut className={styles.icon} />
-            <span className={styles.collapsible}>로그아웃</span>
-          </button>
         </div>
       </aside>
     </>

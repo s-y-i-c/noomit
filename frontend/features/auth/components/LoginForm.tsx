@@ -48,7 +48,7 @@ export function LoginForm() {
   return (
     <div className={styles.card}>
       <div className={styles.logoArea}>
-        <div className={styles.logoBadge}>N</div>
+        <img src="/logo.svg" alt="Noomit" className={styles.logoBadge} />
         <h1 className={styles.brand}>Noomit</h1>
       </div>
 

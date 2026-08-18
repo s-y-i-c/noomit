@@ -41,66 +41,17 @@
     gap: 12px;
   }
 
-  .logoText {
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* 접었을 때 숨겨지는 글자 */
-  .collapsible {
-    overflow: hidden;
-    max-width: 20rem;
-    white-space: nowrap;
-    transition: opacity 200ms ease, max-width 200ms ease;
-  }
-
-  .toggleButton {
-    display: none;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border: 1px solid rgb(255 255 255 / 0.08);
-    border-radius: 12px;
-    background: transparent;
-    color: #a8a7a5;
-    cursor: pointer;
-    transition: background-color 200ms ease, color 200ms ease;
-
-    &:hover {
-      background: rgb(255 255 255 / 0.04);
-      color: #ffffff;
-    }
-
-    &:focus {
-      outline: none;
-    }
-  }
-
   .icon {
     flex-shrink: 0;
     width: 20px;
     height: 20px;
   }
 
-  .bottom {
-    margin-top: auto;
-    padding-top: 16px;
-    border-top: 1px solid rgb(255 255 255 / 0.08);
-  }
-
   .logoBadge {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    background: var(--color-primary);
-    color: #ffffff;
-    font-size: 18px;
-    font-weight: 900;
+    flex-shrink: 0;
   }
 
   .logoBrand {
@@ -110,13 +61,6 @@
     letter-spacing: 0.05em;
     text-transform: uppercase;
     color: #ffffff;
-  }
-
-  .logoSub {
-    margin-top: 4px;
-    font-size: 10px;
-    font-weight: 700;
-    color: #817d76;
   }
 
   .nav {
@@ -219,40 +163,5 @@
 
   .sidebar {
     transform: translateX(0);
-
-    .toggleButton {
-      display: flex;
-    }
-
-    /* 접힌 상태 */
-    &[data-collapsed="true"] {
-      width: 72px;
-      padding: 12px;
-
-      .logoArea {
-        flex-direction: column;
-        gap: 16px;
-        padding-right: 0;
-        padding-left: 0;
-      }
-
-      .collapsible {
-        max-width: 0;
-        opacity: 0;
-        visibility: hidden;
-      }
-
-      .navItem {
-        gap: 0;
-        justify-content: center;
-        padding-right: 0;
-        padding-left: 0;
-      }
-
-      .bottom {
-        display: flex;
-        justify-content: center;
-      }
-    }
   }
 }

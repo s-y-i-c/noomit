@@ -14,12 +14,7 @@ const REQUIRED_ROLES = ["PENDING", "COUNSELOR", "ENGINEER", "ADMIN", "DEVELOPER"
 
 export default function UserLayout({ children }: { children: ReactNode }) {
   return (
-    <RoleLayout
-      requiredRoles={REQUIRED_ROLES}
-      brandSub="홈"
-      navItems={NAV_ITEMS}
-      storageKey="noomit-user-sidebar-collapsed"
-    >
+    <RoleLayout requiredRoles={REQUIRED_ROLES} navItems={NAV_ITEMS}>
       {children}
     </RoleLayout>
   );

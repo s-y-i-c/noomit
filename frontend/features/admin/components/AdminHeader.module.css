@@ -40,8 +40,15 @@
 
   .titleArea {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 8px;
+  }
+
+  .titleLogo {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    flex-shrink: 0;
   }
 
   .title {
@@ -50,16 +57,6 @@
     line-height: 1;
     letter-spacing: -0.02em;
     color: var(--color-text-primary);
-  }
-
-  .prototypeBadge {
-    padding: 2px 6px;
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
-    background: var(--color-page-background);
-    color: var(--color-text-secondary);
-    font-size: 10px;
-    font-weight: 800;
   }
 
   .rightSection {

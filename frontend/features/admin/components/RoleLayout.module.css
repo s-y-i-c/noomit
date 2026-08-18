@@ -54,11 +54,6 @@
   .main {
     padding-left: 15rem;
 
-    /* 사이드바가 접히면 그만큼만 비켜선다. */
-    &[data-collapsed="true"] {
-      padding-left: 72px;
-    }
-
     .content {
       padding: 32px;
     }
