@@ -1,6 +1,11 @@
+<div align="center">
+  <img src="frontend/public/logo.svg" alt="Noomit 로고" width="88" />
+
 # Noomit
 
 > 전화·메모·엑셀로 흩어져 있던 A/S 접수부터 처리 완료까지를 한 플랫폼에서 관리하는 통합 A/S 접수 및 처리 서비스
+
+</div>
 
 ## 프로젝트 소개
 
@@ -16,19 +21,28 @@
 - 접수 생성 및 접수번호 자동 채번(날짜별 순번)
 - 접수 목록/상세 조회, 기사 배정 및 방문 슬롯 예약
 
+![접수 관리 화면](docs/readme-assets/reception-list.png)
+
 **수리 (기사/관리자)**
 
 - 기사 본인 담당 수리 케이스 목록/상세 조회
 - 수리 내역(작업 항목 + 금액) 등록/삭제, 완료 제출
 - 관리자 승인/반려, 전체 케이스 조회
+- 기사 근무 가능 시간대(슬롯) 설정
+
+![근무 일정 관리 화면](docs/readme-assets/engineer-availability.png)
 
 **제품**
 
 - 카테고리/서브카테고리/모델 관리
 
+![제품 등록 화면](docs/readme-assets/product-register.png)
+
 **통계**
 
 - 접수·수리·고객·제품 도메인 데이터를 조합한 대시보드 (기간별 조회)
+
+![기간별 A/S 통계 화면](docs/readme-assets/statistics-dashboard.png)
 
 **인증 & 계정**
 
@@ -159,6 +173,12 @@ k6 run \
 ssh -L 8080:localhost:8080 <운영 서버>
 cd monitoring && docker compose up -d
 ```
+
+부하테스트 중 실제로 관찰한 대시보드입니다 — 요청 처리량/에러율/응답시간/CPU(위), JVM 힙/GC 정지시간/HikariCP 풀/스레드(아래).
+
+![Grafana 대시보드 - 처리량/에러율/응답시간/CPU](docs/readme-assets/grafana-dashboard-1.png)
+
+![Grafana 대시보드 - JVM 힙/GC/HikariCP 풀/스레드](docs/readme-assets/grafana-dashboard-2.png)
 
 ## 배포
 
