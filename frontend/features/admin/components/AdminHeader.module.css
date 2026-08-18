@@ -40,8 +40,15 @@
 
   .titleArea {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 8px;
+  }
+
+  .titleLogo {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    flex-shrink: 0;
   }
 
   .title {

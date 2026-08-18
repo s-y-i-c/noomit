@@ -91,16 +91,10 @@
   }
 
   .logoBadge {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    background: var(--color-primary);
-    color: #ffffff;
-    font-size: 18px;
-    font-weight: 900;
+    flex-shrink: 0;
   }
 
   .logoBrand {

@@ -30,6 +30,7 @@ export function AdminHeader({ onMenuToggle, user, onLogout }: AdminHeaderProps) 
         </button>
 
         <div className={styles.titleArea}>
+          <img src="/logo.svg" alt="" className={styles.titleLogo} />
           <h2 className={styles.title}>
             Noomit
           </h2>

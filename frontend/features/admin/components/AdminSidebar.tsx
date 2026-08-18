@@ -50,7 +50,7 @@ export function AdminSidebar({
         <div className={styles.top}>
           <div className={styles.logoArea}>
             <div className={styles.logoGroup}>
-              <div className={styles.logoBadge}>N</div>
+              <img src="/logo.svg" alt="Noomit" className={styles.logoBadge} />
               <span className={styles.collapsible}>
                 <span className={styles.logoBrand}>Noomit</span>
                 <span className={styles.logoSub}>{brandSub}</span>
