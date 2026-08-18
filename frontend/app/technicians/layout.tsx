@@ -14,12 +14,7 @@ const NAV_ITEMS: SidebarNavItem[] = [
 
 export default function TechniciansLayout({ children }: { children: ReactNode }) {
   return (
-    <RoleLayout
-      requiredRoles={["ENGINEER"]}
-      brandSub="기사"
-      navItems={NAV_ITEMS}
-      storageKey="noomit-technicians-sidebar-collapsed"
-    >
+    <RoleLayout requiredRoles={["ENGINEER"]} navItems={NAV_ITEMS}>
       {children}
     </RoleLayout>
   );

@@ -15,12 +15,7 @@ const NAV_ITEMS: SidebarNavItem[] = [
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <RoleLayout
-      requiredRoles={["ADMIN"]}
-      brandSub="Admin"
-      navItems={NAV_ITEMS}
-      storageKey="noomit-admin-sidebar-collapsed"
-    >
+    <RoleLayout requiredRoles={["ADMIN"]} navItems={NAV_ITEMS}>
       {children}
     </RoleLayout>
   );

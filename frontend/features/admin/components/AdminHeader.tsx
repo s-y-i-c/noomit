@@ -34,9 +34,6 @@ export function AdminHeader({ onMenuToggle, user, onLogout }: AdminHeaderProps) 
           <h2 className={styles.title}>
             Noomit
           </h2>
-          <span className={styles.prototypeBadge}>
-            프로토타입
-          </span>
         </div>
       </div>
 
