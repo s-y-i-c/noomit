@@ -56,7 +56,7 @@
 
 | GitHub | 담당 도메인 |
 | --- | --- |
-| [@ABCganada](https://github.com/ABCganada) | 공통 설정, 인증/회원, 인프라·배포, 부하테스트·모니터링 |
+| [@ABCganada](https://github.com/ABCganada) | 인증/회원, 인프라·배포 |
 | [@julk0206](https://github.com/julk0206) | 접수(reception) |
 | [@songgy0525](https://github.com/songgy0525) | 수리(repair) |
 | [@cochae](https://github.com/cochae) | 고객(customer), 제품(product) |
