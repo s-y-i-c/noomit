@@ -46,6 +46,10 @@ management:
     tags:
       # Grafana/PromQL 에서 앱을 구분하는 공통 라벨.
       application: noomit-backend
+    distribution:
+      percentiles-histogram:
+        # http_server_requests_seconds_bucket 을 노출해 histogram_quantile()로 p95/p99 계산 가능하게 한다.
+        http.server.requests: true
 
 noomit:
   # 브라우저 CORS 허용 오리진.

@@ -40,7 +40,7 @@
     {
       "id": 3,
       "type": "timeseries",
-      "title": "평균 응답시간",
+      "title": "응답시간 (avg/p95/p99)",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
@@ -49,6 +49,16 @@
           "expr": "sum(rate(http_server_requests_seconds_sum{application=\"noomit-backend\"}[1m])) / sum(rate(http_server_requests_seconds_count{application=\"noomit-backend\"}[1m]))",
           "legendFormat": "avg",
           "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"noomit-backend\"}[1m])) by (le))",
+          "legendFormat": "p95",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{application=\"noomit-backend\"}[1m])) by (le))",
+          "legendFormat": "p99",
+          "refId": "C"
         }
       ]
     },
